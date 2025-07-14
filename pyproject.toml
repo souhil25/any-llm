@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=48", "setuptools_scm[toml]>=6.3.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-squid"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+dynamic = ["version"]
+dependencies = [
+  "pydantic",
+]
+
+[project.optional-dependencies]
+
+all = [
+  "llm-squid[mistral]",
+]
+
+mistral = [
+  "mistralai",
+]
+
+[project.urls]
+Documentation = "https://mozilla-ai.github.io/llm-squid/"
+Issues = "https://github.com/mozilla-ai/llm-squid/issues"
+Source = "https://github.com/mozilla-ai/llm-squid"
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+[tool.setuptools.packages.find]
+exclude = ["tests", "tests.*"]
+where = ["src"]
+namespaces = false
+
+[tool.setuptools_scm]
+
+[tool.ruff.lint]
+extend-select = ["ALL"]
+
+
+[dependency-groups]
+dev = [
+  { include-group = "lint" },
+  { include-group = "tests" },
+]
+
+lint = [
+  "pre-commit==4.2.0",
+  "pre-commit-uv==4.1.4",
+]
+
+tests = [
+  "pytest>=8,<9",
+]
+
+# For completeness, but 'uv sync --group dev' currently installs the others too.
+all = [
+  { include-group = "lint" },
+]
