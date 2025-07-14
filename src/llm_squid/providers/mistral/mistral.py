@@ -6,16 +6,8 @@ from mistralai.extra import response_format_from_pydantic_model
 from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
-from llm_squid.utils.message_converter import OpenAICompliantMessageConverter
+from llm_squid.utils import convert_request_to_openai, convert_response_to_openai
 from llm_squid.utils.provider import Provider
-
-
-class MistralMessageConverter(OpenAICompliantMessageConverter):
-    def convert_response(self, response_data: Any) -> ChatCompletion:
-        """Convert Mistral's response to our standard format."""
-        # Convert Mistral's response object to dict format
-        response_dict = response_data.model_dump()
-        return super().convert_response(response_dict)
 
 
 class MistralProvider(Provider):
@@ -26,7 +18,6 @@ class MistralProvider(Provider):
             msg = "Mistral API key is missing. Please provide it in the config or set the MISTRAL_API_KEY environment variable."
             raise ValueError(msg)
         self.client = Mistral(**config)
-        self.transformer = MistralMessageConverter()
 
     def convert_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         """Format the kwargs for Mistral."""
@@ -44,18 +35,18 @@ class MistralProvider(Provider):
         model: str,
         messages: list[Any],
         **kwargs: Any,
-    ) -> Any:
+    ) -> ChatCompletion:
         """Create a chat completion using Mistral."""
         kwargs = self.convert_kwargs(kwargs)
         # Transform messages using converter
-        transformed_messages = self.transformer.convert_request(messages)
+        transformed_messages = convert_request_to_openai(messages)
 
         # Make the request to Mistral
         # Cast to Any to avoid type issues since Mistral accepts dict format
         response = self.client.chat.complete(
             model=model,
-            messages=cast("Any", transformed_messages),
+            messages=transformed_messages,
             **kwargs,
         )
 
-        return self.transformer.convert_response(response)
+        return convert_response_to_openai(response.model_dump())
