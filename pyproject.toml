@@ -16,11 +16,15 @@ dependencies = [
 [project.optional-dependencies]
 
 all = [
-  "llm-squid[mistral]",
+  "llm-squid[mistral,ollama]"
 ]
 
 mistral = [
   "mistralai",
+]
+
+ollama = [
+  "httpx",
 ]
 
 [project.urls]
