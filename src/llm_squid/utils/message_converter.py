@@ -6,32 +6,6 @@ from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall
 
 
-def convert_request_to_openai(
-    messages: list[ChatCompletionMessage | dict[str, Any]],
-    tool_results_as_strings: bool = False,
-) -> list[dict[str, Any]]:
-    """Convert messages to OpenAI format."""
-    transformed_messages = []
-    for message in messages:
-        tmsg = None
-        if isinstance(message, ChatCompletionMessage):
-            message_dict = message.model_dump(mode="json")
-            message_dict.pop("refusal", None)  # Remove refusal field if present
-            tmsg = message_dict
-        else:
-            tmsg = message
-        # Check if tmsg is a dict, otherwise get role attribute
-        if tmsg is not None:
-            role = tmsg["role"] if isinstance(tmsg, dict) else tmsg.role
-            if role == "tool" and tool_results_as_strings:
-                # Handle both dict and object cases for content
-                if isinstance(tmsg, dict):
-                    tmsg["content"] = str(tmsg["content"])
-                else:
-                    tmsg.content = str(tmsg.content)
-            transformed_messages.append(tmsg)
-    return transformed_messages
-
 def convert_response_to_openai(response_data: dict[str, Any]) -> ChatCompletion:
     """Convert response to OpenAI format."""
     # Build choices list first
@@ -80,6 +54,7 @@ def convert_response_to_openai(response_data: dict[str, Any]) -> ChatCompletion:
         completion_response.usage = convert_usage_to_openai(usage_data)
 
     return completion_response
+
 
 def convert_usage_to_openai(usage_data: dict[str, Any]) -> CompletionUsage:
     """Get the completion usage."""

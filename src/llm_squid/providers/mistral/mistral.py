@@ -1,13 +1,25 @@
 import os
-from typing import Any, cast
+from typing import Any
 
 from mistralai import Mistral
 from mistralai.extra import response_format_from_pydantic_model
 from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
-from llm_squid.utils import convert_request_to_openai, convert_response_to_openai
+from llm_squid.utils import convert_response_to_openai
 from llm_squid.utils.provider import Provider
+
+
+def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
+    """Format the kwargs for Mistral."""
+    if "response_format" in kwargs and issubclass(
+        kwargs["response_format"],
+        BaseModel,
+    ):
+        kwargs["response_format"] = response_format_from_pydantic_model(
+            kwargs["response_format"],
+        )
+    return kwargs
 
 
 class MistralProvider(Provider):
@@ -19,33 +31,19 @@ class MistralProvider(Provider):
             raise ValueError(msg)
         self.client = Mistral(**config)
 
-    def convert_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
-        """Format the kwargs for Mistral."""
-        if "response_format" in kwargs and issubclass(
-            kwargs["response_format"],
-            BaseModel,
-        ):
-            kwargs["response_format"] = response_format_from_pydantic_model(
-                kwargs["response_format"],
-            )
-        return kwargs
-
     def completion(
         self,
         model: str,
-        messages: list[Any],
+        messages: list[dict[str, Any]],
         **kwargs: Any,
     ) -> ChatCompletion:
         """Create a chat completion using Mistral."""
-        kwargs = self.convert_kwargs(kwargs)
-        # Transform messages using converter
-        transformed_messages = convert_request_to_openai(messages)
+        kwargs = _convert_kwargs(kwargs)
 
         # Make the request to Mistral
-        # Cast to Any to avoid type issues since Mistral accepts dict format
         response = self.client.chat.complete(
             model=model,
-            messages=transformed_messages,
+            messages=messages,  # type: ignore[arg-type]
             **kwargs,
         )
 

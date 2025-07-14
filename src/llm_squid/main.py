@@ -2,11 +2,10 @@
 from typing import Any
 
 from openai.types.chat.chat_completion import ChatCompletion
-from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from llm_squid.utils import ProviderFactory
 
 
-def completion(model: str, messages: list[ChatCompletionMessage], **kwargs: dict[str, Any]) -> ChatCompletion:
+def completion(model: str, messages: list[dict[str, Any]], **kwargs: dict[str, Any]) -> ChatCompletion:
     """Create a chat completion.
 
     Args:
