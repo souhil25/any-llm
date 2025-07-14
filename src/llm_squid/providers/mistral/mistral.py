@@ -5,13 +5,13 @@ from mistralai import Mistral
 from mistralai.extra import response_format_from_pydantic_model
 from pydantic import BaseModel
 
-from llm_squid.message import ChatCompletionResponse
-from llm_squid.message_converter import OpenAICompliantMessageConverter
-from llm_squid.provider import LLMError, Provider
+from openai.types.chat.chat_completion import ChatCompletion
+from llm_squid.utils.message_converter import OpenAICompliantMessageConverter
+from llm_squid.utils.provider import Provider
 
 
 class MistralMessageConverter(OpenAICompliantMessageConverter):
-    def convert_response(self, response_data: Any) -> ChatCompletionResponse:
+    def convert_response(self, response_data: Any) -> ChatCompletion:
         """Convert Mistral's response to our standard format."""
         # Convert Mistral's response object to dict format
         response_dict = response_data.model_dump()
@@ -39,7 +39,7 @@ class MistralProvider(Provider):
             )
         return kwargs
 
-    def chat_completions_create(
+    def completion(
         self,
         model: str,
         messages: list[Any],
@@ -47,19 +47,15 @@ class MistralProvider(Provider):
     ) -> Any:
         """Create a chat completion using Mistral."""
         kwargs = self.convert_kwargs(kwargs)
-        try:
-            # Transform messages using converter
-            transformed_messages = self.transformer.convert_request(messages)
+        # Transform messages using converter
+        transformed_messages = self.transformer.convert_request(messages)
 
-            # Make the request to Mistral
-            # Cast to Any to avoid type issues since Mistral accepts dict format
-            response = self.client.chat.complete(
-                model=model,
-                messages=cast("Any", transformed_messages),
-                **kwargs,
-            )
+        # Make the request to Mistral
+        # Cast to Any to avoid type issues since Mistral accepts dict format
+        response = self.client.chat.complete(
+            model=model,
+            messages=cast("Any", transformed_messages),
+            **kwargs,
+        )
 
-            return self.transformer.convert_response(response)
-        except Exception as e:
-            msg = f"An error occurred: {e}"
-            raise LLMError(msg) from e
+        return self.transformer.convert_response(response)

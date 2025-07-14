@@ -10,6 +10,7 @@ requires-python = ">=3.11"
 dynamic = ["version"]
 dependencies = [
   "pydantic",
+  "openai",
 ]
 
 [project.optional-dependencies]
@@ -37,9 +38,8 @@ namespaces = false
 
 [tool.setuptools_scm]
 
-[tool.ruff.lint]
-extend-select = ["ALL"]
-
+[tool.ruff]
+line-length = 120
 
 [dependency-groups]
 dev = [

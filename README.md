@@ -1,5 +1,21 @@
-# llm-squid 🦑
-Communicate with an LLM provider using a single interface
+# LLM Squid
 
+A simple, function-based API for interacting with multiple LLM providers.
 
-https://github.com/mozilla-ai/any-agent/issues/524
+## Usage
+
+### Basic Usage
+
+```python
+from llm_squid import completion
+
+# Simple completion without provider configuration
+response = completion(
+    model="mistral/mistral-small-latest",
+    messages=[
+        {"role": "user", "content": "Hello, how are you?"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
