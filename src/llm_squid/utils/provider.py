@@ -13,6 +13,7 @@ class Provider(ABC):
     @abstractmethod
     def completion(self, model: str, messages: list[dict[str, Any]], **kwargs: dict[str, Any]) -> ChatCompletion:
         """Must be implemented by each provider."""
+        raise NotImplementedError
 
 
 class ProviderFactory:
