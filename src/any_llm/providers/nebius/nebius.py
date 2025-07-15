@@ -1,5 +1,4 @@
-from any_llm.provider import ApiConfig
-from ..openai.base import BaseOpenAIProvider
+from any_llm.providers.openai.base import BaseOpenAIProvider
 
 
 class NebiusProvider(BaseOpenAIProvider):
