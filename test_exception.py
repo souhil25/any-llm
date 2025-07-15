@@ -17,4 +17,4 @@ try:
 except MissingApiKeyError as e:
     print(f"✅ Custom message works: {e}")
 
-print("All tests passed! 🎉") 
+print("All tests passed! 🎉")
