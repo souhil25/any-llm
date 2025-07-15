@@ -27,7 +27,7 @@ class ProviderFactory:
         provider_class_name = f"{provider_key.capitalize()}Provider"
         provider_module_name = f"{provider_key}"
 
-        module_path = f"llm_squid.providers.{provider_module_name}"
+        module_path = f"any_llm.providers.{provider_module_name}"
 
         try:
             module = importlib.import_module(module_path)

@@ -7,7 +7,7 @@ A simple, function-based API for interacting with multiple LLM providers.
 ### Basic Usage
 
 ```python
-from llm_squid import completion
+from any_llm import completion
 
 # Simple completion without provider configuration
 response = completion(

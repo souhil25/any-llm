@@ -7,8 +7,8 @@ import json
 import httpx
 from openai.types.chat.chat_completion import ChatCompletion
 
-from llm_squid.utils import convert_response_to_openai
-from llm_squid.utils.provider import Provider
+from any_llm.utils import convert_response_to_openai
+from any_llm.utils.provider import Provider
 
 
 class OllamaProvider(Provider):

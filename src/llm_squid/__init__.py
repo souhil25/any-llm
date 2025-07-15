@@ -1,4 +1,4 @@
-from llm_squid.main import (
+from any_llm.main import (
     completion,
 )
 

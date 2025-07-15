@@ -2,7 +2,7 @@
 from typing import Any
 
 from openai.types.chat.chat_completion import ChatCompletion
-from llm_squid.utils import ProviderFactory
+from any_llm.utils import ProviderFactory
 
 
 def completion(model: str, messages: list[dict[str, Any]], **kwargs: dict[str, Any]) -> ChatCompletion:

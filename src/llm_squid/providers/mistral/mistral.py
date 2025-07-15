@@ -6,8 +6,8 @@ from mistralai.extra import response_format_from_pydantic_model
 from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
-from llm_squid.utils import convert_response_to_openai
-from llm_squid.utils.provider import Provider
+from any_llm.utils import convert_response_to_openai
+from any_llm.utils.provider import Provider
 
 
 def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
