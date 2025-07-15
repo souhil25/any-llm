@@ -1,4 +1,3 @@
-from any_llm.provider import ApiConfig
 from .base import BaseOpenAIProvider
 
 
@@ -23,7 +22,3 @@ class OpenaiProvider(BaseOpenAIProvider):
     DEFAULT_API_BASE = "https://api.openai.com/v1"
     ENV_API_KEY_NAME = "OPENAI_API_KEY"
     PROVIDER_NAME = "OpenAI"
-
-    def __init__(self, config: ApiConfig) -> None:
-        """Initialize OpenAI provider with standard OpenAI configuration."""
-        super().__init__(config)

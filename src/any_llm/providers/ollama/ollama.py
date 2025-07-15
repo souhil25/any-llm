@@ -116,8 +116,6 @@ class OllamaProvider(Provider):
         """Initialize Ollama provider."""
         self.url = str(config.api_base or os.getenv("OLLAMA_API_URL", self._DEFAULT_URL))
 
-        self.timeout = 30
-
     def completion(
         self,
         model: str,
@@ -137,11 +135,12 @@ class OllamaProvider(Provider):
             "options": {"num_ctx": 32000},  # Default is 4096 which is too small for most use cases.
             **kwargs,  # Pass any additional arguments to the API
         }
+        timeout = int(kwargs.pop("timeout", 30))
         try:
             response = httpx.post(
                 self.url.rstrip("/") + self._CHAT_COMPLETION_ENDPOINT,
                 json=data,
-                timeout=self.timeout,
+                timeout=timeout,
             )
             response.raise_for_status()
         except httpx.HTTPStatusError as e:
