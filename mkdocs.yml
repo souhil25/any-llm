@@ -57,9 +57,6 @@ markdown_extensions:
 plugins:
 - search
 - include-markdown
-- mkdocs-jupyter:
-      no_input: false
-      show_input: true
 - mkdocstrings:
     handlers:
       python:
