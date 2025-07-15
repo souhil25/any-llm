@@ -12,25 +12,17 @@ dependencies = [
   "pydantic",
   "openai",
   "rich",
+  "httpx",
 ]
 
 [project.optional-dependencies]
 
 all = [
-  "any-llm-sdk[mistral,ollama,openai]"
+  "any-llm-sdk[mistral]"
 ]
 
 mistral = [
   "mistralai",
-]
-
-ollama = [
-  "httpx",
-]
-
-openai = [
-  # OpenAI is already in base dependencies, but this maintains consistency
-  "openai",
 ]
 
 [project.urls]

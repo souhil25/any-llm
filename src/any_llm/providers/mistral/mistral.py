@@ -1,8 +1,13 @@
 import os
 from typing import Any
 
-from mistralai import Mistral
-from mistralai.extra import response_format_from_pydantic_model
+try:
+    from mistralai import Mistral
+    from mistralai.extra import response_format_from_pydantic_model
+except ImportError:
+    msg = "mistralai is not installed. Please install it with `pip install any-llm-sdk[mistral]`"
+    raise ImportError(msg)
+
 from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
