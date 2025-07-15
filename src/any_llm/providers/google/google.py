@@ -203,10 +203,11 @@ class GoogleProvider(Provider):
             self.client = genai.Client(vertexai=True, project=self.project_id, location=self.location)
         else:
             # Gemini Developer API configuration
-            api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+            # Use api_key from config if provided, otherwise fall back to environment variables
+            api_key = getattr(config, "api_key", None) or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
             if not api_key:
-                msg = "GEMINI_API_KEY or GOOGLE_API_KEY environment variable is required for Gemini Developer API"
+                msg = "API key is required for Gemini Developer API. Provide it via ApiConfig or set GEMINI_API_KEY/GOOGLE_API_KEY environment variable"
                 raise ValueError(msg)
 
             # Initialize client for Gemini Developer API

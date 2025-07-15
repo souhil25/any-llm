@@ -29,7 +29,8 @@ def test_providers(provider: str) -> None:
         if "API key provided" in str(e):
             pytest.skip(f"{provider} API key not provided, skipping")
         raise e
-    except httpx.HTTPStatusError as e:
-        if e.response.status_code == 404 and provider == "ollama":
+    except (httpx.HTTPStatusError, httpx.ConnectError):
+        if provider == "ollama":
             pytest.skip("Ollama is not set up, skipping")
+        raise
     assert result.choices[0].message.content is not None
