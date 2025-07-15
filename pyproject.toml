@@ -18,7 +18,7 @@ dependencies = [
 [project.optional-dependencies]
 
 all = [
-  "any-llm-sdk[mistral,anthropic,huggingface,google]"
+  "any-llm-sdk[mistral,anthropic,huggingface,google,cohere,cerebras,fireworks,groq,aws,azure,watsonx]"
 ]
 
 mistral = [
@@ -35,6 +35,34 @@ google = [
 
 huggingface = [
   "huggingface-hub",
+]
+
+cohere = [
+  "cohere",
+]
+
+cerebras = [
+  "cerebras-cloud-sdk",
+]
+
+fireworks = [
+  "httpx",
+]
+
+groq = [
+  "groq",
+]
+
+aws = [
+  "boto3",
+]
+
+azure = [
+  "httpx",
+]
+
+watsonx = [
+  "ibm-watsonx-ai",
 ]
 
 [project.urls]

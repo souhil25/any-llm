@@ -20,7 +20,12 @@ provider_model_map = {
     "ollama": "llama3.1:8b",
     "azure": "gpt-4o",
     "cohere": "command-r-20240215",
+    "cerebras": "llama3.1-8b",
     "huggingface": "meta-llama/Meta-Llama-3-8B-Instruct",  # You must have novita enabled in your hf account to use this model
+    "aws": "amazon.titan-text-001",
+    "watsonx": "google/gemini-2.0-flash-001",
+    "fireworks": "meta-llama/Meta-Llama-3-8B-Instruct",
+    "groq": "llama-3.1-8b-instant",
 }
 
 
