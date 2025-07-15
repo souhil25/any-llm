@@ -11,8 +11,10 @@ from pydantic import BaseModel
 
 class ApiConfig(BaseModel):
     """Configuration for the provider."""
+
     api_key: str | None = None
     api_base: str | None = None
+
 
 class Provider(ABC):
     """Provider for the LLM."""
@@ -29,7 +31,7 @@ class Provider(ABC):
 class ProviderFactory:
     """Factory to dynamically load provider instances based on the naming conventions."""
 
-    PROVIDERS_DIR = Path(__file__).parent.parent / "providers"
+    PROVIDERS_DIR = Path(__file__).parent / "providers"
 
     @classmethod
     def create_provider(cls, provider_key: str, config: ApiConfig) -> Provider:
