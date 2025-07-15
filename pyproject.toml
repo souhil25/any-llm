@@ -17,7 +17,7 @@ dependencies = [
 [project.optional-dependencies]
 
 all = [
-  "any-llm[mistral,ollama,openai]"
+  "any-llm-sdk[mistral,ollama,openai]"
 ]
 
 mistral = [
