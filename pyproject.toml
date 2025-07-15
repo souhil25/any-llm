@@ -77,7 +77,6 @@ docs = [
   "mkdocs-material",
   "mkdocstrings-python",
   "mkdocs-include-markdown-plugin>=7.1.5",
-  "mkdocs-jupyter>=0.25.1",
 ]
 
 
