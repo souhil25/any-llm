@@ -227,7 +227,7 @@ def generate_llms_full_txt(docs_dir, site_dir, nav_config):
         [
             "# any-llm Documentation",
             "",
-            "> Complete documentation for any-llm - A Python library providing a single interface to different agent frameworks.",
+            "> Complete documentation for any-llm - A Python library providing a single interface to different llm providers.",
             "",
             "This file contains all documentation pages concatenated for easy consumption by AI systems.",
             "",

@@ -1,3 +1,3 @@
-## Agent
+## Completion
 
 ::: any_llm.completion

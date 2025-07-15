@@ -1,6 +1,6 @@
 import pytest
 
-from any_llm.utils.provider import Provider, ProviderFactory
+from any_llm.utils.provider import ProviderFactory
 
 
 @pytest.fixture(params=list(ProviderFactory.get_supported_providers()), ids=lambda x: x)
