@@ -134,6 +134,7 @@ class OllamaProvider(Provider):
         data = {
             "model": model,
             "messages": messages,
+            "options": {"num_ctx": 32000},  # Default is 4096 which is too small for most use cases.
             **kwargs,  # Pass any additional arguments to the API
         }
         try:
