@@ -1,15 +1,14 @@
-import os
 from typing import Any
 from abc import ABC
 
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 
-from any_llm.provider import Provider, ApiConfig
-from any_llm.exceptions import MissingApiKeyError
+from any_llm.provider import ApiConfig
+from any_llm.providers.base_framework import BaseProviderFramework
 
 
-class BaseOpenAIProvider(Provider, ABC):
+class BaseOpenAIProvider(BaseProviderFramework, ABC):
     """
     Base provider for OpenAI-compatible services.
 
@@ -23,10 +22,8 @@ class BaseOpenAIProvider(Provider, ABC):
     ENV_API_KEY_NAME: str
     PROVIDER_NAME: str
 
-    def __init__(self, config: ApiConfig) -> None:
-        """Initialize OpenAI-compatible provider."""
-        super().__init__(config)
-
+    def _initialize_client(self, config: ApiConfig) -> None:
+        """Initialize OpenAI-compatible client."""
         client_kwargs: dict[str, Any] = {}
 
         if not config.api_base:
@@ -34,23 +31,22 @@ class BaseOpenAIProvider(Provider, ABC):
         else:
             client_kwargs["base_url"] = config.api_base
 
-        if not config.api_key and not os.getenv(self.ENV_API_KEY_NAME):
-            raise MissingApiKeyError(self.PROVIDER_NAME, self.ENV_API_KEY_NAME)
-
-        # Get API key from environment if not provided in config
-        api_key = config.api_key or os.getenv(self.ENV_API_KEY_NAME)
-        client_kwargs["api_key"] = api_key
+        # API key is already validated in BaseProviderFramework
+        client_kwargs["api_key"] = config.api_key
 
         # Create the OpenAI client
         self.client = OpenAI(**client_kwargs)
 
-    def completion(
-        self,
-        model: str,
-        messages: list[dict[str, Any]],
-        **kwargs: Any,
-    ) -> ChatCompletion:
-        """Create a chat completion using OpenAI-compatible API."""
+    def _convert_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
+        """Convert kwargs for OpenAI-compatible providers (minimal conversion needed)."""
+        return kwargs.copy()
+
+    def _convert_messages(self, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Convert messages for OpenAI-compatible providers (minimal conversion needed)."""
+        return messages
+
+    def _make_api_call(self, model: str, messages: list[dict[str, Any]], **kwargs: Any) -> ChatCompletion:
+        """Make the API call to OpenAI-compatible service."""
         if "response_format" in kwargs:
             response: ChatCompletion = self.client.chat.completions.parse(
                 model=model,
@@ -63,5 +59,8 @@ class BaseOpenAIProvider(Provider, ABC):
                 messages=messages,  # type: ignore[arg-type]
                 **kwargs,
             )
-
         return response
+
+    def _convert_response(self, raw_response: ChatCompletion) -> ChatCompletion:
+        """Convert response for OpenAI-compatible providers (no conversion needed)."""
+        return raw_response

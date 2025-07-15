@@ -9,31 +9,15 @@ except ImportError:
     msg = "google-genai is not installed. Please install it with `pip install any-llm-sdk[google]`"
     raise ImportError(msg)
 
-from openai.types.chat.chat_completion import ChatCompletion, Choice
-from openai.types.completion_usage import CompletionUsage
-from openai.types.chat.chat_completion_message import ChatCompletionMessage
-from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
+from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
 from any_llm.exceptions import MissingApiKeyError
+from any_llm.providers.base_framework import (
+    create_completion_from_response,
+    remove_unsupported_params,
+)
 
 DEFAULT_TEMPERATURE = 0.7
-
-
-def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
-    """Format the kwargs for Google GenAI."""
-    kwargs = kwargs.copy()
-
-    # Convert tools if present
-    if "tools" in kwargs:
-        kwargs["tools"] = _convert_tool_spec(kwargs["tools"])
-
-    # Handle unsupported parameters
-    unsupported_params = ["response_format", "parallel_tool_calls"]
-    for param in unsupported_params:
-        if param in kwargs:
-            kwargs.pop(param)
-
-    return kwargs
 
 
 def _convert_tool_spec(openai_tools: list[dict[str, Any]]) -> list[types.Tool]:
@@ -113,79 +97,9 @@ def _convert_messages(messages: list[dict[str, Any]]) -> list[types.Content]:
     return formatted_messages
 
 
-def _convert_response(response: Any) -> ChatCompletion:
-    """Convert Google GenAI response to OpenAI ChatCompletion format."""
-    # Check if the response contains function calls
-    if (
-        hasattr(response.candidates[0].content.parts[0], "function_call")
-        and response.candidates[0].content.parts[0].function_call
-    ):
-        function_call = response.candidates[0].content.parts[0].function_call
-
-        # Convert the function call arguments to a dictionary
-        args_dict = {}
-        if hasattr(function_call, "args") and function_call.args:
-            for key, value in function_call.args.items():
-                args_dict[key] = value
-
-        tool_calls = [
-            ChatCompletionMessageToolCall(
-                id=f"call_{hash(function_call.name)}",
-                type="function",
-                function=Function(name=function_call.name, arguments=json.dumps(args_dict)),
-            )
-        ]
-
-        message = ChatCompletionMessage(
-            content=None,
-            role="assistant",
-            tool_calls=tool_calls,
-        )
-
-        finish_reason = "tool_calls"
-    else:
-        # Handle regular text response
-        content = response.candidates[0].content.parts[0].text
-        message = ChatCompletionMessage(
-            content=content,
-            role="assistant",
-            tool_calls=None,
-        )
-
-        finish_reason = "stop"
-
-    # Create the choice
-    choice = Choice(
-        finish_reason=finish_reason,  # type: ignore
-        index=0,
-        message=message,
-    )
-
-    # Create usage information (extract if available)
-    usage = CompletionUsage(
-        completion_tokens=getattr(response.usage_metadata, "candidates_token_count", 0)
-        if hasattr(response, "usage_metadata")
-        else 0,
-        prompt_tokens=getattr(response.usage_metadata, "prompt_token_count", 0)
-        if hasattr(response, "usage_metadata")
-        else 0,
-        total_tokens=getattr(response.usage_metadata, "total_token_count", 0)
-        if hasattr(response, "usage_metadata")
-        else 0,
-    )
-
-    # Build the final ChatCompletion object
-    return ChatCompletion(
-        id="google_genai_response",
-        model="google/genai",
-        object="chat.completion",
-        created=0,
-        choices=[choice],
-        usage=usage,
-    )
-
-
 class GoogleProvider(Provider):
+    """Google Provider using the new response conversion utilities."""
+
     def __init__(self, config: ApiConfig) -> None:
         """Initialize Google GenAI provider."""
         # Check if we should use Vertex AI or Gemini Developer API
@@ -197,10 +111,7 @@ class GoogleProvider(Provider):
             self.location = os.getenv("GOOGLE_REGION", "us-central1")
 
             if not self.project_id:
-                raise MissingApiKeyError(
-                    "Google Vertex AI",
-                    "GOOGLE_PROJECT_ID",
-                )
+                raise MissingApiKeyError("Google Vertex AI", "GOOGLE_PROJECT_ID")
 
             # Initialize client for Vertex AI
             self.client = genai.Client(vertexai=True, project=self.project_id, location=self.location)
@@ -210,10 +121,7 @@ class GoogleProvider(Provider):
             api_key = getattr(config, "api_key", None) or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
             if not api_key:
-                raise MissingApiKeyError(
-                    "Google Gemini Developer API",
-                    "GEMINI_API_KEY/GOOGLE_API_KEY",
-                )
+                raise MissingApiKeyError("Google Gemini Developer API", "GEMINI_API_KEY/GOOGLE_API_KEY")
 
             # Initialize client for Gemini Developer API
             self.client = genai.Client(api_key=api_key)
@@ -225,7 +133,14 @@ class GoogleProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion:
         """Create a chat completion using Google GenAI."""
-        kwargs = _convert_kwargs(kwargs)
+        # Remove unsupported parameters
+        kwargs = remove_unsupported_params(kwargs, ["response_format", "parallel_tool_calls"])
+
+        # Convert tools if present
+        tools = None
+        if "tools" in kwargs:
+            tools = _convert_tool_spec(kwargs["tools"])
+            kwargs.pop("tools")
 
         # Set the temperature if provided, otherwise use the default
         temperature = kwargs.get("temperature", DEFAULT_TEMPERATURE)
@@ -233,19 +148,14 @@ class GoogleProvider(Provider):
         # Convert messages to GenAI format
         formatted_messages = _convert_messages(messages)
 
-        # Handle tools if provided
-        tools = kwargs.get("tools")
-
         # Create generation config
         generation_config = types.GenerateContentConfig(
             temperature=temperature,
-            tools=tools,
+            tools=tools if tools else None,  # type: ignore[arg-type]
         )
 
-        # Generate content using the client
         # For now, let's use a simple string-based approach
         content_text = ""
-
         if len(formatted_messages) == 1 and formatted_messages[0].role == "user":
             # Single user message
             parts = formatted_messages[0].parts
@@ -265,7 +175,93 @@ class GoogleProvider(Provider):
             if not content_text:
                 content_text = "Hello"  # fallback
 
+        # Generate content using the client
         response = self.client.models.generate_content(model=model, contents=content_text, config=generation_config)
 
-        # Convert and return the response
-        return _convert_response(response)
+        # Convert response to dict-like structure for the utility
+        response_dict = {
+            "id": "google_genai_response",
+            "model": "google/genai",
+            "created": 0,
+            "usage": {
+                "prompt_tokens": getattr(response.usage_metadata, "prompt_token_count", 0)
+                if hasattr(response, "usage_metadata")
+                else 0,
+                "completion_tokens": getattr(response.usage_metadata, "candidates_token_count", 0)
+                if hasattr(response, "usage_metadata")
+                else 0,
+                "total_tokens": getattr(response.usage_metadata, "total_token_count", 0)
+                if hasattr(response, "usage_metadata")
+                else 0,
+            },
+        }
+
+        # Check if the response contains function calls
+        if (
+            response.candidates
+            and len(response.candidates) > 0
+            and response.candidates[0].content
+            and response.candidates[0].content.parts
+            and len(response.candidates[0].content.parts) > 0
+            and hasattr(response.candidates[0].content.parts[0], "function_call")
+            and response.candidates[0].content.parts[0].function_call
+        ):
+            function_call = response.candidates[0].content.parts[0].function_call
+
+            # Convert the function call arguments to a dictionary
+            args_dict = {}
+            if hasattr(function_call, "args") and function_call.args:
+                for key, value in function_call.args.items():
+                    args_dict[key] = value
+
+            response_dict["choices"] = [
+                {
+                    "message": {
+                        "role": "assistant",
+                        "content": None,
+                        "tool_calls": [
+                            {
+                                "id": f"call_{hash(function_call.name)}",
+                                "function": {
+                                    "name": function_call.name,
+                                    "arguments": json.dumps(args_dict),
+                                },
+                                "type": "function",
+                            }
+                        ],
+                    },
+                    "finish_reason": "tool_calls",
+                    "index": 0,
+                }
+            ]
+        else:
+            # Handle regular text response
+            content = ""
+            if (
+                response.candidates
+                and len(response.candidates) > 0
+                and response.candidates[0].content
+                and response.candidates[0].content.parts
+                and len(response.candidates[0].content.parts) > 0
+                and hasattr(response.candidates[0].content.parts[0], "text")
+            ):
+                content = response.candidates[0].content.parts[0].text or ""
+
+            response_dict["choices"] = [
+                {
+                    "message": {
+                        "role": "assistant",
+                        "content": content,
+                        "tool_calls": None,
+                    },
+                    "finish_reason": "stop",
+                    "index": 0,
+                }
+            ]
+
+        # Convert to OpenAI format using the new utility
+        return create_completion_from_response(
+            response_data=response_dict,
+            model=model,
+            provider_name="google",
+        )
