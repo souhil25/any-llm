@@ -10,8 +10,10 @@ except ImportError:
 
 from pydantic import BaseModel
 
-from openai.types.chat.chat_completion import ChatCompletion
-from any_llm.utils import convert_response_to_openai
+from openai.types.chat.chat_completion import ChatCompletion, Choice
+from openai.types.completion_usage import CompletionUsage
+from openai.types.chat.chat_completion_message import ChatCompletionMessage
+from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
 from any_llm.provider import Provider, ApiConfig
 
 
@@ -25,6 +27,68 @@ def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
             kwargs["response_format"],
         )
     return kwargs
+
+
+def _convert_response(response: Any) -> ChatCompletion:
+    """Convert Mistral response directly to OpenAI ChatCompletion format."""
+    # Convert Mistral response to dict
+    response_dict = response.model_dump()
+
+    # Build choices list
+    choices = []
+    for i, choice_data in enumerate(response_dict["choices"]):
+        message_data = choice_data["message"]
+
+        # Handle tool calls if present
+        tool_calls = None
+        if "tool_calls" in message_data and message_data["tool_calls"] is not None:
+            tool_calls = [
+                ChatCompletionMessageToolCall(
+                    id=tool_call.get("id") or "unknown",
+                    type="function",
+                    function=Function(
+                        name=tool_call.get("function", {}).get("name", ""),
+                        arguments=tool_call.get("function", {}).get("arguments", ""),
+                    ),
+                )
+                for tool_call in message_data["tool_calls"]
+            ]
+
+        # Create the message
+        message = ChatCompletionMessage(
+            content=message_data["content"],
+            role=message_data.get("role", "assistant"),
+            tool_calls=tool_calls,
+        )
+
+        # Create the choice
+        choice = Choice(
+            finish_reason=choice_data.get("finish_reason", "stop"),
+            index=i,
+            message=message,
+        )
+        choices.append(choice)
+
+    # Create usage info if available
+    usage = None
+    if usage_data := response_dict.get("usage"):
+        usage = CompletionUsage(
+            completion_tokens=usage_data["completion_tokens"],
+            prompt_tokens=usage_data["prompt_tokens"],
+            total_tokens=usage_data["total_tokens"],
+            prompt_tokens_details=usage_data.get("prompt_tokens_details"),
+            completion_tokens_details=usage_data.get("completion_tokens_details"),
+        )
+
+    # Build the final ChatCompletion object
+    return ChatCompletion(
+        id=response_dict["id"],
+        model=response_dict["model"],
+        object="chat.completion",
+        created=response_dict["created"],
+        choices=choices,
+        usage=usage,
+    )
 
 
 class MistralProvider(Provider):
@@ -53,4 +117,4 @@ class MistralProvider(Provider):
             **kwargs,
         )
 
-        return convert_response_to_openai(response.model_dump())
+        return _convert_response(response)

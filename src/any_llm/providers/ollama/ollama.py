@@ -6,9 +6,10 @@ import json
 
 import httpx
 from pydantic import BaseModel
-from openai.types.chat.chat_completion import ChatCompletion
-
-from any_llm.utils import convert_response_to_openai
+from openai.types.chat.chat_completion import ChatCompletion, Choice
+from openai.types.completion_usage import CompletionUsage
+from openai.types.chat.chat_completion_message import ChatCompletionMessage
+from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
 from any_llm.logging import logger
 from any_llm.provider import ApiConfig, Provider
 
@@ -48,7 +49,7 @@ def _convert_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
     """
-    Convert Ollama response to OpenAI format.
+    Convert Ollama response directly to OpenAI ChatCompletion format.
     """
     # Ollama returns a different format than OpenAI, so we need to transform it
     # Ollama response format: {"message": {"role": "assistant", "content": "..."}, "model": "...", ...}
@@ -56,48 +57,53 @@ def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
     # convert the string timestamp to int (2025-07-14T12:00:00Z)
     created = int(datetime.strptime(created_str, "%Y-%m-%dT%H:%M:%S.%fZ").timestamp())
 
+    # Handle tool calls if present
     tool_calls = []
     if "tool_calls" in response_data["message"]:
         for tool_call in response_data["message"]["tool_calls"]:
             tool_calls.append(
-                {
-                    "id": str(uuid.uuid4()),
-                    "type": "function",
-                    "function": {
-                        "name": tool_call["function"]["name"],
-                        "arguments": json.dumps(tool_call["function"]["arguments"]),
-                    },
-                }
+                ChatCompletionMessageToolCall(
+                    id=str(uuid.uuid4()),
+                    type="function",
+                    function=Function(
+                        name=tool_call["function"]["name"],
+                        arguments=json.dumps(tool_call["function"]["arguments"]),
+                    ),
+                )
             )
 
-    # Transform to OpenAI format
-    openai_format = {
-        "id": "chatcmpl-" + str(hash(str(response_data))),  # Generate a fake ID
-        "object": "chat.completion",
-        "created": created,
-        "model": response_data["model"],
-        "choices": [
-            {
-                "index": 0,
-                "message": {
-                    "role": response_data["message"]["role"],
-                    "content": response_data["message"]["content"],
-                    "tool_calls": tool_calls,
-                },
-                "finish_reason": response_data["done_reason"],
-            }
-        ],
-    }
+    # Create the message
+    message = ChatCompletionMessage(
+        role=response_data["message"]["role"],
+        content=response_data["message"]["content"],
+        tool_calls=tool_calls if tool_calls else None,
+    )
 
-    # Add usage info if available
+    # Create the choice
+    choice = Choice(
+        index=0,
+        message=message,
+        finish_reason=response_data["done_reason"],
+    )
+
+    # Create usage info if available
+    usage = None
     if "prompt_eval_count" in response_data or "eval_count" in response_data:
-        openai_format["usage"] = {
-            "prompt_tokens": response_data.get("prompt_eval_count", 0),
-            "completion_tokens": response_data.get("eval_count", 0),
-            "total_tokens": response_data.get("prompt_eval_count", 0) + response_data.get("eval_count", 0),
-        }
+        usage = CompletionUsage(
+            prompt_tokens=response_data.get("prompt_eval_count", 0),
+            completion_tokens=response_data.get("eval_count", 0),
+            total_tokens=response_data.get("prompt_eval_count", 0) + response_data.get("eval_count", 0),
+        )
 
-    return convert_response_to_openai(openai_format)
+    # Build the final ChatCompletion object
+    return ChatCompletion(
+        id="chatcmpl-" + str(hash(str(response_data))),  # Generate a fake ID
+        object="chat.completion",
+        created=created,
+        model=response_data["model"],
+        choices=[choice],
+        usage=usage,
+    )
 
 
 class OllamaProvider(Provider):

@@ -18,11 +18,15 @@ dependencies = [
 [project.optional-dependencies]
 
 all = [
-  "any-llm-sdk[mistral]"
+  "any-llm-sdk[mistral,anthropic]"
 ]
 
 mistral = [
   "mistralai",
+]
+
+anthropic = [
+  "anthropic",
 ]
 
 [project.urls]
