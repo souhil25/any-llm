@@ -13,11 +13,14 @@ provider_model_map = {
     "google": "gemini-2.0-flash-001",
     "moonshot": "moonshot-v1-8k",
     "sambanova": "sambanova-7b-instruct",
-    "together": "meta-llama/Meta-Llama-3.1-405B-Instruct",
+    "together": "meta-llama/Meta-Llama-3-8B-Instruct",
     "xai": "xai-3-70b-instruct",
     "inception": "inception-3-70b-instruct",
     "nebius": "nebius-3-70b-instruct",
     "ollama": "llama3.1:8b",
+    "azure": "gpt-4o",
+    "cohere": "command-r-20240215",
+    "huggingface": "meta-llama/Meta-Llama-3-8B-Instruct", # You must have novita enabled in your hf account to use this model
 }
 
 

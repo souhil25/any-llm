@@ -8,6 +8,7 @@
 - [Mistral](https://docs.mistral.ai/)
 - [Ollama](https://github.com/ollama/ollama)
 - [DeepSeek](https://platform.deepseek.com/)
+- [HuggingFace](https://huggingface.co/inference-endpoints)
 - [Inception Labs](https://inceptionlabs.ai/)
 - [Moonshot AI](https://platform.moonshot.ai/)
 - [Nebius AI Studio](https://studio.nebius.ai/)
