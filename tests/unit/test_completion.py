@@ -50,7 +50,7 @@ def test_provider_factory_can_create_all_supported_providers() -> None:
 
     for provider_name in supported_providers:
         # Should be able to create each supported provider
-        provider_instance = ProviderFactory.create_provider(provider_name, ApiConfig())
+        provider_instance = ProviderFactory.create_provider(provider_name, ApiConfig(api_key="test_key"))
 
         # Each should be a valid Provider instance
         assert isinstance(provider_instance, Provider), f"Failed to create valid Provider instance for {provider_name}"
