@@ -9,7 +9,8 @@
 # any-llm
 
 [![Docs](https://github.com/mozilla-ai/any-llm/actions/workflows/docs.yaml/badge.svg)](https://github.com/mozilla-ai/any-llm/actions/workflows/docs.yaml/)
-[![Tests](https://github.com/mozilla-ai/any-agent/actions/workflows/tests-unit.yaml/badge.svg)](https://github.com/mozilla-ai/any-agent/actions/workflows/tests-unit.yaml/)
+[![Unit Tests](https://github.com/mozilla-ai/any-llm/actions/workflows/tests-unit.yaml/badge.svg)](https://github.com/mozilla-ai/any-llm/actions/workflows/tests-unit.yaml/)
+[![Integration Tests](https://github.com/mozilla-ai/any-llm/actions/workflows/tests-integration.yaml/badge.svg)](https://github.com/mozilla-ai/any-llm/actions/workflows/tests-integration.yaml/)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 
 A single interface to use and evaluate different llm providers.
@@ -39,7 +40,7 @@ While the OpenAI API has become the de facto standard for LLM provider interface
 `any-llm` fills the gap by providing a simple, well-maintained interface that:
 - **Leverages official provider SDKs** when available, reducing maintenance burden and ensuring compatibility
 - **Stays framework-agnostic** so it can be used across different projects and use cases
-- **Provides active maintenance** we support this in our product ([any-agent](https://github.com/mozilla-ai/any-agent)) so we're motivated to maintain it.
+- **Provides active maintenance** we support this in our product ([any-llm](https://github.com/mozilla-ai/any-llm)) so we're motivated to maintain it.
 
 
 

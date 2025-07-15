@@ -18,7 +18,7 @@ dependencies = [
 [project.optional-dependencies]
 
 all = [
-  "any-llm-sdk[mistral,anthropic]"
+  "any-llm-sdk[mistral,anthropic,google]"
 ]
 
 mistral = [
@@ -27,6 +27,10 @@ mistral = [
 
 anthropic = [
   "anthropic",
+]
+
+google = [
+  "google-genai",
 ]
 
 [project.urls]
@@ -89,6 +93,7 @@ lint = [
 tests = [
   "pytest>=8,<9",
   "mktestdocs>=0.2.4",
+  "pytest-xdist>=3.6.1",
 ]
 
 # For completeness, but 'uv sync --group dev' currently installs the others too.

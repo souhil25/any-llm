@@ -39,10 +39,6 @@ class BaseOpenAIProvider(Provider, ABC):
 
         # Get API key from environment if not provided in config
         api_key = config.api_key or os.getenv(self.ENV_API_KEY_NAME)
-        if api_key is None:
-            msg = f"No {self.PROVIDER_NAME} API key provided. Please provide it in the config or set the {self.ENV_API_KEY_NAME} environment variable."
-            raise ValueError(msg)
-
         client_kwargs["api_key"] = api_key
 
         # Create the OpenAI client
