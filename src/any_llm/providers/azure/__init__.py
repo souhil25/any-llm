@@ -1,3 +1,3 @@
 from .azure import AzureProvider
 
-__all__ = ["AzureProvider"] 
+__all__ = ["AzureProvider"]

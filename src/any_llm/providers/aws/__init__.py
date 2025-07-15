@@ -1,3 +1,3 @@
 from .aws import AwsProvider
 
-__all__ = ["AwsProvider"] 
+__all__ = ["AwsProvider"]

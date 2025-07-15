@@ -1,3 +1,3 @@
 from .watsonx import WatsonxProvider
 
-__all__ = ["WatsonxProvider"] 
+__all__ = ["WatsonxProvider"]

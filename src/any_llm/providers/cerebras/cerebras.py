@@ -19,7 +19,7 @@ def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
     """Format the kwargs for Cerebras."""
     # Since Cerebras is OpenAI-compliant, we can pass most kwargs through
     kwargs = kwargs.copy()
-    
+
     # Handle any unsupported parameters if needed
     return kwargs
 
@@ -28,19 +28,19 @@ def _convert_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Convert messages to Cerebras format."""
     # Since Cerebras is OpenAI-compliant, minimal conversion needed
     converted_messages = []
-    
+
     for message in messages:
         # Remove refusal field if present (following aisuite pattern)
         converted_message = message.copy()
         converted_message.pop("refusal", None)
-        
+
         # Handle tool messages - convert content to string if needed
         if message.get("role") == "tool":
             if "content" in converted_message:
                 converted_message["content"] = str(converted_message["content"])
-        
+
         converted_messages.append(converted_message)
-    
+
     return converted_messages
 
 
@@ -48,10 +48,10 @@ def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
     """Convert Cerebras response to OpenAI ChatCompletion format."""
     # Since Cerebras is OpenAI-compliant, the response should already be in the right format
     # We just need to create proper OpenAI objects
-    
+
     choice_data = response_data["choices"][0]
     message_data = choice_data["message"]
-    
+
     # Handle tool calls if present
     tool_calls = None
     if "tool_calls" in message_data and message_data["tool_calls"]:
@@ -67,21 +67,21 @@ def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
                     ),
                 )
             )
-    
+
     # Create the message
     message = ChatCompletionMessage(
         content=message_data.get("content"),
         role=message_data.get("role", "assistant"),
         tool_calls=tool_calls,
     )
-    
+
     # Create the choice
     choice = Choice(
-        finish_reason=choice_data.get("finish_reason", "stop"),  # type: ignore
+        finish_reason=choice_data.get("finish_reason", "stop"),
         index=choice_data.get("index", 0),
         message=message,
     )
-    
+
     # Create usage information (if available)
     usage = None
     if "usage" in response_data:
@@ -91,7 +91,7 @@ def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
             prompt_tokens=usage_data.get("prompt_tokens", 0),
             total_tokens=usage_data.get("total_tokens", 0),
         )
-    
+
     # Build the final ChatCompletion object
     return ChatCompletion(
         id=response_data.get("id", ""),
@@ -115,13 +115,9 @@ class CerebrasProvider(Provider):
                 "Cerebras",
                 "CEREBRAS_API_KEY",
             )
-        
+
         # Initialize the Cerebras client
-        client_config = {"api_key": config.api_key}
-        if config.api_base:
-            client_config["base_url"] = config.api_base
-        
-        self.client = cerebras.Cerebras(**client_config)
+        self.client = cerebras.Cerebras(api_key=config.api_key)
 
     def completion(
         self,
@@ -132,7 +128,7 @@ class CerebrasProvider(Provider):
         """Create a chat completion using Cerebras."""
         kwargs = _convert_kwargs(kwargs)
         converted_messages = _convert_messages(messages)
-        
+
         try:
             # Make the API call using the client
             response = self.client.chat.completions.create(
@@ -140,13 +136,18 @@ class CerebrasProvider(Provider):
                 messages=converted_messages,
                 **kwargs,
             )
-            
+
             # Convert response to dict format for processing
-            response_data = response.model_dump()
-            
+            # Handle the case where response might be a Stream object
+            if hasattr(response, "model_dump"):
+                response_data = response.model_dump()
+            else:
+                # If it's a streaming response, we need to handle it differently
+                raise ValueError("Streaming responses are not supported in this context")
+
             # Convert to OpenAI format
             return _convert_response(response_data)
-            
+
         except cerebras.PermissionDeniedError:
             raise
         except cerebras.AuthenticationError:
@@ -155,4 +156,4 @@ class CerebrasProvider(Provider):
             raise
         except Exception as e:
             # Re-raise as a more generic exception
-            raise RuntimeError(f"Cerebras API error: {e}") from e 
+            raise RuntimeError(f"Cerebras API error: {e}") from e

@@ -1,3 +1,3 @@
 from .cohere import CohereProvider
 
-__all__ = ["CohereProvider"] 
+__all__ = ["CohereProvider"]

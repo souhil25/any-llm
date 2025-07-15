@@ -19,7 +19,7 @@ def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
     """Format the kwargs for Groq."""
     # Since Groq is OpenAI-compliant, we can pass most kwargs through
     kwargs = kwargs.copy()
-    
+
     # Handle any unsupported parameters if needed
     return kwargs
 
@@ -28,14 +28,14 @@ def _convert_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Convert messages to Groq format."""
     # Since Groq is OpenAI-compliant, minimal conversion needed
     converted_messages = []
-    
+
     for message in messages:
         # Remove refusal field if present (following aisuite pattern)
         converted_message = message.copy()
         converted_message.pop("refusal", None)
-        
+
         converted_messages.append(converted_message)
-    
+
     return converted_messages
 
 
@@ -43,10 +43,10 @@ def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
     """Convert Groq response to OpenAI ChatCompletion format."""
     # Since Groq is OpenAI-compliant, the response should already be in the right format
     # We just need to create proper OpenAI objects
-    
+
     choice_data = response_data["choices"][0]
     message_data = choice_data["message"]
-    
+
     # Handle tool calls if present
     tool_calls = None
     if "tool_calls" in message_data and message_data["tool_calls"]:
@@ -62,21 +62,21 @@ def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
                     ),
                 )
             )
-    
+
     # Create the message
     message = ChatCompletionMessage(
         content=message_data.get("content"),
         role=message_data.get("role", "assistant"),
         tool_calls=tool_calls,
     )
-    
+
     # Create the choice
     choice = Choice(
-        finish_reason=choice_data.get("finish_reason", "stop"),  # type: ignore
+        finish_reason=choice_data.get("finish_reason", "stop"),
         index=choice_data.get("index", 0),
         message=message,
     )
-    
+
     # Create usage information (if available)
     usage = None
     if "usage" in response_data:
@@ -86,7 +86,7 @@ def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
             prompt_tokens=usage_data.get("prompt_tokens", 0),
             total_tokens=usage_data.get("total_tokens", 0),
         )
-    
+
     # Build the final ChatCompletion object
     return ChatCompletion(
         id=response_data.get("id", ""),
@@ -110,13 +110,9 @@ class GroqProvider(Provider):
                 "Groq",
                 "GROQ_API_KEY",
             )
-        
+
         # Initialize the Groq client
-        client_config = {"api_key": config.api_key}
-        if config.api_base:
-            client_config["base_url"] = config.api_base
-        
-        self.client = groq.Groq(**client_config)
+        self.client = groq.Groq(api_key=config.api_key)
 
     def completion(
         self,
@@ -127,21 +123,21 @@ class GroqProvider(Provider):
         """Create a chat completion using Groq."""
         kwargs = _convert_kwargs(kwargs)
         converted_messages = _convert_messages(messages)
-        
+
         try:
             # Make the API call using the client
             response = self.client.chat.completions.create(
                 model=model,
-                messages=converted_messages,
+                messages=converted_messages,  # type: ignore[arg-type]
                 **kwargs,
             )
-            
+
             # Convert response to dict format for processing
             response_data = response.model_dump()
-            
+
             # Convert to OpenAI format
             return _convert_response(response_data)
-            
+
         except Exception as e:
             # Re-raise as a more generic exception
-            raise RuntimeError(f"Groq API error: {e}") from e 
+            raise RuntimeError(f"Groq API error: {e}") from e

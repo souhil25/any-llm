@@ -3,7 +3,7 @@ from typing import Any
 
 try:
     from ibm_watsonx_ai import Credentials
-    from ibm_watsonx_ai.foundation_models import ModelInference
+    from ibm_watsonx_ai.foundation_models import ModelInference  # type: ignore[attr-defined]
 except ImportError:
     msg = "ibm-watsonx-ai is not installed. Please install it with `pip install any-llm-sdk[watsonx]`"
     raise ImportError(msg)
@@ -18,7 +18,7 @@ from any_llm.exceptions import MissingApiKeyError
 def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
     """Format the kwargs for Watsonx."""
     kwargs = kwargs.copy()
-    
+
     # Handle any unsupported parameters if needed
     return kwargs
 
@@ -33,21 +33,21 @@ def _convert_response(response: dict[str, Any]) -> ChatCompletion:
     """Convert Watsonx response to OpenAI ChatCompletion format."""
     choice_data = response["choices"][0]
     message_data = choice_data["message"]
-    
+
     # Create the message
     message = ChatCompletionMessage(
         content=message_data.get("content"),
         role=message_data.get("role", "assistant"),
         tool_calls=None,  # Watsonx doesn't seem to support tool calls in the aisuite implementation
     )
-    
+
     # Create the choice
     choice = Choice(
-        finish_reason=choice_data.get("finish_reason", "stop"),  # type: ignore
+        finish_reason=choice_data.get("finish_reason", "stop"),
         index=choice_data.get("index", 0),
         message=message,
     )
-    
+
     # Create usage information (if available)
     usage = None
     if "usage" in response:
@@ -57,7 +57,7 @@ def _convert_response(response: dict[str, Any]) -> ChatCompletion:
             prompt_tokens=usage_data.get("prompt_tokens", 0),
             total_tokens=usage_data.get("total_tokens", 0),
         )
-    
+
     # Build the final ChatCompletion object
     return ChatCompletion(
         id=response.get("id", ""),
@@ -78,7 +78,7 @@ class WatsonxProvider(Provider):
         self.service_url = config.api_base or os.getenv("WATSONX_SERVICE_URL")
         self.api_key = config.api_key or os.getenv("WATSONX_API_KEY")
         self.project_id = os.getenv("WATSONX_PROJECT_ID")
-        
+
         # Only validate API key during instantiation for consistency with other providers
         if not self.api_key:
             raise MissingApiKeyError("Watsonx", "WATSONX_API_KEY")
@@ -99,10 +99,10 @@ class WatsonxProvider(Provider):
             raise ValueError(
                 "Missing WatsonX project ID. Please provide it in the config or set the WATSONX_PROJECT_ID environment variable."
             )
-        
+
         kwargs = _convert_kwargs(kwargs)
         converted_messages = _convert_messages(messages)
-        
+
         try:
             # Create ModelInference instance
             model_inference = ModelInference(
@@ -113,16 +113,16 @@ class WatsonxProvider(Provider):
                 ),
                 project_id=self.project_id,
             )
-            
+
             # Make the API call
             response = model_inference.chat(
                 messages=converted_messages,
                 params=kwargs,
             )
-            
+
             # Convert to OpenAI format
             return _convert_response(response)
-            
+
         except Exception as e:
             # Re-raise as a more generic exception
-            raise RuntimeError(f"Watsonx API error: {e}") from e 
+            raise RuntimeError(f"Watsonx API error: {e}") from e

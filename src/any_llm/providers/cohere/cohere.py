@@ -19,13 +19,13 @@ from any_llm.exceptions import MissingApiKeyError
 def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
     """Format the kwargs for Cohere."""
     kwargs = kwargs.copy()
-    
+
     # Handle unsupported parameters
     unsupported_params = ["response_format", "parallel_tool_calls"]
     for param in unsupported_params:
         if param in kwargs:
             kwargs.pop(param)
-    
+
     return kwargs
 
 
@@ -50,13 +50,13 @@ def _convert_tool_content(content: Any) -> Any:
 def _convert_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Convert messages to Cohere format."""
     converted_messages = []
-    
+
     for message in messages:
         role = message.get("role")
         content = message.get("content")
         tool_calls = message.get("tool_calls")
         tool_plan = message.get("tool_plan")
-        
+
         # Convert to Cohere's format
         if role == "tool":
             # Handle tool response messages
@@ -87,9 +87,9 @@ def _convert_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
         else:
             # Handle regular messages
             converted_message = {"role": role, "content": content}
-        
+
         converted_messages.append(converted_message)
-    
+
     return converted_messages
 
 
@@ -101,7 +101,7 @@ def _convert_response(response: Any) -> ChatCompletion:
         completion_tokens=response.usage.tokens.output_tokens,
         total_tokens=response.usage.tokens.input_tokens + response.usage.tokens.output_tokens,
     )
-    
+
     # Handle tool calls
     if response.finish_reason == "TOOL_CALL":
         tool_call = response.message.tool_calls[0]
@@ -115,14 +115,14 @@ def _convert_response(response: Any) -> ChatCompletion:
                 ),
             )
         ]
-        
+
         # Create the message
         message = ChatCompletionMessage(
             content=response.message.tool_plan,  # Use tool_plan as content
             role="assistant",
             tool_calls=tool_calls,
         )
-        
+
         finish_reason = "tool_calls"
     else:
         # Handle regular text response
@@ -131,16 +131,16 @@ def _convert_response(response: Any) -> ChatCompletion:
             role="assistant",
             tool_calls=None,
         )
-        
+
         finish_reason = "stop"
-    
+
     # Create the choice
     choice = Choice(
         finish_reason=finish_reason,  # type: ignore
         index=0,
         message=message,
     )
-    
+
     # Build the final ChatCompletion object
     return ChatCompletion(
         id=getattr(response, "id", ""),
@@ -164,13 +164,9 @@ class CohereProvider(Provider):
                 "Cohere",
                 "CO_API_KEY",
             )
-        
+
         # Initialize the Cohere client
-        client_config = {"api_key": config.api_key}
-        if config.api_base:
-            client_config["base_url"] = config.api_base
-        
-        self.client = cohere.ClientV2(**client_config)
+        self.client = cohere.ClientV2(api_key=config.api_key)
 
     def completion(
         self,
@@ -181,18 +177,18 @@ class CohereProvider(Provider):
         """Create a chat completion using Cohere."""
         kwargs = _convert_kwargs(kwargs)
         converted_messages = _convert_messages(messages)
-        
+
         try:
             # Make the API call using the client
             response = self.client.chat(
                 model=model,
-                messages=converted_messages,
+                messages=converted_messages,  # type: ignore[arg-type]
                 **kwargs,
             )
-            
+
             # Convert to OpenAI format
             return _convert_response(response)
-            
+
         except Exception as e:
             # Re-raise as a more generic exception
-            raise RuntimeError(f"Cohere API error: {e}") from e 
+            raise RuntimeError(f"Cohere API error: {e}") from e
