@@ -15,6 +15,7 @@ from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
 from any_llm.provider import Provider, ApiConfig
+from any_llm.exceptions import MissingApiKeyError
 
 
 def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
@@ -97,8 +98,7 @@ class MistralProvider(Provider):
         if not config.api_key:
             config.api_key = os.getenv("MISTRAL_API_KEY")
         if not config.api_key:
-            msg = "No Mistral API key provided. Please provide it in the config or set the MISTRAL_API_KEY environment variable."
-            raise ValueError(msg)
+            raise MissingApiKeyError("Mistral", "MISTRAL_API_KEY")
         self.client = Mistral(api_key=config.api_key, server_url=config.api_base)
 
     def completion(

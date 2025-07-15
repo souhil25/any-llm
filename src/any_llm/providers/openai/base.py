@@ -6,6 +6,7 @@ from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 
 from any_llm.provider import Provider, ApiConfig
+from any_llm.exceptions import MissingApiKeyError
 
 
 class BaseOpenAIProvider(Provider, ABC):
@@ -34,8 +35,7 @@ class BaseOpenAIProvider(Provider, ABC):
             client_kwargs["base_url"] = config.api_base
 
         if not config.api_key and not os.getenv(self.ENV_API_KEY_NAME):
-            msg = f"No {self.PROVIDER_NAME} API key provided. Please provide it in the config or set the {self.ENV_API_KEY_NAME} environment variable."
-            raise ValueError(msg)
+            raise MissingApiKeyError(self.PROVIDER_NAME, self.ENV_API_KEY_NAME)
 
         # Get API key from environment if not provided in config
         api_key = config.api_key or os.getenv(self.ENV_API_KEY_NAME)

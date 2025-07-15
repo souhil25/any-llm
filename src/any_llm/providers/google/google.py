@@ -14,6 +14,7 @@ from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
 from any_llm.provider import Provider, ApiConfig
+from any_llm.exceptions import MissingApiKeyError
 
 DEFAULT_TEMPERATURE = 0.7
 
@@ -196,8 +197,10 @@ class GoogleProvider(Provider):
             self.location = os.getenv("GOOGLE_REGION", "us-central1")
 
             if not self.project_id:
-                msg = "GOOGLE_PROJECT_ID environment variable is required for Vertex AI"
-                raise ValueError(msg)
+                raise MissingApiKeyError(
+                    "Google Vertex AI",
+                    "GOOGLE_PROJECT_ID",
+                )
 
             # Initialize client for Vertex AI
             self.client = genai.Client(vertexai=True, project=self.project_id, location=self.location)
@@ -207,8 +210,10 @@ class GoogleProvider(Provider):
             api_key = getattr(config, "api_key", None) or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
             if not api_key:
-                msg = "API key is required for Gemini Developer API. Provide it via ApiConfig or set GEMINI_API_KEY/GOOGLE_API_KEY environment variable"
-                raise ValueError(msg)
+                raise MissingApiKeyError(
+                    "Google Gemini Developer API",
+                    "GEMINI_API_KEY/GOOGLE_API_KEY",
+                )
 
             # Initialize client for Gemini Developer API
             self.client = genai.Client(api_key=api_key)

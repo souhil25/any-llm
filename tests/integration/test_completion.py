@@ -1,6 +1,7 @@
 import httpx
 import pytest
 from any_llm import completion
+from any_llm.exceptions import MissingApiKeyError
 
 
 # Use small models for testing to make sure they work
@@ -25,10 +26,8 @@ def test_providers(provider: str) -> None:
     model_id = provider_model_map[provider]
     try:
         result = completion(f"{provider}/{model_id}", messages=[{"role": "user", "content": "Hello"}])
-    except ValueError as e:
-        if "API key provided" in str(e):
-            pytest.skip(f"{provider} API key not provided, skipping")
-        raise e
+    except MissingApiKeyError:
+        pytest.skip(f"{provider} API key not provided, skipping")
     except (httpx.HTTPStatusError, httpx.ConnectError):
         if provider == "ollama":
             pytest.skip("Ollama is not set up, skipping")
