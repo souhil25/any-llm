@@ -26,4 +26,4 @@ class InceptionProvider(BaseOpenAIProvider):
 
     def __init__(self, config: ApiConfig) -> None:
         """Initialize Inception provider with Inception Labs configuration."""
-        super().__init__(config) 
+        super().__init__(config)

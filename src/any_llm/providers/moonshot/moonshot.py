@@ -26,4 +26,4 @@ class MoonshotProvider(BaseOpenAIProvider):
 
     def __init__(self, config: ApiConfig) -> None:
         """Initialize Moonshot AI provider with Moonshot AI configuration."""
-        super().__init__(config) 
+        super().__init__(config)

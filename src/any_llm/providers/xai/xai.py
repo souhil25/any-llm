@@ -26,4 +26,4 @@ class XaiProvider(BaseOpenAIProvider):
 
     def __init__(self, config: ApiConfig) -> None:
         """Initialize xAI provider with xAI configuration."""
-        super().__init__(config) 
+        super().__init__(config)

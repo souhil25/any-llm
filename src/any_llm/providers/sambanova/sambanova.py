@@ -26,4 +26,4 @@ class SambanovaProvider(BaseOpenAIProvider):
 
     def __init__(self, config: ApiConfig) -> None:
         """Initialize SambaNova provider with SambaNova configuration."""
-        super().__init__(config) 
+        super().__init__(config)

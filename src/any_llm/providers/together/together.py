@@ -26,4 +26,4 @@ class TogetherProvider(BaseOpenAIProvider):
 
     def __init__(self, config: ApiConfig) -> None:
         """Initialize Together AI provider with Together AI configuration."""
-        super().__init__(config) 
+        super().__init__(config)

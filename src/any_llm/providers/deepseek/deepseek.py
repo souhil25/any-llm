@@ -26,4 +26,4 @@ class DeepseekProvider(BaseOpenAIProvider):
 
     def __init__(self, config: ApiConfig) -> None:
         """Initialize DeepSeek provider with DeepSeek configuration."""
-        super().__init__(config) 
+        super().__init__(config)
