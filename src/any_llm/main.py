@@ -29,6 +29,11 @@ def completion(model: str, messages: list[dict[str, Any]], **kwargs: Any) -> Cha
     # Extract the provider key from the model identifier, e.g., "mistral/mistral-small"
     provider_key, model_name = model.split("/", 1)
 
+    # Validate that neither provider nor model name is empty
+    if not provider_key or not model_name:
+        msg = f"Invalid model format. Expected 'provider/model', got '{model}'"
+        raise ValueError(msg)
+
     # Validate if the provider is supported
     supported_providers = ProviderFactory.get_supported_providers()
     if provider_key not in supported_providers:

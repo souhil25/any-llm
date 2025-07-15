@@ -18,7 +18,7 @@ def convert_response_to_openai(response_data: dict[str, Any]) -> ChatCompletion:
         if "tool_calls" in message_data and message_data["tool_calls"] is not None:
             tool_calls = [
                 ChatCompletionMessageToolCall(
-                    id=tool_call.get("id"),
+                    id=tool_call.get("id") or "unknown",  # Handle missing id
                     type="function",  # Always set to "function" as it's the only valid value
                     function=tool_call.get("function"),
                 )

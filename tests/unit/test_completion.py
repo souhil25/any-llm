@@ -1,5 +1,44 @@
+import pytest
+from unittest.mock import Mock, patch
+
+from any_llm.main import completion
 from any_llm.provider import ProviderFactory, ApiConfig, Provider
 
+
+def test_completion_invalid_model_format_no_slash() -> None:
+    """Test completion raises ValueError for model without slash."""
+    with pytest.raises(ValueError, match="Invalid model format. Expected 'provider/model', got 'gpt-4'"):
+        completion("gpt-4", messages=[{"role": "user", "content": "Hello"}])
+
+
+def test_completion_invalid_model_format_empty_provider() -> None:
+    """Test completion raises ValueError for model with empty provider."""
+    with pytest.raises(ValueError, match="Invalid model format"):
+        completion("/model", messages=[{"role": "user", "content": "Hello"}])
+
+
+def test_completion_invalid_model_format_empty_model() -> None:
+    """Test completion raises ValueError for model with empty model name."""
+    with pytest.raises(ValueError, match="Invalid model format"):
+        completion("provider/", messages=[{"role": "user", "content": "Hello"}])
+
+
+def test_completion_invalid_model_format_multiple_slashes() -> None:
+    """Test completion handles multiple slashes correctly (should work - takes first split)."""
+    mock_provider = Mock()
+    mock_provider.completion.return_value = Mock()
+
+    with patch("any_llm.main.ProviderFactory") as mock_factory:
+        mock_factory.get_supported_providers.return_value = ["provider"]
+        mock_factory.create_provider.return_value = mock_provider
+
+        # This should work - splits on first slash only
+        completion("provider/model/extra", messages=[{"role": "user", "content": "Hello"}])
+
+        # Verify the model name includes everything after first slash
+        mock_provider.completion.assert_called_once_with(
+            "model/extra", [{"role": "user", "content": "Hello"}]
+        )
 
 def test_all_providers_can_be_loaded(provider: str) -> None:
     """Test that all supported providers can be loaded successfully.
