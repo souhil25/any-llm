@@ -87,12 +87,7 @@ class BaseProviderFramework(Provider, ABC):
         pass
 
     @abstractmethod
-    def _make_api_call(
-        self,
-        model: str,
-        messages: Any,
-        **kwargs: Any
-    ) -> Any:
+    def _make_api_call(self, model: str, messages: Any, **kwargs: Any) -> Any:
         """Make the actual API call to the provider."""
         pass
 
@@ -108,6 +103,7 @@ class BaseCustomProvider(BaseProviderFramework, ABC):
 
     Examples: Anthropic, Google, Cohere, Mistral, Ollama
     """
+
     pass
 
 
@@ -152,38 +148,39 @@ def create_openai_completion(
 
 # === NEW COMPREHENSIVE RESPONSE CONVERSION UTILITIES ===
 
+
 def create_tool_calls_from_list(tool_calls_data: list[dict[str, Any]]) -> list[ChatCompletionMessageToolCall]:
     """
     Convert a list of tool call dictionaries to ChatCompletionMessageToolCall objects.
-    
+
     Handles common variations in tool call structure across providers.
     """
     tool_calls = []
-    
+
     for tool_call in tool_calls_data:
         # Extract tool call ID (handle various formats)
         tool_call_id = tool_call.get("id") or tool_call.get("tool_call_id") or f"call_{hash(str(tool_call))}"
-        
+
         # Extract function info (handle nested structures)
         function_info = tool_call.get("function", {})
         if not function_info and "name" in tool_call:
             # Some providers put function info directly in the tool_call
             function_info = {
                 "name": tool_call["name"],
-                "arguments": tool_call.get("arguments", tool_call.get("input", {}))
+                "arguments": tool_call.get("arguments", tool_call.get("input", {})),
             }
-        
+
         name = function_info.get("name", "")
         arguments = function_info.get("arguments", {})
-        
+
         # Ensure arguments is a JSON string
         if isinstance(arguments, dict):
             arguments = json.dumps(arguments)
         elif not isinstance(arguments, str):
             arguments = str(arguments)
-        
+
         tool_calls.append(create_openai_tool_call(tool_call_id, name, arguments))
-    
+
     return tool_calls
 
 
@@ -191,11 +188,11 @@ def create_choice_from_message_data(
     message_data: dict[str, Any],
     index: int = 0,
     finish_reason: str = "stop",
-    finish_reason_mapping: Optional[dict[str, str]] = None
+    finish_reason_mapping: Optional[dict[str, str]] = None,
 ) -> Choice:
     """
     Create a Choice object from message data, handling tool calls and content.
-    
+
     Args:
         message_data: Dictionary containing message content and tool calls
         index: Choice index (default 0)
@@ -205,20 +202,20 @@ def create_choice_from_message_data(
     # Apply finish reason mapping if provided
     if finish_reason_mapping and finish_reason in finish_reason_mapping:
         finish_reason = finish_reason_mapping[finish_reason]
-    
+
     # Extract tool calls if present
     tool_calls = None
     tool_calls_data = message_data.get("tool_calls", [])
     if tool_calls_data:
         tool_calls = create_tool_calls_from_list(tool_calls_data)
-    
+
     # Create the message
     message = create_openai_message(
         role=message_data.get("role", "assistant"),
         content=message_data.get("content"),
         tool_calls=tool_calls,
     )
-    
+
     return Choice(
         finish_reason=finish_reason,  # type: ignore[arg-type]
         index=index,
@@ -227,12 +224,11 @@ def create_choice_from_message_data(
 
 
 def create_usage_from_data(
-    usage_data: dict[str, Any],
-    token_field_mapping: Optional[dict[str, str]] = None
+    usage_data: dict[str, Any], token_field_mapping: Optional[dict[str, str]] = None
 ) -> CompletionUsage:
     """
     Create CompletionUsage from provider usage data.
-    
+
     Args:
         usage_data: Dictionary containing usage information
         token_field_mapping: Optional mapping for field names (e.g., {"input_tokens": "prompt_tokens"})
@@ -240,16 +236,16 @@ def create_usage_from_data(
     # Default field mapping
     default_mapping = {
         "completion_tokens": "completion_tokens",
-        "prompt_tokens": "prompt_tokens", 
+        "prompt_tokens": "prompt_tokens",
         "total_tokens": "total_tokens",
     }
-    
+
     # Apply custom mapping if provided
     if token_field_mapping:
         for openai_field, provider_field in token_field_mapping.items():
             if provider_field in usage_data:
                 default_mapping[openai_field] = provider_field
-    
+
     return CompletionUsage(
         completion_tokens=usage_data.get(default_mapping["completion_tokens"], 0),
         prompt_tokens=usage_data.get(default_mapping["prompt_tokens"], 0),
@@ -266,13 +262,13 @@ def create_completion_from_response(
     id_field: str = "id",
     created_field: str = "created",
     choices_field: str = "choices",
-    usage_field: str = "usage"
+    usage_field: str = "usage",
 ) -> ChatCompletion:
     """
     Create a complete ChatCompletion from provider response data.
-    
+
     This is the main utility that most providers can use to convert their responses.
-    
+
     Args:
         response_data: The raw response from the provider
         model: Model name to use in the response
@@ -287,28 +283,30 @@ def create_completion_from_response(
     # Extract choices
     choices = []
     choices_data = response_data.get(choices_field, [])
-    
+
     # Handle single choice responses (common pattern)
     if not choices_data and "message" in response_data:
-        choices_data = [{"message": response_data["message"], "finish_reason": response_data.get("finish_reason", "stop")}]
-    
+        choices_data = [
+            {"message": response_data["message"], "finish_reason": response_data.get("finish_reason", "stop")}
+        ]
+
     for i, choice_data in enumerate(choices_data):
         choice = create_choice_from_message_data(
             choice_data.get("message", choice_data),
             index=i,
             finish_reason=choice_data.get("finish_reason", "stop"),
-            finish_reason_mapping=finish_reason_mapping
+            finish_reason_mapping=finish_reason_mapping,
         )
         choices.append(choice)
-    
+
     # Create usage if available
     usage = None
     if usage_field in response_data and response_data[usage_field]:
         usage = create_usage_from_data(response_data[usage_field], token_field_mapping)
-    
+
     # Generate ID if not present
     response_id = response_data.get(id_field, f"{provider_name}_{hash(str(response_data))}")
-    
+
     return create_openai_completion(
         id=response_id,
         model=model,
@@ -320,19 +318,20 @@ def create_completion_from_response(
 
 # === TOOL SPECIFICATION CONVERSION UTILITIES ===
 
+
 def convert_openai_tools_to_generic(openai_tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     Convert OpenAI tool specification to a generic format that can be easily
     transformed to provider-specific formats.
-    
+
     Returns a list of tool dictionaries with standardized structure.
     """
     generic_tools = []
-    
+
     for tool in openai_tools:
         if tool.get("type") != "function":
             continue
-            
+
         function = tool["function"]
         generic_tool = {
             "name": function["name"],
@@ -340,11 +339,12 @@ def convert_openai_tools_to_generic(openai_tools: list[dict[str, Any]]) -> list[
             "parameters": function.get("parameters", {}),
         }
         generic_tools.append(generic_tool)
-    
+
     return generic_tools
 
 
 # === MESSAGE CONVERSION UTILITIES ===
+
 
 def standardize_message_content(content: Any) -> str:
     """Convert message content to string format, handling various input types."""
@@ -360,22 +360,23 @@ def standardize_message_content(content: Any) -> str:
 def extract_system_message(messages: list[dict[str, Any]]) -> tuple[str, list[dict[str, Any]]]:
     """
     Extract system message from messages list.
-    
+
     Returns tuple of (system_message_content, remaining_messages)
     """
     system_message = ""
     remaining_messages = []
-    
+
     for message in messages:
         if message.get("role") == "system":
             system_message = standardize_message_content(message.get("content", ""))
         else:
             remaining_messages.append(message)
-    
+
     return system_message, remaining_messages
 
 
 # === PARAMETER CONVERSION UTILITIES ===
+
 
 def remove_unsupported_params(kwargs: dict[str, Any], unsupported: list[str]) -> dict[str, Any]:
     """Remove unsupported parameters from kwargs."""
@@ -388,9 +389,9 @@ def remove_unsupported_params(kwargs: dict[str, Any], unsupported: list[str]) ->
 def map_parameter_names(kwargs: dict[str, Any], param_mapping: dict[str, str]) -> dict[str, Any]:
     """Map parameter names from OpenAI format to provider format."""
     mapped_kwargs = {}
-    
+
     for key, value in kwargs.items():
         mapped_key = param_mapping.get(key, key)
         mapped_kwargs[mapped_key] = value
-    
-    return mapped_kwargs 
+
+    return mapped_kwargs
