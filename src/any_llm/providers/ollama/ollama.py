@@ -8,7 +8,7 @@ import httpx
 from openai.types.chat.chat_completion import ChatCompletion
 
 from any_llm.utils import convert_response_to_openai
-from any_llm.utils.provider import Provider
+from any_llm.utils.provider import ApiConfig, Provider
 
 
 def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
@@ -101,11 +101,11 @@ class OllamaProvider(Provider):
     _DEFAULT_URL = "http://localhost:11434"
     _CONNECT_ERROR_MESSAGE = "Ollama is likely not running. Start Ollama by running `ollama serve` on your host."
 
-    def __init__(self, **config: Any) -> None:
+    def __init__(self, config: ApiConfig) -> None:
         """Initialize Ollama provider."""
-        self.url = str(config.get("api_url") or os.getenv("OLLAMA_API_URL", self._DEFAULT_URL))
+        self.url = str(config.api_base or os.getenv("OLLAMA_API_URL", self._DEFAULT_URL))
         # Optionally set a custom timeout (default to 30s)
-        self.timeout = config.get("timeout", 30)
+        self.timeout = 30
 
     def completion(
         self,

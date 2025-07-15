@@ -2,13 +2,23 @@
 import importlib
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any
+from typing import Any, Type
 
+from pydantic import BaseModel
 from openai.types.chat.chat_completion import ChatCompletion
+
+
+class ApiConfig(BaseModel):
+    api_key: str | None = None
+    api_base: str | None = None
+    api_version: str | None = None
 
 
 class Provider(ABC):
     """Provider for the LLM."""
+
+    def __init__(self, config: ApiConfig) -> None:
+        self.config = config
 
     @abstractmethod
     def completion(self, model: str, messages: list[dict[str, Any]], **kwargs: dict[str, Any]) -> ChatCompletion:
@@ -22,7 +32,7 @@ class ProviderFactory:
     PROVIDERS_DIR = Path(__file__).parent.parent / "providers"
 
     @classmethod
-    def create_provider(cls, provider_key: str, config: dict[str, Any]) -> Provider:
+    def create_provider(cls, provider_key: str, config: ApiConfig) -> Provider:
         """Dynamically load and create an instance of a provider based on the naming convention."""
         provider_class_name = f"{provider_key.capitalize()}Provider"
         provider_module_name = f"{provider_key}"
@@ -36,8 +46,8 @@ class ProviderFactory:
             raise ImportError(msg) from e
 
         # Instantiate the provider class
-        provider_class = getattr(module, provider_class_name)
-        return provider_class(**config)
+        provider_class: Type[Provider] = getattr(module, provider_class_name)
+        return provider_class(config=config)
 
     @classmethod
     def get_supported_providers(cls) -> list[str]:

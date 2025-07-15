@@ -3,9 +3,10 @@ from typing import Any
 
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.utils import ProviderFactory
+from any_llm.utils.provider import ApiConfig
 
 
-def completion(model: str, messages: list[dict[str, Any]], **kwargs: dict[str, Any]) -> ChatCompletion:
+def completion(model: str, messages: list[dict[str, Any]], **kwargs: Any) -> ChatCompletion:
     """Create a chat completion.
 
     Args:
@@ -36,14 +37,15 @@ def completion(model: str, messages: list[dict[str, Any]], **kwargs: dict[str, A
         raise ValueError(msg)
 
     # Create provider instance
-    config = {}
+    config: dict[str, str] = {}
     if "api_key" in kwargs:
-        config["api_key"] = kwargs.pop("api_key")
+        config["api_key"] = str(kwargs.pop("api_key"))
     if "api_base" in kwargs:
-        config["api_base"] = kwargs.pop("api_base")
+        config["api_base"] = str(kwargs.pop("api_base"))
     if "api_version" in kwargs:
-        config["api_version"] = kwargs.pop("api_version")
+        config["api_version"] = str(kwargs.pop("api_version"))
+    api_config = ApiConfig(**config)
 
-    provider = ProviderFactory.create_provider(provider_key, config)
+    provider = ProviderFactory.create_provider(provider_key, api_config)
 
     return provider.completion(model_name, messages, **kwargs)

@@ -11,6 +11,7 @@ dynamic = ["version"]
 dependencies = [
   "pydantic",
   "openai",
+  "rich",
 ]
 
 [project.optional-dependencies]
@@ -42,8 +43,27 @@ namespaces = false
 
 [tool.setuptools_scm]
 
+[tool.pylint.messages_control]
+disable = [
+    "import-outside-toplevel",
+]
+
 [tool.ruff]
 line-length = 120
+
+[tool.mypy]
+strict = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+follow_untyped_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_decorators = false # mypy gets confused by pytest decorators
+
+[[tool.mypy.overrides]]
+module = ["pytest", "mktestdocs", "pytest_lazy_fixtures", "syrupy.assertion"]
+ignore_missing_imports = true # pytest related modules are not found
 
 [dependency-groups]
 dev = [
