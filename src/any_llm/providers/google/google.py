@@ -9,6 +9,8 @@ except ImportError:
     msg = "google-genai is not installed. Please install it with `pip install any-llm-sdk[google]`"
     raise ImportError(msg)
 
+from pydantic import BaseModel
+
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
 from any_llm.exceptions import MissingApiKeyError
@@ -97,6 +99,41 @@ def _convert_messages(messages: list[dict[str, Any]]) -> list[types.Content]:
     return formatted_messages
 
 
+def _convert_pydantic_to_google_json(
+    pydantic_model: type[BaseModel], messages: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """
+    Convert Pydantic model to Google-compatible JSON instructions.
+
+    Following a similar pattern to the DeepSeek provider but adapted for Google.
+
+    Returns:
+        modified_messages
+    """
+    # Get the JSON schema from the Pydantic model
+    schema = pydantic_model.model_json_schema()
+
+    # Add JSON instructions to the last user message
+    modified_messages = messages.copy()
+    if modified_messages and modified_messages[-1]["role"] == "user":
+        original_content = modified_messages[-1]["content"]
+        json_instruction = f"""
+Please respond with a JSON object that matches the following schema:
+
+{json.dumps(schema, indent=2)}
+
+Return the JSON object only, no other text, do not wrap it in ```json or ```.
+
+{original_content}
+"""
+        modified_messages[-1]["content"] = json_instruction
+    else:
+        msg = "Last message is not a user message"
+        raise ValueError(msg)
+
+    return modified_messages
+
+
 class GoogleProvider(Provider):
     """Google Provider using the new response conversion utilities."""
 
@@ -133,8 +170,15 @@ class GoogleProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion:
         """Create a chat completion using Google GenAI."""
-        # Remove unsupported parameters
-        kwargs = remove_unsupported_params(kwargs, ["response_format", "parallel_tool_calls"])
+        # Handle response_format for Pydantic models
+        if "response_format" in kwargs:
+            response_format = kwargs.pop("response_format")
+            if isinstance(response_format, type) and issubclass(response_format, BaseModel):
+                # Convert Pydantic model to Google JSON format
+                messages = _convert_pydantic_to_google_json(response_format, messages)
+
+        # Remove other unsupported parameters
+        kwargs = remove_unsupported_params(kwargs, ["parallel_tool_calls"])
 
         # Convert tools if present
         tools = None

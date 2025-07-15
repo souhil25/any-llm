@@ -1,4 +1,5 @@
 import os
+import json
 from typing import Any
 
 try:
@@ -6,6 +7,8 @@ try:
 except ImportError:
     msg = "groq is not installed. Please install it with `pip install any-llm-sdk[groq]`"
     raise ImportError(msg)
+
+from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
@@ -32,6 +35,28 @@ class GroqProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion:
         """Create a chat completion using Groq."""
+        # Handle response_format for Pydantic models
+        if "response_format" in kwargs:
+            response_format = kwargs["response_format"]
+            if isinstance(response_format, type) and issubclass(response_format, BaseModel):
+                # Convert Pydantic model to JSON schema format for Groq
+                schema = response_format.model_json_schema()
+                kwargs["response_format"] = {"type": "json_object"}
+
+                # Add JSON instruction to the last user message (required by Groq)
+                if messages and messages[-1]["role"] == "user":
+                    original_content = messages[-1]["content"]
+                    json_instruction = f"""
+Please respond with a JSON object that matches the following schema:
+
+{json.dumps(schema, indent=2)}
+
+Return the JSON object only, no other text.
+
+{original_content}
+"""
+                    messages[-1]["content"] = json_instruction
+
         # Clean messages (remove refusal field as per original implementation)
         cleaned_messages = []
         for message in messages:
