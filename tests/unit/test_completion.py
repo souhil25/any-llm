@@ -15,7 +15,7 @@ def test_all_providers_can_be_loaded(provider: str) -> None:
     """
     # Try to create the provider with empty config
     # This should not raise any ImportError or other loading exceptions
-    provider_instance = ProviderFactory.create_provider(provider, ApiConfig())
+    provider_instance = ProviderFactory.create_provider(provider, ApiConfig(api_key="test_key"))
 
     # Verify that the created instance is actually a Provider
     assert isinstance(provider_instance, Provider), f"Provider {provider} did not create a valid Provider instance"
