@@ -202,12 +202,7 @@ def create_file_title(file_path):
     if file_path == "index.md":
         return "Introduction"
 
-    return (
-        file_path.replace(MARKDOWN_EXTENSION, "")
-        .replace("_", " ")
-        .replace("/", " - ")
-        .title()
-    )
+    return file_path.replace(MARKDOWN_EXTENSION, "").replace("_", " ").replace("/", " - ").title()
 
 
 def generate_llms_txt(docs_dir, site_dir, nav_config):
@@ -274,9 +269,7 @@ def generate_llms_full_txt(docs_dir, site_dir, nav_config):
                 cleaned_content = clean_markdown_content(content, file_path)
 
                 # Add section separator
-                llms_full_content.extend(
-                    [f"## {file_path}", "", cleaned_content, "", "---", ""]
-                )
+                llms_full_content.extend([f"## {file_path}", "", cleaned_content, "", "---", ""])
 
     # Write the combined content to llms-full.txt
     llms_full_txt_dest = site_dir / "llms-full.txt"
