@@ -53,7 +53,7 @@ Refer to [pyproject.toml](./pyproject.toml) for a list of the options available.
 Update your pip install command to include the frameworks that you plan on using:
 
 ```bash
-pip install 'any-llm[mistral]'
+pip install 'any-llm-sdk[mistral]'
 ```
 
 Make sure you have the appropriate API key environment variable set for your provider

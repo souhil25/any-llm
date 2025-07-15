@@ -11,7 +11,7 @@
 Install `any-llm` with the name of the provider that you plan to use
 
 ```bash
-pip install any-llm[mistral,ollama]
+pip install any-llm-sdk[mistral,ollama]
 ```
 
 Refer to [pyproject.toml](https://github.com/mozilla-ai/any-llm/blob/main/pyproject.toml) for a list of the options available.
