@@ -98,11 +98,12 @@ class OllamaProvider(Provider):
     """
 
     _CHAT_COMPLETION_ENDPOINT = "/api/chat"
+    _DEFAULT_URL = "http://localhost:11434"
     _CONNECT_ERROR_MESSAGE = "Ollama is likely not running. Start Ollama by running `ollama serve` on your host."
 
     def __init__(self, **config: Any) -> None:
         """Initialize Ollama provider."""
-        self.url = config.get("api_url") or os.getenv("OLLAMA_API_URL", "http://localhost:11434")
+        self.url = str(config.get("api_url") or os.getenv("OLLAMA_API_URL", self._DEFAULT_URL))
         # Optionally set a custom timeout (default to 30s)
         self.timeout = config.get("timeout", 30)
 

@@ -47,9 +47,19 @@ line-length = 120
 
 [dependency-groups]
 dev = [
+  { include-group = "docs" },
   { include-group = "lint" },
   { include-group = "tests" },
 ]
+
+docs = [
+  "mkdocs",
+  "mkdocs-material",
+  "mkdocstrings-python",
+  "mkdocs-include-markdown-plugin>=7.1.5",
+  "mkdocs-jupyter>=0.25.1",
+]
+
 
 lint = [
   "pre-commit==4.2.0",
@@ -58,9 +68,12 @@ lint = [
 
 tests = [
   "pytest>=8,<9",
+  "mktestdocs>=0.2.4",
 ]
 
 # For completeness, but 'uv sync --group dev' currently installs the others too.
 all = [
   { include-group = "lint" },
+  { include-group = "tests" },
+  { include-group = "docs" },
 ]
