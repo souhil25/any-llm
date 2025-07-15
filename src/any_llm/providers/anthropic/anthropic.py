@@ -14,6 +14,7 @@ from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
 from any_llm.provider import Provider, ApiConfig
+from any_llm.exceptions import MissingApiKeyError
 
 # Define a constant for the default max_tokens value
 DEFAULT_MAX_TOKENS = 4096
@@ -186,8 +187,10 @@ class AnthropicProvider(Provider):
         if not config.api_key:
             config.api_key = os.getenv("ANTHROPIC_API_KEY")
         if not config.api_key:
-            msg = "No Anthropic API key provided. Please provide it in the config or set the ANTHROPIC_API_KEY environment variable."
-            raise ValueError(msg)
+            raise MissingApiKeyError(
+                "Anthropic",
+                "ANTHROPIC_API_KEY",
+            )
         self.client = Anthropic(api_key=config.api_key, base_url=config.api_base)
 
     def completion(
