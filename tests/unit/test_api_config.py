@@ -1,10 +1,10 @@
 from unittest.mock import Mock, patch
 from any_llm.main import completion
-from any_llm.utils.provider import ApiConfig
+from any_llm.provider import ApiConfig
 
 
 def test_completion_extracts_all_config_from_kwargs() -> None:
-    """Test that api_key, api_base, and api_version are properly extracted from kwargs to create config."""
+    """Test that api_key and api_base are properly extracted from kwargs to create config."""
     # Mock the provider factory and provider
     mock_provider = Mock()
     mock_provider.completion.return_value = Mock()
@@ -19,13 +19,12 @@ def test_completion_extracts_all_config_from_kwargs() -> None:
             messages=[{"role": "user", "content": "Hello"}],
             api_key="test_key",
             api_base="https://test.com",
-            api_version="v1",
             other_param="value",
         )
 
         # Verify that create_provider was called with extracted config
         mock_factory.create_provider.assert_called_once_with(
-            "mistral", ApiConfig(api_key="test_key", api_base="https://test.com", api_version="v1")
+            "mistral", ApiConfig(api_key="test_key", api_base="https://test.com")
         )
 
         # Verify that provider.completion was called with remaining kwargs (config keys removed)
@@ -106,30 +105,4 @@ def test_completion_extracts_api_base_only() -> None:
         # Verify that provider.completion was called with remaining kwargs
         mock_provider.completion.assert_called_once_with(
             "llama2", [{"role": "user", "content": "Test"}], temperature=0.7
-        )
-
-
-def test_completion_extracts_api_version_only() -> None:
-    """Test that only api_version is extracted when only it's provided."""
-    mock_provider = Mock()
-    mock_provider.completion.return_value = Mock()
-
-    with patch("any_llm.main.ProviderFactory") as mock_factory:
-        mock_factory.get_supported_providers.return_value = ["mistral"]
-        mock_factory.create_provider.return_value = mock_provider
-
-        # Test with only api_version
-        completion(
-            model="mistral/mistral-medium",
-            messages=[{"role": "user", "content": "Test"}],
-            api_version="2023-12-01",
-            max_tokens=100,
-        )
-
-        # Verify that create_provider was called with only api_version in config
-        mock_factory.create_provider.assert_called_once_with("mistral", ApiConfig(api_version="2023-12-01"))
-
-        # Verify that provider.completion was called with remaining kwargs
-        mock_provider.completion.assert_called_once_with(
-            "mistral-medium", [{"role": "user", "content": "Test"}], max_tokens=100
         )

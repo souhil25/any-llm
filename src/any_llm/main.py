@@ -2,8 +2,7 @@
 from typing import Any
 
 from openai.types.chat.chat_completion import ChatCompletion
-from any_llm.utils import ProviderFactory
-from any_llm.utils.provider import ApiConfig
+from any_llm.provider import ProviderFactory, ApiConfig
 
 
 def completion(model: str, messages: list[dict[str, Any]], **kwargs: Any) -> ChatCompletion:
@@ -42,8 +41,6 @@ def completion(model: str, messages: list[dict[str, Any]], **kwargs: Any) -> Cha
         config["api_key"] = str(kwargs.pop("api_key"))
     if "api_base" in kwargs:
         config["api_base"] = str(kwargs.pop("api_base"))
-    if "api_version" in kwargs:
-        config["api_version"] = str(kwargs.pop("api_version"))
     api_config = ApiConfig(**config)
 
     provider = ProviderFactory.create_provider(provider_key, api_config)

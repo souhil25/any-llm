@@ -5,10 +5,12 @@ import uuid
 import json
 
 import httpx
+from pydantic import BaseModel
 from openai.types.chat.chat_completion import ChatCompletion
 
 from any_llm.utils import convert_response_to_openai
-from any_llm.utils.provider import ApiConfig, Provider
+from any_llm.logging import logger
+from any_llm.provider import ApiConfig, Provider
 
 
 def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
@@ -18,7 +20,13 @@ def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
     # Ensure stream is disabled for synchronous response
     kwargs["stream"] = False
     if "response_format" in kwargs:
-        kwargs["format"] = kwargs.pop("response_format").model_json_schema()
+        response_format = kwargs.pop("response_format")
+        if isinstance(response_format, type) and issubclass(response_format, BaseModel):
+            # response_format is a Pydantic model class
+            kwargs["format"] = response_format.model_json_schema()
+        else:
+            # response_format is already a dict/schema
+            kwargs["format"] = response_format
     return kwargs
 
 
@@ -32,6 +40,9 @@ def _convert_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
             message["content"] = json.dumps(message["content"])
             message.pop("tool_call_id")
             message.pop("name")
+        elif message["role"] == "assistant" and "tool_calls" in message:
+            message["content"] = message["content"] + "\n" + json.dumps(message["tool_calls"])
+            message.pop("tool_calls")
     return messages
 
 
@@ -104,7 +115,7 @@ class OllamaProvider(Provider):
     def __init__(self, config: ApiConfig) -> None:
         """Initialize Ollama provider."""
         self.url = str(config.api_base or os.getenv("OLLAMA_API_URL", self._DEFAULT_URL))
-        # Optionally set a custom timeout (default to 30s)
+
         self.timeout = 30
 
     def completion(
@@ -116,7 +127,7 @@ class OllamaProvider(Provider):
         """Create a chat completion using Ollama."""
         kwargs = _convert_kwargs(kwargs)
 
-        # Convert tool messages to user messages
+        # Convert tool messages to user messages and remove tool_calls from assistant messages
         # (https://www.reddit.com/r/ollama/comments/1ked8x2/feeding_tool_output_back_to_llm/)
         messages = _convert_messages(messages)
 
@@ -125,13 +136,16 @@ class OllamaProvider(Provider):
             "messages": messages,
             **kwargs,  # Pass any additional arguments to the API
         }
-
-        response = httpx.post(
-            self.url.rstrip("/") + self._CHAT_COMPLETION_ENDPOINT,
-            json=data,
-            timeout=self.timeout,
-        )
-        response.raise_for_status()
+        try:
+            response = httpx.post(
+                self.url.rstrip("/") + self._CHAT_COMPLETION_ENDPOINT,
+                json=data,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            logger.error(f"Error calling Ollama: {e.response.text}")
+            raise e
         response_data = response.json()
         # Convert Ollama response to OpenAI format
         return _convert_response(response_data)

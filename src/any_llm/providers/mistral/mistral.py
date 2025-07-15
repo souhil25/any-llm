@@ -7,8 +7,7 @@ from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.utils import convert_response_to_openai
-from any_llm.utils.provider import Provider, ApiConfig
-from any_llm.logging import logger
+from any_llm.provider import Provider, ApiConfig
 
 
 def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
@@ -31,8 +30,6 @@ class MistralProvider(Provider):
         if not config.api_key:
             msg = "No Mistral API key provided. Please provide it in the config or set the MISTRAL_API_KEY environment variable."
             raise ValueError(msg)
-        if config.api_version:
-            logger.warning("API Version setting is not supported for Mistral provider.")
         self.client = Mistral(api_key=config.api_key, server_url=config.api_base)
 
     def completion(

@@ -4,15 +4,15 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Type
 
-from pydantic import BaseModel
 from openai.types.chat.chat_completion import ChatCompletion
+
+from pydantic import BaseModel
 
 
 class ApiConfig(BaseModel):
+    """Configuration for the provider."""
     api_key: str | None = None
     api_base: str | None = None
-    api_version: str | None = None
-
 
 class Provider(ABC):
     """Provider for the LLM."""

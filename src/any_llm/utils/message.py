@@ -51,12 +51,12 @@ def convert_response_to_openai(response_data: dict[str, Any]) -> ChatCompletion:
 
     # Conditionally parse usage data if it exists.
     if usage_data := response_data.get("usage"):
-        completion_response.usage = convert_usage_to_openai(usage_data)
+        completion_response.usage = _convert_usage_to_openai(usage_data)
 
     return completion_response
 
 
-def convert_usage_to_openai(usage_data: dict[str, Any]) -> CompletionUsage:
+def _convert_usage_to_openai(usage_data: dict[str, Any]) -> CompletionUsage:
     """Get the completion usage."""
     return CompletionUsage(
         completion_tokens=usage_data["completion_tokens"],

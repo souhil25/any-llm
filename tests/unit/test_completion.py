@@ -1,5 +1,4 @@
-from any_llm.utils import ProviderFactory
-from any_llm.utils.provider import ApiConfig, Provider
+from any_llm.provider import ProviderFactory, ApiConfig, Provider
 
 
 def test_all_providers_can_be_loaded(provider: str) -> None:
@@ -30,10 +29,10 @@ def test_all_providers_can_be_loaded_with_config(provider: str) -> None:
     """Test that all supported providers can be loaded with sample config parameters.
 
     This test verifies that providers can handle common configuration parameters
-    like api_key, api_base, and api_version without throwing errors during instantiation.
+    like api_key and api_base without throwing errors during instantiation.
     """
     # Sample config that might be passed to any provider
-    sample_config = ApiConfig(api_key="test_key", api_base="https://test.example.com", api_version="v1")
+    sample_config = ApiConfig(api_key="test_key", api_base="https://test.example.com")
 
     # Try to create the provider with sample config
     # Providers should handle unknown config parameters gracefully

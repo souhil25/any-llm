@@ -17,7 +17,7 @@ dependencies = [
 [project.optional-dependencies]
 
 all = [
-  "any-llm[mistral,ollama]"
+  "any-llm[mistral,ollama,openai]"
 ]
 
 mistral = [
@@ -26,6 +26,11 @@ mistral = [
 
 ollama = [
   "httpx",
+]
+
+openai = [
+  # OpenAI is already in base dependencies, but this maintains consistency
+  "openai",
 ]
 
 [project.urls]

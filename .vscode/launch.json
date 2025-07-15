@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "LLMSquid",
+            "name": "any-llm",
             "type": "debugpy",
             "request": "attach",
             "connect": {

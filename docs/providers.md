@@ -2,6 +2,7 @@
 
 `any-llm` supports the following providers:
 
+- [OpenAI](https://platform.openai.com/docs/api-reference)
 - [Mistral](https://docs.mistral.ai/)
 - [Ollama](https://github.com/ollama/ollama)
 
