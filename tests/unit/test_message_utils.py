@@ -1,6 +1,4 @@
 import pytest
-from unittest.mock import Mock
-from typing import Any
 
 from any_llm.utils.message import convert_response_to_openai, _convert_usage_to_openai
 from openai.types.chat.chat_completion import ChatCompletion
@@ -13,15 +11,7 @@ def test_basic_response_conversion() -> None:
         "id": "chat-123",
         "model": "gpt-4",
         "created": 1234567890,
-        "choices": [
-            {
-                "message": {
-                    "content": "Hello, world!",
-                    "role": "assistant"
-                },
-                "finish_reason": "stop"
-            }
-        ]
+        "choices": [{"message": {"content": "Hello, world!", "role": "assistant"}, "finish_reason": "stop"}],
     }
 
     result = convert_response_to_openai(response_data)
@@ -44,20 +34,8 @@ def test_response_with_usage_data() -> None:
         "id": "chat-456",
         "model": "gpt-3.5-turbo",
         "created": 1234567890,
-        "choices": [
-            {
-                "message": {
-                    "content": "Test response",
-                    "role": "assistant"
-                },
-                "finish_reason": "stop"
-            }
-        ],
-        "usage": {
-            "completion_tokens": 10,
-            "prompt_tokens": 5,
-            "total_tokens": 15
-        }
+        "choices": [{"message": {"content": "Test response", "role": "assistant"}, "finish_reason": "stop"}],
+        "usage": {"completion_tokens": 10, "prompt_tokens": 5, "total_tokens": 15},
     }
 
     result = convert_response_to_openai(response_data)
@@ -82,16 +60,13 @@ def test_response_with_tool_calls() -> None:
                     "tool_calls": [
                         {
                             "id": "call_123",
-                            "function": {
-                                "name": "get_weather",
-                                "arguments": '{"location": "San Francisco"}'
-                            }
+                            "function": {"name": "get_weather", "arguments": '{"location": "San Francisco"}'},
                         }
-                    ]
+                    ],
                 },
-                "finish_reason": "tool_calls"
+                "finish_reason": "tool_calls",
             }
-        ]
+        ],
     }
 
     result = convert_response_to_openai(response_data)
@@ -112,21 +87,9 @@ def test_response_with_multiple_choices() -> None:
         "model": "gpt-4",
         "created": 1234567890,
         "choices": [
-            {
-                "message": {
-                    "content": "Choice 1",
-                    "role": "assistant"
-                },
-                "finish_reason": "stop"
-            },
-            {
-                "message": {
-                    "content": "Choice 2",
-                    "role": "assistant"
-                },
-                "finish_reason": "length"
-            }
-        ]
+            {"message": {"content": "Choice 1", "role": "assistant"}, "finish_reason": "stop"},
+            {"message": {"content": "Choice 2", "role": "assistant"}, "finish_reason": "length"},
+        ],
     }
 
     result = convert_response_to_openai(response_data)
@@ -154,7 +117,7 @@ def test_response_missing_optional_fields() -> None:
                 }
                 # Missing 'finish_reason' - should default to 'stop'
             }
-        ]
+        ],
         # Missing 'usage' - should be None
     }
 
@@ -172,15 +135,8 @@ def test_response_with_empty_tool_calls() -> None:
         "model": "gpt-4",
         "created": 1234567890,
         "choices": [
-            {
-                "message": {
-                    "content": "No tools used",
-                    "role": "assistant",
-                    "tool_calls": None
-                },
-                "finish_reason": "stop"
-            }
-        ]
+            {"message": {"content": "No tools used", "role": "assistant", "tool_calls": None}, "finish_reason": "stop"}
+        ],
     }
 
     result = convert_response_to_openai(response_data)
@@ -194,22 +150,14 @@ def test_response_with_detailed_usage() -> None:
         "id": "chat-detailed",
         "model": "gpt-4",
         "created": 1234567890,
-        "choices": [
-            {
-                "message": {
-                    "content": "Detailed usage response",
-                    "role": "assistant"
-                },
-                "finish_reason": "stop"
-            }
-        ],
+        "choices": [{"message": {"content": "Detailed usage response", "role": "assistant"}, "finish_reason": "stop"}],
         "usage": {
             "completion_tokens": 20,
             "prompt_tokens": 10,
             "total_tokens": 30,
             "prompt_tokens_details": {"cached_tokens": 5},
-            "completion_tokens_details": {"reasoning_tokens": 15}
-        }
+            "completion_tokens_details": {"reasoning_tokens": 15},
+        },
     }
 
     result = convert_response_to_openai(response_data)
@@ -218,7 +166,9 @@ def test_response_with_detailed_usage() -> None:
     assert result.usage.completion_tokens == 20
     assert result.usage.prompt_tokens == 10
     assert result.usage.total_tokens == 30
+    assert result.usage.prompt_tokens_details is not None
     assert result.usage.prompt_tokens_details.cached_tokens == 5
+    assert result.usage.completion_tokens_details is not None
     assert result.usage.completion_tokens_details.reasoning_tokens == 15
 
 
@@ -234,25 +184,16 @@ def test_response_with_malformed_tool_calls() -> None:
                     "content": None,
                     "role": "assistant",
                     "tool_calls": [
-                        {
-                            "id": "call_valid",
-                            "function": {
-                                "name": "valid_function",
-                                "arguments": "{}"
-                            }
-                        },
+                        {"id": "call_valid", "function": {"name": "valid_function", "arguments": "{}"}},
                         {
                             # Missing 'id' field
-                            "function": {
-                                "name": "missing_id_function",
-                                "arguments": "{}"
-                            }
-                        }
-                    ]
+                            "function": {"name": "missing_id_function", "arguments": "{}"}
+                        },
+                    ],
                 },
-                "finish_reason": "tool_calls"
+                "finish_reason": "tool_calls",
             }
-        ]
+        ],
     }
 
     result = convert_response_to_openai(response_data)
@@ -267,11 +208,7 @@ def test_response_with_malformed_tool_calls() -> None:
 
 def test_basic_usage_conversion() -> None:
     """Test basic usage conversion with required fields."""
-    usage_data = {
-        "completion_tokens": 100,
-        "prompt_tokens": 50,
-        "total_tokens": 150
-    }
+    usage_data = {"completion_tokens": 100, "prompt_tokens": 50, "total_tokens": 150}
 
     result = _convert_usage_to_openai(usage_data)
 
@@ -290,7 +227,7 @@ def test_usage_conversion_with_details() -> None:
         "prompt_tokens": 25,
         "total_tokens": 100,
         "prompt_tokens_details": {"cached_tokens": 10},
-        "completion_tokens_details": {"reasoning_tokens": 20}
+        "completion_tokens_details": {"reasoning_tokens": 20},
     }
 
     result = _convert_usage_to_openai(usage_data)
@@ -298,7 +235,9 @@ def test_usage_conversion_with_details() -> None:
     assert result.completion_tokens == 75
     assert result.prompt_tokens == 25
     assert result.total_tokens == 100
+    assert result.prompt_tokens_details is not None
     assert result.prompt_tokens_details.cached_tokens == 10
+    assert result.completion_tokens_details is not None
     assert result.completion_tokens_details.reasoning_tokens == 20
 
 
@@ -307,7 +246,7 @@ def test_usage_conversion_missing_optional_fields() -> None:
     usage_data = {
         "completion_tokens": 60,
         "prompt_tokens": 40,
-        "total_tokens": 100
+        "total_tokens": 100,
         # Missing detail fields
     }
 
@@ -326,7 +265,7 @@ def test_missing_required_fields_raises_error() -> None:
     incomplete_data = {
         "id": "chat-incomplete",
         "model": "gpt-4",
-        "created": 1234567890
+        "created": 1234567890,
         # Missing 'choices'
     }
 
@@ -336,12 +275,7 @@ def test_missing_required_fields_raises_error() -> None:
 
 def test_empty_choices_list() -> None:
     """Test response conversion with empty choices list."""
-    response_data = {
-        "id": "chat-empty",
-        "model": "gpt-4",
-        "created": 1234567890,
-        "choices": []
-    }
+    response_data = {"id": "chat-empty", "model": "gpt-4", "created": 1234567890, "choices": []}
 
     result = convert_response_to_openai(response_data)
 
@@ -359,8 +293,8 @@ def test_choice_missing_message() -> None:
                 "finish_reason": "stop"
                 # Missing 'message'
             }
-        ]
+        ],
     }
 
     with pytest.raises(KeyError):
-        convert_response_to_openai(response_data) 
+        convert_response_to_openai(response_data)

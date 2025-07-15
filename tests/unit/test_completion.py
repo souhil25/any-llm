@@ -36,9 +36,8 @@ def test_completion_invalid_model_format_multiple_slashes() -> None:
         completion("provider/model/extra", messages=[{"role": "user", "content": "Hello"}])
 
         # Verify the model name includes everything after first slash
-        mock_provider.completion.assert_called_once_with(
-            "model/extra", [{"role": "user", "content": "Hello"}]
-        )
+        mock_provider.completion.assert_called_once_with("model/extra", [{"role": "user", "content": "Hello"}])
+
 
 def test_all_providers_can_be_loaded(provider: str) -> None:
     """Test that all supported providers can be loaded successfully.
