@@ -20,7 +20,7 @@ provider_model_map = {
     "ollama": "llama3.1:8b",
     "azure": "gpt-4o",
     "cohere": "command-r-20240215",
-    "huggingface": "meta-llama/Meta-Llama-3-8B-Instruct", # You must have novita enabled in your hf account to use this model
+    "huggingface": "meta-llama/Meta-Llama-3-8B-Instruct",  # You must have novita enabled in your hf account to use this model
 }
 
 

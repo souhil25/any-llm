@@ -1,3 +1,3 @@
 from .huggingface import HuggingfaceProvider
 
-__all__ = ["HuggingfaceProvider"] 
+__all__ = ["HuggingfaceProvider"]
