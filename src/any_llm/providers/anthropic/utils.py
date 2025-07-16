@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from any_llm.logging import logger
 
@@ -16,7 +16,6 @@ except ImportError:
     raise ImportError(msg)
 
 from openai.types.chat.chat_completion import ChatCompletion
-from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
 from any_llm.providers.base_framework import create_completion_from_response
@@ -35,10 +34,10 @@ def _create_openai_chunk_from_anthropic_chunk(chunk: Any) -> ChatCompletionChunk
         "choices": [],
         "usage": None,
     }
-    
+
     delta: Dict[str, Any] = {}
     finish_reason = None
-    
+
     if isinstance(chunk, ContentBlockStartEvent):
         # Starting a new content block
         if chunk.content_block.type == "text":
@@ -55,7 +54,7 @@ def _create_openai_chunk_from_anthropic_chunk(chunk: Any) -> ChatCompletionChunk
                     }
                 ]
             }
-    
+
     elif isinstance(chunk, ContentBlockDeltaEvent):
         # Delta content
         if chunk.delta.type == "text_delta":
@@ -70,33 +69,33 @@ def _create_openai_chunk_from_anthropic_chunk(chunk: Any) -> ChatCompletionChunk
                     }
                 ]
             }
-    
+
     elif isinstance(chunk, ContentBlockStopEvent):
-        # End of content block  
-        if hasattr(chunk, 'content_block') and chunk.content_block.type == "tool_use":
+        # End of content block
+        if hasattr(chunk, "content_block") and chunk.content_block.type == "tool_use":
             finish_reason = "tool_calls"
         else:
             finish_reason = None
-    
+
     elif isinstance(chunk, MessageStopEvent):
         # End of message
         finish_reason = "stop"
-        if hasattr(chunk, 'message') and chunk.message.usage:
+        if hasattr(chunk, "message") and chunk.message.usage:
             chunk_dict["usage"] = {
                 "prompt_tokens": chunk.message.usage.input_tokens,
                 "completion_tokens": chunk.message.usage.output_tokens,
                 "total_tokens": chunk.message.usage.input_tokens + chunk.message.usage.output_tokens,
             }
-    
+
     choice = {
         "index": 0,
         "delta": delta,
         "finish_reason": finish_reason,
         "logprobs": None,
     }
-    
+
     chunk_dict["choices"] = [choice]
-    
+
     return ChatCompletionChunk.model_validate(chunk_dict)
 
 
