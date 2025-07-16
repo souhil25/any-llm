@@ -11,7 +11,6 @@ except ImportError:
     msg = "together or instructor is not installed. Please install it with `pip install any-llm-sdk[together]`"
     raise ImportError(msg)
 
-from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig, convert_instructor_response
@@ -48,10 +47,10 @@ class TogetherProvider(Provider):
             self.client = together.Together(api_key=config.api_key, base_url=config.api_base)
         else:
             self.client = together.Together(api_key=config.api_key)
-        
+
         # Create instructor client for structured output support
         # Together is OpenAI-compatible, so we can use instructor.from_openai
-        self.instructor_client = instructor.patch(self.client, mode=instructor.Mode.JSON)
+        self.instructor_client = instructor.patch(self.client, mode=instructor.Mode.JSON)  # type: ignore [call-overload]
 
     def completion(
         self,
@@ -64,7 +63,7 @@ class TogetherProvider(Provider):
         # Handle response_format for structured output
         if "response_format" in kwargs:
             response_format = kwargs.pop("response_format")
-            
+
             # Use instructor for structured output
             instructor_response = self.instructor_client.chat.completions.create(
                 model=model,
@@ -72,7 +71,7 @@ class TogetherProvider(Provider):
                 response_model=response_format,
                 **kwargs,
             )
-            
+
             # Convert instructor response to ChatCompletion format
             return convert_instructor_response(instructor_response, model, "together")
 

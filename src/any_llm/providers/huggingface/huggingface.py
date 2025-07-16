@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
-from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
+from any_llm.exceptions import MissingApiKeyError
 from any_llm.providers.base_framework import (
     create_completion_from_response,
 )
@@ -87,31 +87,10 @@ class HuggingfaceProvider(Provider):
                 # Convert Pydantic model to HuggingFace JSON format
                 messages = _convert_pydantic_to_huggingface_json(response_format, messages)
 
-        # Remove other unsupported parameters
-        if "parallel_tool_calls" in kwargs:
-            raise UnsupportedParameterError("parallel_tool_calls", self.PROVIDER_NAME)
-
-        # Ensure message content is always a string and handle tool calls
-        cleaned_messages = []
-        for message in messages:
-            cleaned_message = {
-                "role": message["role"],
-                "content": message.get("content") or "",
-            }
-
-            # Handle tool calls if present
-            if "tool_calls" in message and message["tool_calls"]:
-                cleaned_message["tool_calls"] = message["tool_calls"]
-
-            # Handle tool call ID for tool messages
-            if "tool_call_id" in message:
-                cleaned_message["tool_call_id"] = message["tool_call_id"]
-
-            cleaned_messages.append(cleaned_message)
         # Make the API call
         response = self.client.chat_completion(
             model=model,
-            messages=cleaned_messages,
+            messages=messages,
             **kwargs,
         )
 

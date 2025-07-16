@@ -115,6 +115,9 @@ disallow_untyped_decorators = false # mypy gets confused by pytest decorators
 module = ["pytest", "mktestdocs", "pytest_lazy_fixtures", "syrupy.assertion"]
 ignore_missing_imports = true # pytest related modules are not found
 
+[tool.pytest.ini_options]
+timeout = 30
+
 [dependency-groups]
 dev = [
   { include-group = "docs" },

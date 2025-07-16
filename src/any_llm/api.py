@@ -1,8 +1,9 @@
-from typing import Any, Optional, List, Union
+from typing import Any, Optional, List, Union, Callable
 
 from openai.types.chat.chat_completion import ChatCompletion
 from pydantic import BaseModel
 from any_llm.provider import ProviderFactory, ApiConfig
+from any_llm.tools import prepare_tools
 
 
 def completion(
@@ -10,7 +11,7 @@ def completion(
     messages: list[dict[str, Any]],
     *,
     # Common parameters with explicit types
-    tools: Optional[List[dict[str, Any]]] = None,
+    tools: Optional[List[Union[dict[str, Any], Callable[..., Any]]]] = None,
     tool_choice: Optional[Union[str, dict[str, Any]]] = None,
     max_turns: Optional[int] = None,
     temperature: Optional[float] = None,
@@ -37,7 +38,7 @@ def completion(
     Args:
         model: Model identifier in format 'provider/model' (e.g., 'mistral/mistral-small')
         messages: List of messages for the conversation
-        tools: List of tools or functions for tool calling
+        tools: List of tools for tool calling. Can be Python callables or OpenAI tool format dicts
         tool_choice: Controls which tools the model can call
         max_turns: Maximum number of tool execution turns
         temperature: Controls randomness in the response (0.0 to 2.0)
@@ -92,7 +93,7 @@ def completion(
     # Build kwargs with explicit parameters
     completion_kwargs = kwargs.copy()
     if tools is not None:
-        completion_kwargs["tools"] = tools
+        completion_kwargs["tools"] = prepare_tools(tools)
     if tool_choice is not None:
         completion_kwargs["tool_choice"] = tool_choice
     if max_turns is not None:

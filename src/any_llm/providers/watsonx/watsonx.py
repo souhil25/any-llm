@@ -15,20 +15,6 @@ from any_llm.provider import Provider, ApiConfig
 from any_llm.exceptions import MissingApiKeyError
 
 
-def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
-    """Format the kwargs for Watsonx."""
-    kwargs = kwargs.copy()
-
-    # Handle any unsupported parameters if needed
-    return kwargs
-
-
-def _convert_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Convert messages to Watsonx format."""
-    # Watsonx uses standard OpenAI format
-    return messages
-
-
 def _convert_response(response: dict[str, Any]) -> ChatCompletion:
     """Convert Watsonx response to OpenAI ChatCompletion format."""
     choice_data = response["choices"][0]
@@ -100,9 +86,6 @@ class WatsonxProvider(Provider):
                 "Missing WatsonX project ID. Please provide it in the config or set the WATSONX_PROJECT_ID environment variable."
             )
 
-        kwargs = _convert_kwargs(kwargs)
-        converted_messages = _convert_messages(messages)
-
         # Create ModelInference instance
         model_inference = ModelInference(
             model_id=model,
@@ -115,7 +98,7 @@ class WatsonxProvider(Provider):
 
         # Make the API call
         response = model_inference.chat(
-            messages=converted_messages,
+            messages=messages,
             params=kwargs,
         )
 

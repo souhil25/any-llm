@@ -61,50 +61,10 @@ class CohereProvider(Provider):
         elif "parallel_tool_calls" in kwargs:
             raise UnsupportedParameterError("parallel_tool_calls", self.PROVIDER_NAME)
 
-        # Convert messages to Cohere format
-        converted_messages = []
-        for message in messages:
-            role = message.get("role")
-            content = message.get("content")
-            tool_calls = message.get("tool_calls")
-            tool_plan = message.get("tool_plan")
-
-            if role == "tool":
-                # Handle tool response messages
-                converted_message = {
-                    "role": role,
-                    "tool_call_id": message.get("tool_call_id"),
-                    "content": _convert_tool_content(content),
-                }
-            elif role == "assistant" and tool_calls:
-                # Handle assistant messages with tool calls
-                converted_message = {
-                    "role": role,
-                    "tool_calls": [
-                        {
-                            "id": tc["id"],
-                            "function": {
-                                "name": tc["function"]["name"],
-                                "arguments": tc["function"]["arguments"],
-                            },
-                            "type": "function",
-                        }
-                        for tc in tool_calls
-                    ],
-                    "tool_plan": tool_plan,
-                }
-                if content:
-                    converted_message["content"] = content
-            else:
-                # Handle regular messages
-                converted_message = {"role": role, "content": content}
-
-            converted_messages.append(converted_message)
-
         # Make the API call
         response = self.client.chat(
             model=model,
-            messages=converted_messages,  # type: ignore[arg-type]
+            messages=messages,  # type: ignore[arg-type]
             **kwargs,
         )
 

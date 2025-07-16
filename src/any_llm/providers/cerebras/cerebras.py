@@ -1,6 +1,5 @@
 import os
-import json
-from typing import Any
+from typing import Any, cast
 
 try:
     import cerebras.cloud.sdk as cerebras
@@ -9,7 +8,6 @@ except ImportError:
     msg = "cerebras or instructor is not installed. Please install it with `pip install any-llm-sdk[cerebras]`"
     raise ImportError(msg)
 
-from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai.types.completion_usage import CompletionUsage
@@ -23,31 +21,11 @@ def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
     """Format the kwargs for Cerebras."""
     # Since Cerebras is OpenAI-compliant, we can pass most kwargs through
     kwargs = kwargs.copy()
-    
+
     # Remove response_format since it will be handled by instructor
     kwargs.pop("response_format", None)
 
     return kwargs
-
-
-def _convert_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Convert messages to Cerebras format."""
-    # Since Cerebras is OpenAI-compliant, minimal conversion needed
-    converted_messages = []
-
-    for message in messages:
-        # Remove refusal field if present (following aisuite pattern)
-        converted_message = message.copy()
-        converted_message.pop("refusal", None)
-
-        # Handle tool messages - convert content to string if needed
-        if message.get("role") == "tool":
-            if "content" in converted_message:
-                converted_message["content"] = str(converted_message["content"])
-
-        converted_messages.append(converted_message)
-
-    return converted_messages
 
 
 def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
@@ -126,7 +104,7 @@ class CerebrasProvider(Provider):
 
         # Initialize the Cerebras client
         self.client = cerebras.Cerebras(api_key=config.api_key)
-        
+
         # Create instructor client for structured output support
         self.instructor_client = instructor.from_cerebras(self.client)
 
@@ -137,32 +115,30 @@ class CerebrasProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion:
         """Create a chat completion using Cerebras with instructor support for structured outputs."""
-        
+
         # Handle response_format for structured output
         if "response_format" in kwargs:
             response_format = kwargs.pop("response_format")
             converted_kwargs = _convert_kwargs(kwargs)
-            converted_messages = _convert_messages(messages)
-            
+
             # Use instructor for structured output
             instructor_response = self.instructor_client.chat.completions.create(
                 model=model,
-                messages=converted_messages,
+                messages=cast(Any, messages),
                 response_model=response_format,
                 **converted_kwargs,
             )
-            
+
             # Convert instructor response to ChatCompletion format
             return convert_instructor_response(instructor_response, model, "cerebras")
-        
+
         # For non-structured outputs, use the regular client
         kwargs = _convert_kwargs(kwargs)
-        converted_messages = _convert_messages(messages)
 
         # Use regular create method for non-structured outputs
         response = self.client.chat.completions.create(
             model=model,
-            messages=converted_messages,
+            messages=messages,
             **kwargs,
         )
 

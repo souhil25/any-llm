@@ -65,7 +65,7 @@ class AnthropicProvider(BaseCustomProvider):
             instructor_response = self.instructor_client.messages.create(
                 model=model,
                 system=system_message,
-                messages=converted_messages,
+                messages=converted_messages,  # type: ignore[arg-type]
                 response_model=response_format,
                 **converted_kwargs,
             )
