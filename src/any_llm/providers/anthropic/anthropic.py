@@ -1,20 +1,20 @@
 import json
 from typing import Any, cast
 
-from any_llm.exceptions import UnsupportedParameterError
 from any_llm.logging import logger
 
 try:
     from anthropic import Anthropic
     from anthropic.types import Message
+    import instructor
 except ImportError:
-    msg = "anthropic is not installed. Please install it with `pip install any-llm-sdk[anthropic]`"
+    msg = "anthropic or instructor is not installed. Please install it with `pip install any-llm-sdk[anthropic]`"
     raise ImportError(msg)
 
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai.types.completion_usage import CompletionUsage
 
-from any_llm.provider import ApiConfig
+from any_llm.provider import ApiConfig, convert_instructor_response
 from any_llm.providers.base_framework import (
     BaseCustomProvider,
     create_openai_tool_call,
@@ -41,12 +41,44 @@ class AnthropicProvider(BaseCustomProvider):
         """Initialize the Anthropic client."""
         self.client = Anthropic(api_key=config.api_key, base_url=config.api_base)
 
+        # Create instructor client for structured output
+        self.instructor_client = instructor.from_anthropic(self.client)
+
+    def completion(
+        self,
+        model: str,
+        messages: list[dict[str, Any]],
+        **kwargs: Any,
+    ) -> ChatCompletion:
+        """Create a chat completion using Anthropic with instructor support."""
+        # Handle response_format for structured output
+        if "response_format" in kwargs:
+            response_format = kwargs.pop("response_format")
+
+            # Convert messages to Anthropic format
+            system_message, converted_messages = self._convert_messages(messages)
+
+            # Convert other kwargs
+            converted_kwargs = self._convert_kwargs(kwargs)
+
+            # Use instructor for structured output
+            instructor_response = self.instructor_client.messages.create(
+                model=model,
+                system=system_message,
+                messages=converted_messages,
+                response_model=response_format,
+                **converted_kwargs,
+            )
+
+            # Convert instructor response to ChatCompletion format
+            return convert_instructor_response(instructor_response, model, "anthropic")
+
+        # Fall back to standard completion flow
+        return super().completion(model, messages, **kwargs)
+
     def _convert_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         """Convert kwargs to Anthropic format."""
         kwargs = kwargs.copy()
-
-        if "response_format" in kwargs:
-            raise UnsupportedParameterError("response_format", self.PROVIDER_NAME)
 
         if "max_tokens" not in kwargs:
             logger.warning(f"max_tokens is required for Anthropic, setting to {DEFAULT_MAX_TOKENS}")

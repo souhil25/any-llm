@@ -7,8 +7,8 @@ from any_llm.exceptions import MissingApiKeyError
 
 def test_response_format(provider: ProviderName, provider_model_map: dict[ProviderName, str]) -> None:
     """Test that all supported providers can be loaded successfully."""
-    if provider in [ProviderName.ANTHROPIC, ProviderName.COHERE]:
-        pytest.skip("Anthropic does not support response_format")
+    if provider in [ProviderName.COHERE]:
+        pytest.skip(f"{provider.value} does not support response_format")
         return
     model_id = provider_model_map[provider]
 

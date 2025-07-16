@@ -385,3 +385,59 @@ def map_parameter_names(kwargs: dict[str, Any], param_mapping: dict[str, str]) -
         mapped_kwargs[mapped_key] = value
 
     return mapped_kwargs
+
+
+# === RESPONSE FORMAT CONVERSION UTILITIES ===
+def convert_response_format_for_provider(
+    response_format: Any,
+    provider_name: str = "default",
+    provider_format_type: str = "json_schema"
+) -> dict[str, Any]:
+    """
+    Convert response_format to provider-specific format.
+    
+    Args:
+        response_format: The response format from kwargs (can be Pydantic model class or dict)
+        provider_name: Name of the provider (for error messages)
+        provider_format_type: Type of format the provider expects ("json_schema" or "json_object")
+    
+    Returns:
+        Dictionary with provider-specific response format
+    """
+    from pydantic import BaseModel
+    
+    # Check if it's a Pydantic model class
+    if isinstance(response_format, type) and issubclass(response_format, BaseModel):
+        schema = response_format.model_json_schema()
+        
+        if provider_format_type == "json_object":
+            # For providers like Cohere that use json_object format
+            return {
+                "type": "json_object",
+                "json_schema": schema
+            }
+        else:
+            # For providers that use json_schema format (default)
+            return {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": response_format.__name__,
+                    "schema": schema
+                }
+            }
+    
+    # If it's already a dict, handle provider-specific format requirements
+    elif isinstance(response_format, dict):
+        if provider_format_type == "json_object" and response_format.get("type") == "json_schema":
+            # Convert json_schema format to json_object format for providers like Cohere
+            return {
+                "type": "json_object",
+                "json_schema": response_format.get("json_schema", {}).get("schema", response_format.get("json_schema", {}))
+            }
+        else:
+            # Pass through as-is for other cases
+            return response_format
+    
+    # If it's neither a Pydantic model nor a dict, return as-is
+    else:
+        return response_format

@@ -6,24 +6,25 @@ try:
     from together.types import (
         ChatCompletionResponse,
     )
+    import instructor
 except ImportError:
-    msg = "together is not installed. Please install it with `pip install any-llm-sdk[together]`"
+    msg = "together or instructor is not installed. Please install it with `pip install any-llm-sdk[together]`"
     raise ImportError(msg)
 
 from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
-from any_llm.provider import Provider, ApiConfig
+from any_llm.provider import Provider, ApiConfig, convert_instructor_response
 from any_llm.exceptions import MissingApiKeyError
 from any_llm.providers.base_framework import create_completion_from_response
 
 
 class TogetherProvider(Provider):
     """
-    Together AI Provider implementation using the official Together AI SDK.
+    Together AI Provider implementation using the official Together AI SDK with instructor support.
 
-    This provider connects to Together AI's API using the Together SDK.
-    It supports structured outputs (JSON schema, regex) as documented in Together AI's API.
+    This provider connects to Together AI's API using the Together SDK with instructor
+    handling structured outputs for Pydantic models.
 
     Configuration:
     - api_key: Together AI API key (can be set via TOGETHER_API_KEY environment variable)
@@ -47,6 +48,10 @@ class TogetherProvider(Provider):
             self.client = together.Together(api_key=config.api_key, base_url=config.api_base)
         else:
             self.client = together.Together(api_key=config.api_key)
+        
+        # Create instructor client for structured output support
+        # Together is OpenAI-compatible, so we can use instructor.from_openai
+        self.instructor_client = instructor.patch(self.client, mode=instructor.Mode.JSON)
 
     def completion(
         self,
@@ -54,20 +59,22 @@ class TogetherProvider(Provider):
         messages: list[dict[str, Any]],
         **kwargs: Any,
     ) -> ChatCompletion:
-        """Create a chat completion using Together AI."""
+        """Create a chat completion using Together AI with instructor support for structured outputs."""
 
-        # Handle response_format for Pydantic models
+        # Handle response_format for structured output
         if "response_format" in kwargs:
             response_format = kwargs.pop("response_format")
-            if isinstance(response_format, type) and issubclass(response_format, BaseModel):
-                # Convert Pydantic model to Fireworks JSON schema format
-                kwargs["response_format"] = {
-                    "type": "json_schema",
-                    "json_schema": {"name": response_format.__name__, "schema": response_format.model_json_schema()},
-                }
-            else:
-                # response_format is already a dict, pass it through
-                kwargs["response_format"] = response_format
+            
+            # Use instructor for structured output
+            instructor_response = self.instructor_client.chat.completions.create(
+                model=model,
+                messages=messages,
+                response_model=response_format,
+                **kwargs,
+            )
+            
+            # Convert instructor response to ChatCompletion format
+            return convert_instructor_response(instructor_response, model, "together")
 
         # Make the API call. Since streaming is not supported, this won't be an iter
         response: ChatCompletionResponse = self.client.chat.completions.create(  # type: ignore[assignment]

@@ -1,23 +1,22 @@
 import os
-import json
 from typing import Any
 
 try:
     import groq
+    import instructor
 except ImportError:
-    msg = "groq is not installed. Please install it with `pip install any-llm-sdk[groq]`"
+    msg = "groq or instructor is not installed. Please install it with `pip install any-llm-sdk[groq]`"
     raise ImportError(msg)
 
-from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
-from any_llm.provider import Provider, ApiConfig
+from any_llm.provider import Provider, ApiConfig, convert_instructor_response
 from any_llm.exceptions import MissingApiKeyError
 from any_llm.providers.base_framework import create_completion_from_response
 
 
 class GroqProvider(Provider):
-    """Groq Provider using the new response conversion utilities."""
+    """Groq Provider using instructor for structured output."""
 
     def __init__(self, config: ApiConfig) -> None:
         """Initialize Groq provider."""
@@ -26,7 +25,11 @@ class GroqProvider(Provider):
         if not config.api_key:
             raise MissingApiKeyError("Groq", "GROQ_API_KEY")
 
+        # Create regular Groq client for standard completions
         self.client = groq.Groq(api_key=config.api_key)
+
+        # Create instructor client for structured output
+        self.instructor_client = instructor.from_groq(self.client, mode=instructor.Mode.JSON)
 
     def completion(
         self,
@@ -35,39 +38,24 @@ class GroqProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion:
         """Create a chat completion using Groq."""
-        # Handle response_format for Pydantic models
+
+        # Handle response_format for structured output
         if "response_format" in kwargs:
-            response_format = kwargs["response_format"]
-            if isinstance(response_format, type) and issubclass(response_format, BaseModel):
-                # Convert Pydantic model to JSON schema format for Groq
-                schema = response_format.model_json_schema()
-                kwargs["response_format"] = {"type": "json_object"}
+            response_format = kwargs.pop("response_format")
+            # Use instructor for structured output
+            instructor_response = self.instructor_client.chat.completions.create(
+                model=model,
+                messages=messages,  # type: ignore[arg-type]
+                response_model=response_format,
+                **kwargs,
+            )
+            # Convert instructor response to ChatCompletion format
+            return convert_instructor_response(instructor_response, model, "groq")
 
-                # Add JSON instruction to the last user message (required by Groq)
-                if messages and messages[-1]["role"] == "user":
-                    original_content = messages[-1]["content"]
-                    json_instruction = f"""
-Please respond with a JSON object that matches the following schema:
-
-{json.dumps(schema, indent=2)}
-
-Return the JSON object only, no other text.
-
-{original_content}
-"""
-                    messages[-1]["content"] = json_instruction
-
-        # Clean messages (remove refusal field as per original implementation)
-        cleaned_messages = []
-        for message in messages:
-            cleaned_message = message.copy()
-            cleaned_message.pop("refusal", None)
-            cleaned_messages.append(cleaned_message)
-
-        # Make the API call
-        response = self.client.chat.completions.create(
+        # Make the API call with regular client
+        response: ChatCompletion = self.client.chat.completions.create(  # type: ignore[assignment]
             model=model,
-            messages=cleaned_messages,  # type: ignore[arg-type]
+            messages=messages,  # type: ignore[arg-type]
             **kwargs,
         )
 
