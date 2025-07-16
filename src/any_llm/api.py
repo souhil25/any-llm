@@ -4,6 +4,8 @@ from openai.types.chat.chat_completion import ChatCompletion
 from pydantic import BaseModel
 from any_llm.provider import ProviderFactory, ApiConfig, Provider
 from any_llm.tools import prepare_tools
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
 
 def _prepare_completion_request(
@@ -125,7 +127,7 @@ def completion(
     user: Optional[str] = None,
     # Additional provider-specific parameters
     **kwargs: Any,
-) -> ChatCompletion:
+) -> ChatCompletion | Stream[ChatCompletionChunk]:
     """Create a chat completion.
 
     Args:
@@ -206,7 +208,7 @@ async def acompletion(
     user: Optional[str] = None,
     # Additional provider-specific parameters
     **kwargs: Any,
-) -> ChatCompletion:
+) -> ChatCompletion | Stream[ChatCompletionChunk]:
     """Create a chat completion asynchronously.
 
     Args:

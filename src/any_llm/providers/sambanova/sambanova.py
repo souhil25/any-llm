@@ -8,6 +8,9 @@ except ImportError:
 
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
+
 from any_llm.provider import ApiConfig, convert_instructor_response
 from any_llm.providers.openai.base import BaseOpenAIProvider
 
@@ -51,7 +54,9 @@ class SambanovaProvider(BaseOpenAIProvider):
         # Wrap with instructor
         self.instructor_client = instructor.from_openai(openai_client)
 
-    def _make_api_call(self, model: str, messages: list[dict[str, Any]], **kwargs: Any) -> ChatCompletion:
+    def completion(
+        self, model: str, messages: list[dict[str, Any]], **kwargs: Any
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Make the API call to SambaNova service with instructor for structured output."""
         if "response_format" in kwargs:
             # Use instructor for structured output

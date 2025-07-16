@@ -7,6 +7,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Type, Union
 
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 
@@ -93,11 +95,15 @@ class Provider(ABC):
         self.config = config
 
     @abstractmethod
-    def completion(self, model: str, messages: list[dict[str, Any]], **kwargs: dict[str, Any]) -> ChatCompletion:
+    def completion(
+        self, model: str, messages: list[dict[str, Any]], **kwargs: dict[str, Any]
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Must be implemented by each provider."""
         raise NotImplementedError
 
-    async def acompletion(self, model: str, messages: list[dict[str, Any]], **kwargs: dict[str, Any]) -> ChatCompletion:
+    async def acompletion(
+        self, model: str, messages: list[dict[str, Any]], **kwargs: dict[str, Any]
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Async completion method. Calls the sync completion method in a thread pool."""
         return await asyncio.to_thread(self.completion, model, messages, **kwargs)
 

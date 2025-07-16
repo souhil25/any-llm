@@ -11,6 +11,8 @@ except ImportError:
 
 from pydantic import BaseModel
 
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
 from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
@@ -132,7 +134,7 @@ class GoogleProvider(Provider):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion:
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Google GenAI."""
         # Handle response_format for Pydantic models
         response_schema = None

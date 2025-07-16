@@ -8,6 +8,8 @@ from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
 from any_llm.provider import Provider, ApiConfig
 from any_llm.exceptions import MissingApiKeyError
@@ -52,38 +54,22 @@ class BaseProviderFramework(Provider, ABC):
         """Initialize the provider-specific client. Must be implemented by subclasses."""
         pass
 
+    @abstractmethod
     def completion(
         self,
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion:
-        converted_kwargs = self._convert_kwargs(kwargs)
-        raw_response = self._make_api_call(model, messages, **converted_kwargs)
-        return self._convert_response(raw_response)
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
+        raise NotImplementedError("Subclasses must implement this method")
 
     async def acompletion(
         self,
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion:
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         return await asyncio.to_thread(self.completion, model, messages, **kwargs)
-
-    @abstractmethod
-    def _convert_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
-        """Convert standard kwargs to provider-specific format."""
-        pass
-
-    @abstractmethod
-    def _make_api_call(self, model: str, messages: Any, **kwargs: Any) -> Any:
-        """Make the actual API call to the provider."""
-        pass
-
-    @abstractmethod
-    def _convert_response(self, raw_response: Any) -> ChatCompletion:
-        """Convert provider response to OpenAI ChatCompletion format."""
-        pass
 
 
 # Common utility functions that can be shared across providers

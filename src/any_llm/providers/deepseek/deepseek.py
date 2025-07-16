@@ -5,6 +5,9 @@ from pydantic import BaseModel
 
 from any_llm.provider import ApiConfig
 from any_llm.providers.openai.base import BaseOpenAIProvider
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
+from openai.types.chat.chat_completion import ChatCompletion
 
 
 def _convert_pydantic_to_deepseek_json(
@@ -79,7 +82,7 @@ class DeepseekProvider(BaseOpenAIProvider):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> Any:
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """
         Create a chat completion using DeepSeek with Pydantic model support.
 

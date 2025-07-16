@@ -14,7 +14,8 @@ from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
 from any_llm.provider import Provider, ApiConfig
 from any_llm.exceptions import MissingApiKeyError
-
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
 INFERENCE_PARAMETERS = ["maxTokens", "temperature", "topP", "stopSequences"]
 
@@ -285,7 +286,7 @@ class AwsProvider(Provider):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion:
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using AWS Bedrock."""
         # Check credentials before creating client
         self._check_aws_credentials()

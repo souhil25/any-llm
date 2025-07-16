@@ -15,6 +15,8 @@ from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
 from any_llm.provider import Provider, ApiConfig, convert_instructor_response
 from any_llm.exceptions import MissingApiKeyError
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
 
 def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
@@ -102,7 +104,7 @@ class CerebrasProvider(Provider):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion:
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Cerebras with instructor support for structured outputs."""
 
         # Handle response_format for structured output
@@ -118,7 +120,6 @@ class CerebrasProvider(Provider):
 
             # Convert instructor response to ChatCompletion format
             return convert_instructor_response(instructor_response, model, "cerebras")
-
 
         # Use regular create method for non-structured outputs
         response = self.client.chat.completions.create(

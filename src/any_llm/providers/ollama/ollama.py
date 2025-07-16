@@ -6,6 +6,8 @@ import json
 import httpx
 from pydantic import BaseModel
 from openai.types.chat.chat_completion import ChatCompletion
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from any_llm.logging import logger
 from any_llm.provider import ApiConfig, Provider
 from any_llm.providers.base_framework import create_completion_from_response
@@ -33,9 +35,9 @@ class OllamaProvider(Provider):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion:
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Ollama."""
-        kwargs['stream'] = kwargs.get('stream', False)
+        kwargs["stream"] = kwargs.get("stream", False)
         # Handle response_format for Pydantic models
         if "response_format" in kwargs:
             response_format = kwargs.pop("response_format")

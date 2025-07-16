@@ -10,6 +10,8 @@ except ImportError:
 
 from pydantic import BaseModel
 
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
 from any_llm.exceptions import MissingApiKeyError
@@ -74,7 +76,7 @@ class HuggingfaceProvider(Provider):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion:
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using HuggingFace."""
         # Convert max_tokens to max_new_tokens (HuggingFace specific)
         if "max_tokens" in kwargs:

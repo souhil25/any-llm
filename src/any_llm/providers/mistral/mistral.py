@@ -14,6 +14,8 @@ from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
 from any_llm.exceptions import MissingApiKeyError
 from any_llm.providers.base_framework import create_completion_from_response
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
 
 class MistralProvider(Provider):
@@ -33,7 +35,7 @@ class MistralProvider(Provider):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion:
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Mistral."""
         # Handle response_format for Pydantic models
         if "response_format" in kwargs and issubclass(kwargs["response_format"], BaseModel):

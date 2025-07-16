@@ -3,6 +3,8 @@ from abc import ABC
 
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
 from any_llm.provider import ApiConfig
 from any_llm.providers.base_framework import BaseProviderFramework
@@ -37,14 +39,12 @@ class BaseOpenAIProvider(BaseProviderFramework, ABC):
         # Create the OpenAI client
         self.client = OpenAI(**client_kwargs)
 
-    def _convert_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
-        """Convert kwargs for OpenAI-compatible providers (minimal conversion needed)."""
-        return kwargs
-
-    def _make_api_call(self, model: str, messages: list[dict[str, Any]], **kwargs: Any) -> ChatCompletion:
+    def completion(
+        self, model: str, messages: list[dict[str, Any]], **kwargs: Any
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Make the API call to OpenAI-compatible service."""
         if "response_format" in kwargs:
-            response: ChatCompletion = self.client.chat.completions.parse(  # type: ignore[attr-defined]
+            response = self.client.chat.completions.parse(  # type: ignore[attr-defined]
                 model=model,
                 messages=messages,
                 **kwargs,
@@ -55,8 +55,4 @@ class BaseOpenAIProvider(BaseProviderFramework, ABC):
                 messages=messages,  # type: ignore[arg-type]
                 **kwargs,
             )
-        return response
-
-    def _convert_response(self, raw_response: ChatCompletion) -> ChatCompletion:
-        """Convert response for OpenAI-compatible providers (no conversion needed)."""
-        return raw_response
+        return response  # type: ignore[no-any-return]

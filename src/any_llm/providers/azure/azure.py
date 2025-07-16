@@ -10,6 +10,9 @@ from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
 from any_llm.provider import Provider, ApiConfig
 from any_llm.exceptions import MissingApiKeyError
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
+
 
 def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
     """Convert Azure response to OpenAI ChatCompletion format."""
@@ -84,7 +87,7 @@ class AzureProvider(Provider):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion:
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Azure."""
         if not self.base_url:
             raise ValueError(
