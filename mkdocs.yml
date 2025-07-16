@@ -8,6 +8,7 @@ nav:
   - Providers: providers.md
   - API Reference:
     - Completion: api/completion.md
+    - Exceptions: api/exceptions.md
 theme:
   name: material
   font:
