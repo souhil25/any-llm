@@ -146,9 +146,6 @@ def create_openai_completion(
     )
 
 
-# === NEW COMPREHENSIVE RESPONSE CONVERSION UTILITIES ===
-
-
 def create_tool_calls_from_list(tool_calls_data: list[dict[str, Any]]) -> list[ChatCompletionMessageToolCall]:
     """
     Convert a list of tool call dictionaries to ChatCompletionMessageToolCall objects.
@@ -314,74 +311,3 @@ def create_completion_from_response(
         usage=usage,
         created=response_data.get(created_field, 0),
     )
-
-
-# === TOOL SPECIFICATION CONVERSION UTILITIES ===
-
-
-def convert_openai_tools_to_generic(openai_tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """
-    Convert OpenAI tool specification to a generic format that can be easily
-    transformed to provider-specific formats.
-
-    Returns a list of tool dictionaries with standardized structure.
-    """
-    generic_tools = []
-
-    for tool in openai_tools:
-        if tool.get("type") != "function":
-            continue
-
-        function = tool["function"]
-        generic_tool = {
-            "name": function["name"],
-            "description": function.get("description", ""),
-            "parameters": function.get("parameters", {}),
-        }
-        generic_tools.append(generic_tool)
-
-    return generic_tools
-
-
-# === MESSAGE CONVERSION UTILITIES ===
-
-
-def standardize_message_content(content: Any) -> str:
-    """Convert message content to string format, handling various input types."""
-    if content is None:
-        return ""
-    if isinstance(content, str):
-        return content
-    if isinstance(content, dict):
-        return json.dumps(content)
-    return str(content)
-
-
-def extract_system_message(messages: list[dict[str, Any]]) -> tuple[str, list[dict[str, Any]]]:
-    """
-    Extract system message from messages list.
-
-    Returns tuple of (system_message_content, remaining_messages)
-    """
-    system_message = ""
-    remaining_messages = []
-
-    for message in messages:
-        if message.get("role") == "system":
-            system_message = standardize_message_content(message.get("content", ""))
-        else:
-            remaining_messages.append(message)
-
-    return system_message, remaining_messages
-
-
-# === PARAMETER CONVERSION UTILITIES ===
-def map_parameter_names(kwargs: dict[str, Any], param_mapping: dict[str, str]) -> dict[str, Any]:
-    """Map parameter names from OpenAI format to provider format."""
-    mapped_kwargs = {}
-
-    for key, value in kwargs.items():
-        mapped_key = param_mapping.get(key, key)
-        mapped_kwargs[mapped_key] = value
-
-    return mapped_kwargs

@@ -1,5 +1,5 @@
 import json
-from typing import Any, cast
+from typing import Any
 
 from any_llm.logging import logger
 
@@ -11,17 +11,12 @@ except ImportError:
     msg = "anthropic or instructor is not installed. Please install it with `pip install any-llm-sdk[anthropic]`"
     raise ImportError(msg)
 
-from openai.types.chat.chat_completion import ChatCompletion, Choice
-from openai.types.completion_usage import CompletionUsage
+from openai.types.chat.chat_completion import ChatCompletion
 
 from any_llm.provider import ApiConfig, convert_instructor_response
 from any_llm.providers.base_framework import (
     BaseCustomProvider,
-    create_openai_tool_call,
-    create_openai_message,
-    create_openai_completion,
-    convert_openai_tools_to_generic,
-    extract_system_message,
+    create_completion_from_response,
 )
 
 DEFAULT_MAX_TOKENS = 4096
@@ -54,18 +49,13 @@ class AnthropicProvider(BaseCustomProvider):
         # Handle response_format for structured output
         if "response_format" in kwargs:
             response_format = kwargs.pop("response_format")
-
-            # Convert messages to Anthropic format
-            system_message, converted_messages = self._convert_messages(messages)
-
             # Convert other kwargs
             converted_kwargs = self._convert_kwargs(kwargs)
 
             # Use instructor for structured output
             instructor_response = self.instructor_client.messages.create(
                 model=model,
-                system=system_message,
-                messages=converted_messages,  # type: ignore[arg-type]
+                messages=messages,  # type: ignore[arg-type]
                 response_model=response_format,
                 **converted_kwargs,
             )
@@ -97,68 +87,27 @@ class AnthropicProvider(BaseCustomProvider):
 
         return kwargs
 
-    def _convert_messages(self, messages: list[dict[str, Any]]) -> tuple[str, list[dict[str, Any]]]:
-        """Convert messages to Anthropic format, extracting system message."""
-        # Extract system message using the utility
-        system_message, remaining_messages = extract_system_message(messages)
-
-        converted_messages = []
-        for message in remaining_messages:
-            if message["role"] == "tool":
-                converted_message = {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "tool_result",
-                            "tool_use_id": message["tool_call_id"],
-                            "content": message["content"],
-                        }
-                    ],
-                }
-                converted_messages.append(converted_message)
-            elif message["role"] == "assistant" and "tool_calls" in message:
-                message_content = []
-                if message.get("content"):
-                    message_content.append({"type": "text", "text": message["content"]})
-
-                for tool_call in message.get("tool_calls") or []:
-                    message_content.append(
-                        {
-                            "type": "tool_use",
-                            "id": tool_call["id"],
-                            "name": tool_call["function"]["name"],
-                            "input": json.loads(tool_call["function"]["arguments"]),
-                        }
-                    )
-
-                converted_message = {"role": "assistant", "content": message_content}
-                converted_messages.append(converted_message)
-            else:
-                converted_message = {"role": message["role"], "content": message["content"]}
-                converted_messages.append(converted_message)
-
-        return system_message, converted_messages
+    def _convert_messages(self, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Convert messages to Anthropic format."""
+        return messages
 
     def _make_api_call(self, model: str, messages: tuple[str, list[dict[str, Any]]], **kwargs: Any) -> Message:
         """Make the API call to Anthropic."""
-        system_message, converted_messages = messages
-
         return self.client.messages.create(
             model=model,
-            system=system_message,
-            messages=converted_messages,  # type: ignore[arg-type]
+            messages=messages,  # type: ignore[arg-type]
             **kwargs,
         )
 
     def _convert_response(self, response: Message) -> ChatCompletion:
-        """Convert Anthropic response to OpenAI format."""
+        """Convert Anthropic response to OpenAI format using base_framework utility."""
         finish_reason_mapping = {
             "end_turn": "stop",
             "max_tokens": "length",
             "tool_use": "tool_calls",
         }
 
-        # Process content blocks
+        # Process content blocks into structured format
         tool_calls = []
         content = ""
 
@@ -167,47 +116,63 @@ class AnthropicProvider(BaseCustomProvider):
                 content = content_block.text
             elif content_block.type == "tool_use":
                 tool_calls.append(
-                    create_openai_tool_call(
-                        tool_call_id=content_block.id,
-                        name=content_block.name,
-                        arguments=json.dumps(content_block.input),
-                    )
+                    {
+                        "id": content_block.id,
+                        "function": {
+                            "name": content_block.name,
+                            "arguments": json.dumps(content_block.input),
+                        },
+                        "type": "function",
+                    }
                 )
 
-        # Create the message
-        message = create_openai_message(
-            role="assistant",
-            content=content or None,
-            tool_calls=tool_calls if tool_calls else None,
-        )
+        # Structure response data for the utility
+        response_dict = {
+            "id": response.id,
+            "model": response.model,
+            "created": int(response.created_at.timestamp()) if hasattr(response, "created_at") else 0,
+            "choices": [
+                {
+                    "message": {
+                        "role": "assistant",
+                        "content": content or None,
+                        "tool_calls": tool_calls if tool_calls else None,
+                    },
+                    "finish_reason": response.stop_reason or "end_turn",
+                    "index": 0,
+                }
+            ],
+            "usage": {
+                "completion_tokens": response.usage.output_tokens,
+                "prompt_tokens": response.usage.input_tokens,
+                "total_tokens": response.usage.input_tokens + response.usage.output_tokens,
+            },
+        }
 
-        # Create the choice
-        mapped_finish_reason = finish_reason_mapping.get(response.stop_reason or "end_turn", "stop")
-        choice = Choice(
-            finish_reason=cast(Any, mapped_finish_reason),
-            index=0,
-            message=message,
-        )
-
-        # Create usage information
-        usage = CompletionUsage(
-            completion_tokens=response.usage.output_tokens,
-            prompt_tokens=response.usage.input_tokens,
-            total_tokens=response.usage.input_tokens + response.usage.output_tokens,
-        )
-
-        return create_openai_completion(
-            id=response.id,
+        # Use base_framework utility for conversion
+        return create_completion_from_response(
+            response_data=response_dict,
             model=response.model,
-            choices=[choice],
-            usage=usage,
-            created=int(response.created_at.timestamp()) if hasattr(response, "created_at") else 0,
+            provider_name="anthropic",
+            finish_reason_mapping=finish_reason_mapping,
         )
 
     def _convert_tool_spec(self, openai_tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Convert OpenAI tool specification to Anthropic format."""
         # Use the generic utility first
-        generic_tools = convert_openai_tools_to_generic(openai_tools)
+        generic_tools = []
+
+        for tool in openai_tools:
+            if tool.get("type") != "function":
+                continue
+
+            function = tool["function"]
+            generic_tool = {
+                "name": function["name"],
+                "description": function.get("description", ""),
+                "parameters": function.get("parameters", {}),
+            }
+            generic_tools.append(generic_tool)
 
         # Convert to Anthropic-specific format
         anthropic_tools = []
