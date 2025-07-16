@@ -1,6 +1,9 @@
 import json
 from typing import Any, cast
 
+from any_llm.exceptions import UnsupportedParameterError
+from any_llm.logging import logger
+
 try:
     from anthropic import Anthropic
     from anthropic.types import Message
@@ -19,7 +22,6 @@ from any_llm.providers.base_framework import (
     create_openai_completion,
     convert_openai_tools_to_generic,
     extract_system_message,
-    remove_unsupported_params,
 )
 
 DEFAULT_MAX_TOKENS = 4096
@@ -42,10 +44,13 @@ class AnthropicProvider(BaseCustomProvider):
     def _convert_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         """Convert kwargs to Anthropic format."""
         kwargs = kwargs.copy()
-        kwargs.setdefault("max_tokens", DEFAULT_MAX_TOKENS)
 
-        # Remove unsupported parameters
-        kwargs = remove_unsupported_params(kwargs, ["response_format"])
+        if "response_format" in kwargs:
+            raise UnsupportedParameterError("response_format", self.PROVIDER_NAME)
+
+        if "max_tokens" not in kwargs:
+            logger.warning(f"max_tokens is required for Anthropic, setting to {DEFAULT_MAX_TOKENS}")
+            kwargs["max_tokens"] = DEFAULT_MAX_TOKENS
 
         # Convert tools if present
         if "tools" in kwargs:

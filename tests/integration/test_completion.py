@@ -13,19 +13,19 @@ provider_model_map = {
     ProviderName.OPENAI: "gpt-4.1-mini",
     ProviderName.GOOGLE: "gemini-2.0-flash-001",
     ProviderName.MOONSHOT: "moonshot-v1-8k",
-    ProviderName.SAMBANOVA: "sambanova-7b-instruct",
-    ProviderName.TOGETHER: "meta-llama/Meta-Llama-3-8B-Instruct",
-    ProviderName.XAI: "xai-3-70b-instruct",
+    ProviderName.SAMBANOVA: "Meta-Llama-3.1-8B-Instruct",
+    ProviderName.TOGETHER: "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+    ProviderName.XAI: "grok-3-latest",
     ProviderName.INCEPTION: "inception-3-70b-instruct",
-    ProviderName.NEBIUS: "nebius-3-70b-instruct",
+    ProviderName.NEBIUS: "meta-llama/Meta-Llama-3.1-8B-Instruct",
     ProviderName.OLLAMA: "llama3.2:3b",
     ProviderName.AZURE: "gpt-4o",
-    ProviderName.COHERE: "command-r-20240215",
-    ProviderName.CEREBRAS: "llama3.1-8b",
+    ProviderName.COHERE: "command-a-03-2025",
+    ProviderName.CEREBRAS: "llama-4-scout-17b-16e-instruct",
     ProviderName.HUGGINGFACE: "meta-llama/Meta-Llama-3-8B-Instruct",  # You must have novita enabled in your hf account to use this model
     ProviderName.AWS: "amazon.titan-text-001",
     ProviderName.WATSONX: "google/gemini-2.0-flash-001",
-    ProviderName.FIREWORKS: "meta-llama/Meta-Llama-3-8B-Instruct",
+    ProviderName.FIREWORKS: "accounts/fireworks/models/llama4-scout-instruct-basic",
     ProviderName.GROQ: "llama-3.1-8b-instant",
 }
 
@@ -59,6 +59,7 @@ def test_response_format(provider: ProviderName) -> None:
         result = completion(
             f"{provider.value}/{model_id}",
             messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
             response_format=ResponseFormat,
         )
         assert result.choices[0].message.content is not None

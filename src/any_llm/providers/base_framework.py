@@ -376,16 +376,6 @@ def extract_system_message(messages: list[dict[str, Any]]) -> tuple[str, list[di
 
 
 # === PARAMETER CONVERSION UTILITIES ===
-
-
-def remove_unsupported_params(kwargs: dict[str, Any], unsupported: list[str]) -> dict[str, Any]:
-    """Remove unsupported parameters from kwargs."""
-    cleaned_kwargs = kwargs.copy()
-    for param in unsupported:
-        cleaned_kwargs.pop(param, None)
-    return cleaned_kwargs
-
-
 def map_parameter_names(kwargs: dict[str, Any], param_mapping: dict[str, str]) -> dict[str, Any]:
     """Map parameter names from OpenAI format to provider format."""
     mapped_kwargs = {}

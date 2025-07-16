@@ -103,26 +103,21 @@ class WatsonxProvider(Provider):
         kwargs = _convert_kwargs(kwargs)
         converted_messages = _convert_messages(messages)
 
-        try:
-            # Create ModelInference instance
-            model_inference = ModelInference(
-                model_id=model,
-                credentials=Credentials(
-                    api_key=self.api_key,
-                    url=self.service_url,
-                ),
-                project_id=self.project_id,
-            )
+        # Create ModelInference instance
+        model_inference = ModelInference(
+            model_id=model,
+            credentials=Credentials(
+                api_key=self.api_key,
+                url=self.service_url,
+            ),
+            project_id=self.project_id,
+        )
 
-            # Make the API call
-            response = model_inference.chat(
-                messages=converted_messages,
-                params=kwargs,
-            )
+        # Make the API call
+        response = model_inference.chat(
+            messages=converted_messages,
+            params=kwargs,
+        )
 
-            # Convert to OpenAI format
-            return _convert_response(response)
-
-        except Exception as e:
-            # Re-raise as a more generic exception
-            raise RuntimeError(f"Watsonx API error: {e}") from e
+        # Convert to OpenAI format
+        return _convert_response(response)

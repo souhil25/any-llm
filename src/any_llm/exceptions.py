@@ -39,3 +39,20 @@ class UnsupportedProviderError(Exception):
         message = f"'{provider_key}' is not a supported provider. Supported providers: {', '.join(supported_providers)}"
 
         super().__init__(message)
+
+
+class UnsupportedParameterError(Exception):
+    """Exception raised when an unsupported parameter is provided."""
+
+    def __init__(self, parameter_name: str, provider_name: str) -> None:
+        """Initialize the exception.
+
+        Args:
+            parameter_name: Name of the parameter that was provided
+        """
+        self.parameter_name = parameter_name
+        self.provider_name = provider_name
+
+        message = f"'{parameter_name}' is not supported for {provider_name}"
+
+        super().__init__(message)

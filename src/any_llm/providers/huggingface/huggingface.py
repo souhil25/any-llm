@@ -12,10 +12,9 @@ from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
-from any_llm.exceptions import MissingApiKeyError
+from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
 from any_llm.providers.base_framework import (
     create_completion_from_response,
-    remove_unsupported_params,
 )
 
 
@@ -59,6 +58,8 @@ Answer (as JSON):"""
 class HuggingfaceProvider(Provider):
     """HuggingFace Provider using the new response conversion utilities."""
 
+    PROVIDER_NAME = "HuggingFace"
+
     def __init__(self, config: ApiConfig) -> None:
         """Initialize HuggingFace provider."""
         if not config.api_key:
@@ -87,7 +88,8 @@ class HuggingfaceProvider(Provider):
                 messages = _convert_pydantic_to_huggingface_json(response_format, messages)
 
         # Remove other unsupported parameters
-        kwargs = remove_unsupported_params(kwargs, ["parallel_tool_calls"])
+        if "parallel_tool_calls" in kwargs:
+            raise UnsupportedParameterError("parallel_tool_calls", self.PROVIDER_NAME)
 
         # Ensure message content is always a string and handle tool calls
         cleaned_messages = []
@@ -106,21 +108,16 @@ class HuggingfaceProvider(Provider):
                 cleaned_message["tool_call_id"] = message["tool_call_id"]
 
             cleaned_messages.append(cleaned_message)
+        # Make the API call
+        response = self.client.chat_completion(
+            model=model,
+            messages=cleaned_messages,
+            **kwargs,
+        )
 
-        try:
-            # Make the API call
-            response = self.client.chat_completion(
-                model=model,
-                messages=cleaned_messages,
-                **kwargs,
-            )
-
-            # Convert to OpenAI format using the new utility
-            return create_completion_from_response(
-                response_data=response,
-                model=model,
-                provider_name="huggingface",
-            )
-
-        except Exception as e:
-            raise RuntimeError(f"HuggingFace API error: {e}") from e
+        # Convert to OpenAI format using the new utility
+        return create_completion_from_response(
+            response_data=response,
+            model=model,
+            provider_name="huggingface",
+        )

@@ -13,13 +13,10 @@ from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
-from any_llm.exceptions import MissingApiKeyError
+from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
 from any_llm.providers.base_framework import (
     create_completion_from_response,
-    remove_unsupported_params,
 )
-
-DEFAULT_TEMPERATURE = 0.7
 
 
 def _convert_tool_spec(openai_tools: list[dict[str, Any]]) -> list[types.Tool]:
@@ -99,43 +96,10 @@ def _convert_messages(messages: list[dict[str, Any]]) -> list[types.Content]:
     return formatted_messages
 
 
-def _convert_pydantic_to_google_json(
-    pydantic_model: type[BaseModel], messages: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
-    """
-    Convert Pydantic model to Google-compatible JSON instructions.
-
-    Following a similar pattern to the DeepSeek provider but adapted for Google.
-
-    Returns:
-        modified_messages
-    """
-    # Get the JSON schema from the Pydantic model
-    schema = pydantic_model.model_json_schema()
-
-    # Add JSON instructions to the last user message
-    modified_messages = messages.copy()
-    if modified_messages and modified_messages[-1]["role"] == "user":
-        original_content = modified_messages[-1]["content"]
-        json_instruction = f"""
-Please respond with a JSON object that matches the following schema:
-
-{json.dumps(schema, indent=2)}
-
-Return the JSON object only, no other text, do not wrap it in ```json or ```.
-
-{original_content}
-"""
-        modified_messages[-1]["content"] = json_instruction
-    else:
-        msg = "Last message is not a user message"
-        raise ValueError(msg)
-
-    return modified_messages
-
-
 class GoogleProvider(Provider):
     """Google Provider using the new response conversion utilities."""
+
+    PROVIDER_NAME = "Google"
 
     def __init__(self, config: ApiConfig) -> None:
         """Initialize Google GenAI provider."""
@@ -171,31 +135,31 @@ class GoogleProvider(Provider):
     ) -> ChatCompletion:
         """Create a chat completion using Google GenAI."""
         # Handle response_format for Pydantic models
+        response_schema = None
         if "response_format" in kwargs:
             response_format = kwargs.pop("response_format")
             if isinstance(response_format, type) and issubclass(response_format, BaseModel):
-                # Convert Pydantic model to Google JSON format
-                messages = _convert_pydantic_to_google_json(response_format, messages)
+                # Use native Google GenAI schema configuration
+                response_schema = response_format
+                # Set the response mime type for JSON output
+                kwargs["response_mime_type"] = "application/json"
 
         # Remove other unsupported parameters
-        kwargs = remove_unsupported_params(kwargs, ["parallel_tool_calls"])
+        if "parallel_tool_calls" in kwargs:
+            raise UnsupportedParameterError("parallel_tool_calls", self.PROVIDER_NAME)
 
         # Convert tools if present
         tools = None
         if "tools" in kwargs:
             tools = _convert_tool_spec(kwargs["tools"])
-            kwargs.pop("tools")
-
-        # Set the temperature if provided, otherwise use the default
-        temperature = kwargs.get("temperature", DEFAULT_TEMPERATURE)
+            kwargs["tools"] = tools
 
         # Convert messages to GenAI format
         formatted_messages = _convert_messages(messages)
 
         # Create generation config
         generation_config = types.GenerateContentConfig(
-            temperature=temperature,
-            tools=tools if tools else None,  # type: ignore[arg-type]
+            **kwargs,
         )
 
         # For now, let's use a simple string-based approach
@@ -219,8 +183,13 @@ class GoogleProvider(Provider):
             if not content_text:
                 content_text = "Hello"  # fallback
 
-        # Generate content using the client
-        response = self.client.models.generate_content(model=model, contents=content_text, config=generation_config)
+        # Generate content using the client with schema if provided
+        if response_schema:
+            # Add response_schema to the config
+            generation_config.response_schema = response_schema
+            response = self.client.models.generate_content(model=model, contents=content_text, config=generation_config)
+        else:
+            response = self.client.models.generate_content(model=model, contents=content_text, config=generation_config)
 
         # Convert response to dict-like structure for the utility
         response_dict = {

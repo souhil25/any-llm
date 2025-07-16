@@ -140,23 +140,11 @@ class AzureProvider(Provider):
             "Authorization": self.api_key or "",
         }
 
-        try:
-            # Make the request to Azure endpoint
-            req = urllib.request.Request(url, body, headers)
-            with urllib.request.urlopen(req) as response:
-                result = response.read()
-                response_data = json.loads(result)
+        # Make the request to Azure endpoint
+        req = urllib.request.Request(url, body, headers)
+        with urllib.request.urlopen(req) as response:
+            result = response.read()
+            response_data = json.loads(result)
 
-                # Convert to OpenAI format
-                return _convert_response(response_data)
-
-        except urllib.error.HTTPError as error:
-            error_message = (
-                f"The request failed with status code: {error.code}\n"
-                f"Headers: {error.info()}\n"
-                f"{error.read().decode('utf-8', 'ignore')}"
-            )
-            raise RuntimeError(f"Azure API error: {error_message}") from error
-        except Exception as e:
-            # Re-raise as a more generic exception
-            raise RuntimeError(f"Azure API error: {e}") from e
+            # Convert to OpenAI format
+            return _convert_response(response_data)

@@ -64,20 +64,16 @@ Return the JSON object only, no other text.
             cleaned_message.pop("refusal", None)
             cleaned_messages.append(cleaned_message)
 
-        try:
-            # Make the API call
-            response = self.client.chat.completions.create(
-                model=model,
-                messages=cleaned_messages,  # type: ignore[arg-type]
-                **kwargs,
-            )
+        # Make the API call
+        response = self.client.chat.completions.create(
+            model=model,
+            messages=cleaned_messages,  # type: ignore[arg-type]
+            **kwargs,
+        )
 
-            # Convert to OpenAI format using the new utility
-            return create_completion_from_response(
-                response_data=response.model_dump(),
-                model=model,
-                provider_name="groq",
-            )
-
-        except Exception as e:
-            raise RuntimeError(f"Groq API error: {e}") from e
+        # Convert to OpenAI format using the new utility
+        return create_completion_from_response(
+            response_data=response.model_dump(),
+            model=model,
+            provider_name="groq",
+        )

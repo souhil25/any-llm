@@ -4,7 +4,6 @@ from typing import Any, Optional, Literal
 
 try:
     import boto3
-    import botocore
 except ImportError:
     msg = "boto3 is not installed. Please install it with `pip install any-llm-sdk[aws]`"
     raise ImportError(msg)
@@ -293,30 +292,18 @@ class AwsProvider(Provider):
 
         # Create client if not already created
         if self.client is None:
-            try:
-                self.client = boto3.client("bedrock-runtime", region_name=self.region_name)  # type: ignore[no-untyped-call]
-            except Exception as e:
-                raise RuntimeError(f"Failed to create AWS Bedrock client: {e}") from e
+            self.client = boto3.client("bedrock-runtime", region_name=self.region_name)  # type: ignore[no-untyped-call]
 
         system_message, formatted_messages = _convert_messages(messages)
         request_config = _convert_kwargs(kwargs)
 
-        try:
-            assert self.client is not None  # For mypy
-            response = self.client.converse(
-                modelId=model,
-                messages=formatted_messages,
-                system=system_message,
-                **request_config,
-            )
+        assert self.client is not None  # For mypy
+        response = self.client.converse(
+            modelId=model,
+            messages=formatted_messages,
+            system=system_message,
+            **request_config,
+        )
 
-            # Convert to OpenAI format
-            return _convert_response(response)
-
-        except botocore.exceptions.ClientError as e:
-            if e.response["Error"]["Code"] == "ValidationException":
-                error_message = e.response["Error"]["Message"]
-                raise RuntimeError(f"AWS Bedrock validation error: {error_message}") from e
-            raise RuntimeError(f"AWS Bedrock API error: {e}") from e
-        except Exception as e:
-            raise RuntimeError(f"AWS Bedrock API error: {e}") from e
+        # Convert to OpenAI format
+        return _convert_response(response)

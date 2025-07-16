@@ -1,4 +1,5 @@
 import os
+import json
 from typing import Any
 
 try:
@@ -6,6 +7,8 @@ try:
 except ImportError:
     msg = "cerebras is not installed. Please install it with `pip install any-llm-sdk[cerebras]`"
     raise ImportError(msg)
+
+from pydantic import BaseModel
 
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai.types.completion_usage import CompletionUsage
@@ -42,6 +45,29 @@ def _convert_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
         converted_messages.append(converted_message)
 
     return converted_messages
+
+
+def _add_json_instruction_to_messages(messages: list[dict[str, Any]], schema: dict[str, Any]) -> list[dict[str, Any]]:
+    """Add JSON instruction to the last user message for structured output."""
+    if not messages or messages[-1]["role"] != "user":
+        return messages
+
+    # Create a copy of messages to avoid modifying the original
+    modified_messages = messages.copy()
+    original_content = modified_messages[-1]["content"]
+
+    json_instruction = f"""
+Please respond with a JSON object that matches the following schema:
+
+{json.dumps(schema, indent=2)}
+
+Return the JSON object only, no other text.
+
+{original_content}
+"""
+    modified_messages[-1]["content"] = json_instruction
+
+    return modified_messages
 
 
 def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
@@ -106,6 +132,8 @@ def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
 class CerebrasProvider(Provider):
     """Cerebras Provider using the official Cerebras SDK."""
 
+    PROVIDER_NAME = "Cerebras"
+
     def __init__(self, config: ApiConfig) -> None:
         """Initialize Cerebras provider."""
         if not config.api_key:
@@ -126,34 +154,34 @@ class CerebrasProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion:
         """Create a chat completion using Cerebras."""
+        # Handle response_format for Pydantic models
+        if "response_format" in kwargs:
+            response_format = kwargs["response_format"]
+            if isinstance(response_format, type) and issubclass(response_format, BaseModel):
+                # Convert Pydantic model to JSON schema format for Cerebras
+                schema = response_format.model_json_schema()
+                kwargs["response_format"] = {"type": "json_object"}
+
+                # Add JSON instruction to the last user message (required by Cerebras)
+                messages = _add_json_instruction_to_messages(messages, schema)
+
         kwargs = _convert_kwargs(kwargs)
         converted_messages = _convert_messages(messages)
 
-        try:
-            # Make the API call using the client
-            response = self.client.chat.completions.create(
-                model=model,
-                messages=converted_messages,
-                **kwargs,
-            )
+        # Make the API call using the client
+        response = self.client.chat.completions.create(
+            model=model,
+            messages=converted_messages,
+            **kwargs,
+        )
 
-            # Convert response to dict format for processing
-            # Handle the case where response might be a Stream object
-            if hasattr(response, "model_dump"):
-                response_data = response.model_dump()
-            else:
-                # If it's a streaming response, we need to handle it differently
-                raise ValueError("Streaming responses are not supported in this context")
+        # Convert response to dict format for processing
+        # Handle the case where response might be a Stream object
+        if hasattr(response, "model_dump"):
+            response_data = response.model_dump()
+        else:
+            # If it's a streaming response, we need to handle it differently
+            raise ValueError("Streaming responses are not supported in this context")
 
-            # Convert to OpenAI format
-            return _convert_response(response_data)
-
-        except cerebras.PermissionDeniedError:
-            raise
-        except cerebras.AuthenticationError:
-            raise
-        except cerebras.RateLimitError:
-            raise
-        except Exception as e:
-            # Re-raise as a more generic exception
-            raise RuntimeError(f"Cerebras API error: {e}") from e
+        # Convert to OpenAI format
+        return _convert_response(response_data)
