@@ -87,10 +87,6 @@ class AnthropicProvider(BaseProviderFramework):
 
         return kwargs
 
-    def _convert_messages(self, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        """Convert messages to Anthropic format."""
-        return messages
-
     def _make_api_call(self, model: str, messages: tuple[str, list[dict[str, Any]]], **kwargs: Any) -> Message:
         """Make the API call to Anthropic."""
         return self.client.messages.create(

@@ -35,9 +35,7 @@ class OllamaProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion:
         """Create a chat completion using Ollama."""
-        # Ensure stream is disabled for synchronous response
-        kwargs["stream"] = False
-
+        kwargs['stream'] = kwargs.get('stream', False)
         # Handle response_format for Pydantic models
         if "response_format" in kwargs:
             response_format = kwargs.pop("response_format")

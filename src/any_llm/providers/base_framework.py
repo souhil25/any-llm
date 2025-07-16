@@ -58,23 +58,8 @@ class BaseProviderFramework(Provider, ABC):
         messages: list[dict[str, Any]],
         **kwargs: Any,
     ) -> ChatCompletion:
-        """
-        Standard completion flow that all providers follow:
-        1. Convert kwargs to provider format
-        2. Convert messages to provider format
-        3. Make the API call
-        4. Convert response back to OpenAI format
-        """
-        # Step 1: Convert kwargs
         converted_kwargs = self._convert_kwargs(kwargs)
-
-        # Step 2: Convert messages
-        converted_messages = self._convert_messages(messages)
-
-        # Step 3: Make API call (provider-specific)
-        raw_response = self._make_api_call(model, converted_messages, **converted_kwargs)
-
-        # Step 4: Convert response to OpenAI format
+        raw_response = self._make_api_call(model, messages, **converted_kwargs)
         return self._convert_response(raw_response)
 
     async def acompletion(
@@ -88,11 +73,6 @@ class BaseProviderFramework(Provider, ABC):
     @abstractmethod
     def _convert_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         """Convert standard kwargs to provider-specific format."""
-        pass
-
-    @abstractmethod
-    def _convert_messages(self, messages: list[dict[str, Any]]) -> Any:
-        """Convert standard messages to provider-specific format."""
         pass
 
     @abstractmethod

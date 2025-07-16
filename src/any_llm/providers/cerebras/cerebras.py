@@ -17,17 +17,6 @@ from any_llm.provider import Provider, ApiConfig, convert_instructor_response
 from any_llm.exceptions import MissingApiKeyError
 
 
-def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
-    """Format the kwargs for Cerebras."""
-    # Since Cerebras is OpenAI-compliant, we can pass most kwargs through
-    kwargs = kwargs.copy()
-
-    # Remove response_format since it will be handled by instructor
-    kwargs.pop("response_format", None)
-
-    return kwargs
-
-
 def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
     """Convert Cerebras response to OpenAI ChatCompletion format."""
     # Since Cerebras is OpenAI-compliant, the response should already be in the right format
@@ -119,21 +108,17 @@ class CerebrasProvider(Provider):
         # Handle response_format for structured output
         if "response_format" in kwargs:
             response_format = kwargs.pop("response_format")
-            converted_kwargs = _convert_kwargs(kwargs)
-
             # Use instructor for structured output
             instructor_response = self.instructor_client.chat.completions.create(
                 model=model,
                 messages=cast(Any, messages),
                 response_model=response_format,
-                **converted_kwargs,
+                **kwargs,
             )
 
             # Convert instructor response to ChatCompletion format
             return convert_instructor_response(instructor_response, model, "cerebras")
 
-        # For non-structured outputs, use the regular client
-        kwargs = _convert_kwargs(kwargs)
 
         # Use regular create method for non-structured outputs
         response = self.client.chat.completions.create(

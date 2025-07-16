@@ -11,23 +11,6 @@ from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMe
 from any_llm.provider import Provider, ApiConfig
 from any_llm.exceptions import MissingApiKeyError
 
-
-def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
-    """Format the kwargs for Azure."""
-    kwargs = kwargs.copy()
-
-    # Remove 'stream' from kwargs if present (not supported in this implementation)
-    kwargs.pop("stream", None)
-
-    return kwargs
-
-
-def _convert_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Convert messages to Azure format."""
-    # Azure uses standard OpenAI format
-    return messages
-
-
 def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
     """Convert Azure response to OpenAI ChatCompletion format."""
     choice_data = response_data["choices"][0]
@@ -109,16 +92,13 @@ class AzureProvider(Provider):
                 "https://<model-deployment-name>.<region>.models.ai.azure.com"
             )
 
-        kwargs = _convert_kwargs(kwargs)
-        converted_messages = _convert_messages(messages)
-
         # Build the URL
         url = f"{self.base_url}/chat/completions"
         if self.api_version:
             url = f"{url}?api-version={self.api_version}"
 
         # Prepare the request payload
-        data = {"messages": converted_messages}
+        data = {"messages": messages}
 
         # Add tools if provided
         if "tools" in kwargs:

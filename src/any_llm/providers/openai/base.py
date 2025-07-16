@@ -39,11 +39,7 @@ class BaseOpenAIProvider(BaseProviderFramework, ABC):
 
     def _convert_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         """Convert kwargs for OpenAI-compatible providers (minimal conversion needed)."""
-        return kwargs.copy()
-
-    def _convert_messages(self, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        """Convert messages for OpenAI-compatible providers (minimal conversion needed)."""
-        return messages
+        return kwargs
 
     def _make_api_call(self, model: str, messages: list[dict[str, Any]], **kwargs: Any) -> ChatCompletion:
         """Make the API call to OpenAI-compatible service."""
