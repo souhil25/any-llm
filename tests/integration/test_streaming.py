@@ -10,15 +10,18 @@ def test_streaming_completion(provider: ProviderName, provider_model_map: dict[P
     model_id = provider_model_map[provider]
     try:
         output = ""
+        num_chunks = 0
         for result in completion(
             f"{provider.value}/{model_id}",
             messages=[{"role": "user", "content": "Say 'Hello World'"}],
             stream=True,
             temperature=0.1,
         ):
+            num_chunks += 1
             # Verify the response is still a valid ChatCompletion object
             assert isinstance(result, ChatCompletionChunk)
             output += result.choices[0].delta.content or ""
+        assert num_chunks > 2, f"Expected at least 2 chunks, got {num_chunks}"
         assert "hello world" in output.lower()
     except MissingApiKeyError:
         pytest.skip(f"{provider.value} API key not provided, skipping")
