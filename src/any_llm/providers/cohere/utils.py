@@ -16,31 +16,35 @@ def _create_openai_chunk_from_cohere_chunk(chunk: Any) -> ChatCompletionChunk:
         "choices": [],
         "usage": None,
     }
-    
+
     delta: Dict[str, Any] = {}
     finish_reason = None
-    
+
     chunk_type = getattr(chunk, "type", None)
-    
+
     if chunk_type == "content-delta":
         # Handle content delta
-        if (hasattr(chunk, "delta") and 
-            chunk.delta and 
-            hasattr(chunk.delta, "message") and
-            chunk.delta.message and 
-            hasattr(chunk.delta.message, "content") and
-            chunk.delta.message.content and 
-            hasattr(chunk.delta.message.content, "text")):
+        if (
+            hasattr(chunk, "delta")
+            and chunk.delta
+            and hasattr(chunk.delta, "message")
+            and chunk.delta.message
+            and hasattr(chunk.delta.message, "content")
+            and chunk.delta.message.content
+            and hasattr(chunk.delta.message.content, "text")
+        ):
             delta["content"] = chunk.delta.message.content.text
-            
+
     elif chunk_type == "tool-call-start":
         # Handle tool call start
-        if (hasattr(chunk, "delta") and 
-            chunk.delta and 
-            hasattr(chunk.delta, "message") and
-            chunk.delta.message and 
-            hasattr(chunk.delta.message, "tool_calls") and
-            chunk.delta.message.tool_calls):
+        if (
+            hasattr(chunk, "delta")
+            and chunk.delta
+            and hasattr(chunk.delta, "message")
+            and chunk.delta.message
+            and hasattr(chunk.delta.message, "tool_calls")
+            and chunk.delta.message.tool_calls
+        ):
             tool_call = chunk.delta.message.tool_calls
             delta["tool_calls"] = [
                 {
@@ -48,22 +52,26 @@ def _create_openai_chunk_from_cohere_chunk(chunk: Any) -> ChatCompletionChunk:
                     "id": getattr(tool_call, "id", ""),
                     "type": "function",
                     "function": {
-                        "name": getattr(tool_call.function, "name", "") if hasattr(tool_call, "function") and tool_call.function else "",
+                        "name": getattr(tool_call.function, "name", "")
+                        if hasattr(tool_call, "function") and tool_call.function
+                        else "",
                         "arguments": "",
                     },
                 }
             ]
-            
+
     elif chunk_type == "tool-call-delta":
         # Handle tool call arguments delta
-        if (hasattr(chunk, "delta") and 
-            chunk.delta and 
-            hasattr(chunk.delta, "message") and
-            chunk.delta.message and 
-            hasattr(chunk.delta.message, "tool_calls") and
-            chunk.delta.message.tool_calls and
-            hasattr(chunk.delta.message.tool_calls, "function") and
-            chunk.delta.message.tool_calls.function):
+        if (
+            hasattr(chunk, "delta")
+            and chunk.delta
+            and hasattr(chunk.delta, "message")
+            and chunk.delta.message
+            and hasattr(chunk.delta.message, "tool_calls")
+            and chunk.delta.message.tool_calls
+            and hasattr(chunk.delta.message.tool_calls, "function")
+            and chunk.delta.message.tool_calls.function
+        ):
             delta["tool_calls"] = [
                 {
                     "index": 0,
@@ -72,37 +80,42 @@ def _create_openai_chunk_from_cohere_chunk(chunk: Any) -> ChatCompletionChunk:
                     },
                 }
             ]
-            
+
     elif chunk_type == "tool-call-end":
         # End of tool call
         finish_reason = "tool_calls"
-        
+
     elif chunk_type == "message-end":
         # End of message
         finish_reason = "stop"
-        
+
         # Add usage info if available
-        if (hasattr(chunk, "delta") and 
-            chunk.delta and 
-            hasattr(chunk.delta, "usage") and
-            chunk.delta.usage and 
-            hasattr(chunk.delta.usage, "tokens") and
-            chunk.delta.usage.tokens):
+        if (
+            hasattr(chunk, "delta")
+            and chunk.delta
+            and hasattr(chunk.delta, "usage")
+            and chunk.delta.usage
+            and hasattr(chunk.delta.usage, "tokens")
+            and chunk.delta.usage.tokens
+        ):
             chunk_dict["usage"] = {
                 "prompt_tokens": int(getattr(chunk.delta.usage.tokens, "input_tokens", 0) or 0),
                 "completion_tokens": int(getattr(chunk.delta.usage.tokens, "output_tokens", 0) or 0),
-                "total_tokens": int((getattr(chunk.delta.usage.tokens, "input_tokens", 0) or 0) + (getattr(chunk.delta.usage.tokens, "output_tokens", 0) or 0)),
+                "total_tokens": int(
+                    (getattr(chunk.delta.usage.tokens, "input_tokens", 0) or 0)
+                    + (getattr(chunk.delta.usage.tokens, "output_tokens", 0) or 0)
+                ),
             }
-    
+
     choice_dict = {
         "index": 0,
         "delta": delta,
         "finish_reason": finish_reason,
         "logprobs": None,
     }
-    
+
     chunk_dict["choices"] = [choice_dict]
-    
+
     return ChatCompletionChunk.model_validate(chunk_dict)
 
 
@@ -173,4 +186,4 @@ def _convert_response(response: Any, model: str) -> ChatCompletion:
         response_data=response_dict,
         model=model,
         provider_name="cohere",
-    ) 
+    )
