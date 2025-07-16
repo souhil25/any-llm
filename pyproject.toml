@@ -18,7 +18,7 @@ dependencies = [
 [project.optional-dependencies]
 
 all = [
-  "any-llm-sdk[mistral,anthropic,huggingface,google,cohere,cerebras,fireworks,groq,aws,azure,watsonx]"
+  "any-llm-sdk[mistral,anthropic,huggingface,google,cohere,cerebras,fireworks,groq,aws,azure,watsonx,together,sambanova]"
 ]
 
 mistral = [
@@ -46,7 +46,7 @@ cerebras = [
 ]
 
 fireworks = [
-  "httpx",
+  "fireworks-ai",
 ]
 
 groq = [
@@ -63,6 +63,14 @@ azure = [
 
 watsonx = [
   "ibm-watsonx-ai",
+]
+
+together = [
+  "together",
+]
+
+sambanova = [
+  "instructor",
 ]
 
 [project.urls]
@@ -126,6 +134,7 @@ tests = [
   "pytest>=8,<9",
   "mktestdocs>=0.2.4",
   "pytest-xdist>=3.6.1",
+  "debugpy",
 ]
 
 # For completeness, but 'uv sync --group dev' currently installs the others too.

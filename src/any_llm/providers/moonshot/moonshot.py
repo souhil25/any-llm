@@ -20,7 +20,7 @@ class MoonshotProvider(BaseOpenAIProvider):
     """
 
     # Moonshot AI-specific configuration
-    DEFAULT_API_BASE = "https://api.moonshot.cn/v1"
+    DEFAULT_API_BASE = "https://api.moonshot.ai/v1"
     ENV_API_KEY_NAME = "MOONSHOT_API_KEY"
     PROVIDER_NAME = "Moonshot AI"
 

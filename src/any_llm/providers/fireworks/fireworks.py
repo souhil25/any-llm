@@ -1,15 +1,73 @@
-from any_llm.providers.openai.base import BaseOpenAIProvider
+import os
+from typing import Any
+
+try:
+    from fireworks import LLM
+except ImportError:
+    msg = "fireworks-ai is not installed. Please install it with `pip install any-llm-sdk[fireworks]`"
+    raise ImportError(msg)
+
+from pydantic import BaseModel
+from openai.types.chat.chat_completion import ChatCompletion
+from any_llm.provider import Provider, ApiConfig
+from any_llm.exceptions import MissingApiKeyError
+from any_llm.providers.base_framework import create_completion_from_response
 
 
-class FireworksProvider(BaseOpenAIProvider):
+class FireworksProvider(Provider):
     """
-    Fireworks AI Provider using BaseOpenAIProvider.
+    Fireworks AI Provider using the native fireworks-ai client.
 
-    Fireworks AI has an OpenAI-compatible API, so we can use the base OpenAI provider
-    with just different configuration values.
+    This provider uses the fireworks-ai SDK to communicate with Fireworks AI's API,
+    properly handling their JSON schema format for structured outputs.
     """
 
-    # Fireworks-specific configuration
-    DEFAULT_API_BASE = "https://api.fireworks.ai/inference/v1"
-    ENV_API_KEY_NAME = "FIREWORKS_API_KEY"
-    PROVIDER_NAME = "Fireworks"
+    def __init__(self, config: ApiConfig) -> None:
+        """Initialize Fireworks provider."""
+        if not config.api_key:
+            config.api_key = os.getenv("FIREWORKS_API_KEY")
+        if not config.api_key:
+            raise MissingApiKeyError("Fireworks", "FIREWORKS_API_KEY")
+
+        # Store the API key for client creation
+        self.api_key = config.api_key
+
+    def completion(
+        self,
+        model: str,
+        messages: list[dict[str, Any]],
+        **kwargs: Any,
+    ) -> ChatCompletion:
+        """Create a chat completion using Fireworks."""
+        # Initialize the LLM client with the model
+        llm = LLM(
+            model=model,
+            deployment_type="serverless",
+            api_key=self.api_key,
+        )
+
+        # Handle response_format for Pydantic models
+        if "response_format" in kwargs:
+            response_format = kwargs.pop("response_format")
+            if isinstance(response_format, type) and issubclass(response_format, BaseModel):
+                # Convert Pydantic model to Fireworks JSON schema format
+                kwargs["response_format"] = {
+                    "type": "json_schema",
+                    "json_schema": {"name": response_format.__name__, "schema": response_format.model_json_schema()},
+                }
+            else:
+                # response_format is already a dict, pass it through
+                kwargs["response_format"] = response_format
+
+        # Make the API call
+        response = llm.chat.completions.create(
+            messages=messages,  # type: ignore[arg-type]
+            **kwargs,
+        )
+
+        # Convert to OpenAI format using the new utility
+        return create_completion_from_response(
+            response_data=response.model_dump(),
+            provider_name="Fireworks",
+            model=model,
+        )

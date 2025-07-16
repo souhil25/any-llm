@@ -41,7 +41,7 @@ While the OpenAI API has become the de facto standard for LLM provider interface
 `any-llm` fills the gap by providing a simple, well-maintained interface that:
 - **Leverages official provider SDKs** when available, reducing maintenance burden and ensuring compatibility
 - **Stays framework-agnostic** so it can be used across different projects and use cases
-- **Provides active maintenance** we support this in our product ([any-llm](https://github.com/mozilla-ai/any-llm)) so we're motivated to maintain it.
+- **Provides active maintenance** we support this in our product ([any-agent](https://github.com/mozilla-ai/any-agent)) so we're motivated to maintain it.
 - **No Proxy or Gateway server required** so you don't need to deal with setting up any other service to talk to whichever LLM provider you need.
 
 

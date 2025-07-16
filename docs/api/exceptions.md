@@ -1,3 +1,3 @@
 ## Exceptions
 
-::: any_llm.exceptions 
+::: any_llm.exceptions

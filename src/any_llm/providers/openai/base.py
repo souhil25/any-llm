@@ -48,9 +48,9 @@ class BaseOpenAIProvider(BaseProviderFramework, ABC):
     def _make_api_call(self, model: str, messages: list[dict[str, Any]], **kwargs: Any) -> ChatCompletion:
         """Make the API call to OpenAI-compatible service."""
         if "response_format" in kwargs:
-            response: ChatCompletion = self.client.chat.completions.parse(
+            response: ChatCompletion = self.client.chat.completions.parse(  # type: ignore[attr-defined]
                 model=model,
-                messages=messages,  # type: ignore[arg-type]
+                messages=messages,
                 **kwargs,
             )
         else:
