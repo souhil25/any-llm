@@ -1,11 +1,8 @@
-import json
-from typing import Any
+from typing import Any, Iterator
 
-from any_llm.logging import logger
 
 try:
     from anthropic import Anthropic
-    from anthropic.types import Message
     import instructor
 except ImportError:
     msg = "anthropic or instructor is not installed. Please install it with `pip install any-llm-sdk[anthropic]`"
@@ -17,127 +14,12 @@ from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
 from any_llm.exceptions import UnsupportedParameterError
 from any_llm.provider import ApiConfig, convert_instructor_response
-from any_llm.providers.base_framework import (
-    BaseProviderFramework,
-    create_completion_from_response,
+from any_llm.providers.base_framework import BaseProviderFramework
+from any_llm.providers.anthropic.utils import (
+    _create_openai_chunk_from_anthropic_chunk,
+    _convert_response,
+    _convert_kwargs,
 )
-
-DEFAULT_MAX_TOKENS = 4096
-
-
-def _convert_response(response: Message) -> ChatCompletion | Stream[ChatCompletionChunk]:
-    """Convert Anthropic response to OpenAI format using base_framework utility."""
-    finish_reason_mapping = {
-        "end_turn": "stop",
-        "max_tokens": "length",
-        "tool_use": "tool_calls",
-    }
-
-    # Process content blocks into structured format
-    tool_calls = []
-    content = ""
-
-    for content_block in response.content:
-        if content_block.type == "text":
-            content = content_block.text
-        elif content_block.type == "tool_use":
-            tool_calls.append(
-                {
-                    "id": content_block.id,
-                    "function": {
-                        "name": content_block.name,
-                        "arguments": json.dumps(content_block.input),
-                    },
-                    "type": "function",
-                }
-            )
-
-    # Structure response data for the utility
-    response_dict = {
-        "id": response.id,
-        "model": response.model,
-        "created": int(response.created_at.timestamp()) if hasattr(response, "created_at") else 0,
-        "choices": [
-            {
-                "message": {
-                    "role": "assistant",
-                    "content": content or None,
-                    "tool_calls": tool_calls if tool_calls else None,
-                },
-                "finish_reason": response.stop_reason or "end_turn",
-                "index": 0,
-            }
-        ],
-        "usage": {
-            "completion_tokens": response.usage.output_tokens,
-            "prompt_tokens": response.usage.input_tokens,
-            "total_tokens": response.usage.input_tokens + response.usage.output_tokens,
-        },
-    }
-
-    # Use base_framework utility for conversion
-    return create_completion_from_response(
-        response_data=response_dict,
-        model=response.model,
-        provider_name="anthropic",
-        finish_reason_mapping=finish_reason_mapping,
-    )
-
-
-def _convert_tool_spec(openai_tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Convert OpenAI tool specification to Anthropic format."""
-    # Use the generic utility first
-    generic_tools = []
-
-    for tool in openai_tools:
-        if tool.get("type") != "function":
-            continue
-
-        function = tool["function"]
-        generic_tool = {
-            "name": function["name"],
-            "description": function.get("description", ""),
-            "parameters": function.get("parameters", {}),
-        }
-        generic_tools.append(generic_tool)
-
-    # Convert to Anthropic-specific format
-    anthropic_tools = []
-    for tool in generic_tools:
-        anthropic_tool = {
-            "name": tool["name"],
-            "description": tool["description"],
-            "input_schema": {
-                "type": "object",
-                "properties": tool["parameters"]["properties"],
-                "required": tool["parameters"].get("required", []),
-            },
-        }
-        anthropic_tools.append(anthropic_tool)
-
-    return anthropic_tools
-
-
-def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
-    """Convert kwargs to Anthropic format."""
-    kwargs = kwargs.copy()
-
-    if "max_tokens" not in kwargs:
-        logger.warning(f"max_tokens is required for Anthropic, setting to {DEFAULT_MAX_TOKENS}")
-        kwargs["max_tokens"] = DEFAULT_MAX_TOKENS
-
-    # Convert tools if present
-    if "tools" in kwargs:
-        kwargs["tools"] = _convert_tool_spec(kwargs["tools"])
-
-    # Handle parallel_tool_calls
-    if "parallel_tool_calls" in kwargs:
-        parallel_tool_calls = kwargs.pop("parallel_tool_calls")
-        if parallel_tool_calls is False:
-            tool_choice = {"type": kwargs.get("tool_choice", "any"), "disable_parallel_tool_use": True}
-            kwargs["tool_choice"] = tool_choice
-
-    return kwargs
 
 
 class AnthropicProvider(BaseProviderFramework):
@@ -157,6 +39,22 @@ class AnthropicProvider(BaseProviderFramework):
         # Create instructor client for structured output
         self.instructor_client = instructor.from_anthropic(self.client)
 
+    def _stream_completion(
+        self,
+        model: str,
+        messages: list[dict[str, Any]],
+        **kwargs: Any,
+    ) -> Iterator[ChatCompletionChunk]:
+        """Handle streaming completion - extracted to avoid generator issues."""
+        # Get the Anthropic stream
+        with self.client.messages.stream(
+            model=model,
+            messages=messages,  # type: ignore[arg-type]
+            **kwargs,
+        ) as anthropic_stream:
+            for event in anthropic_stream:
+                yield _create_openai_chunk_from_anthropic_chunk(event)
+
     def completion(
         self,
         model: str,
@@ -165,13 +63,13 @@ class AnthropicProvider(BaseProviderFramework):
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Anthropic with instructor support."""
 
-        if kwargs.get("stream", False) is True:
-            raise UnsupportedParameterError("stream", "Anthropic")
-
         # Handle response_format for structured output
         kwargs = _convert_kwargs(kwargs)
 
         if "response_format" in kwargs:
+            if kwargs.get("stream", False):
+                raise UnsupportedParameterError("response_format with streaming", "Anthropic")
+
             response_format = kwargs.pop("response_format")
             # Use instructor for structured output
             instructor_response = self.instructor_client.messages.create(
@@ -184,9 +82,14 @@ class AnthropicProvider(BaseProviderFramework):
             # Convert instructor response to ChatCompletion format
             return convert_instructor_response(instructor_response, model, "anthropic")
 
-        message = self.client.messages.create(
-            model=model,
-            messages=messages,  # type: ignore[arg-type]
-            **kwargs,
-        )
-        return _convert_response(message)
+        if kwargs.get("stream", False):
+            # Return the streaming generator
+            kwargs.pop("stream")
+            return self._stream_completion(model, messages, **kwargs)  # type: ignore[return-value]
+        else:
+            message = self.client.messages.create(
+                model=model,
+                messages=messages,  # type: ignore[arg-type]
+                **kwargs,
+            )
+            return _convert_response(message)

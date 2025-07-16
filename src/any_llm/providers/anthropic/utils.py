@@ -1,0 +1,215 @@
+import json
+from typing import Any, Dict, List, Union
+
+from any_llm.logging import logger
+
+try:
+    from anthropic.types import Message
+    from anthropic.types import (
+        ContentBlockStartEvent,
+        ContentBlockDeltaEvent,
+        ContentBlockStopEvent,
+        MessageStopEvent,
+    )
+except ImportError:
+    msg = "anthropic is not installed. Please install it with `pip install any-llm-sdk[anthropic]`"
+    raise ImportError(msg)
+
+from openai.types.chat.chat_completion import ChatCompletion
+from openai._streaming import Stream
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
+
+from any_llm.providers.base_framework import create_completion_from_response
+
+DEFAULT_MAX_TOKENS = 4096
+
+
+def _create_openai_chunk_from_anthropic_chunk(chunk: Any) -> ChatCompletionChunk:
+    """Convert Anthropic streaming chunk to OpenAI ChatCompletionChunk format."""
+    # Default chunk structure
+    chunk_dict = {
+        "id": f"chatcmpl-{hash(str(chunk))}",
+        "object": "chat.completion.chunk",
+        "created": 0,
+        "model": "claude-3-5-sonnet-20241022",  # Default model
+        "choices": [],
+        "usage": None,
+    }
+    
+    delta: Dict[str, Any] = {}
+    finish_reason = None
+    
+    if isinstance(chunk, ContentBlockStartEvent):
+        # Starting a new content block
+        if chunk.content_block.type == "text":
+            delta = {"content": ""}
+        elif chunk.content_block.type == "tool_use":
+            # Start of tool call
+            delta = {
+                "tool_calls": [
+                    {
+                        "index": 0,
+                        "id": chunk.content_block.id,
+                        "type": "function",
+                        "function": {"name": chunk.content_block.name, "arguments": ""},
+                    }
+                ]
+            }
+    
+    elif isinstance(chunk, ContentBlockDeltaEvent):
+        # Delta content
+        if chunk.delta.type == "text_delta":
+            delta = {"content": chunk.delta.text}
+        elif chunk.delta.type == "input_json_delta":
+            # Tool call arguments delta
+            delta = {
+                "tool_calls": [
+                    {
+                        "index": 0,
+                        "function": {"arguments": chunk.delta.partial_json},
+                    }
+                ]
+            }
+    
+    elif isinstance(chunk, ContentBlockStopEvent):
+        # End of content block  
+        if hasattr(chunk, 'content_block') and chunk.content_block.type == "tool_use":
+            finish_reason = "tool_calls"
+        else:
+            finish_reason = None
+    
+    elif isinstance(chunk, MessageStopEvent):
+        # End of message
+        finish_reason = "stop"
+        if hasattr(chunk, 'message') and chunk.message.usage:
+            chunk_dict["usage"] = {
+                "prompt_tokens": chunk.message.usage.input_tokens,
+                "completion_tokens": chunk.message.usage.output_tokens,
+                "total_tokens": chunk.message.usage.input_tokens + chunk.message.usage.output_tokens,
+            }
+    
+    choice = {
+        "index": 0,
+        "delta": delta,
+        "finish_reason": finish_reason,
+        "logprobs": None,
+    }
+    
+    chunk_dict["choices"] = [choice]
+    
+    return ChatCompletionChunk.model_validate(chunk_dict)
+
+
+def _convert_response(response: Message) -> ChatCompletion:
+    """Convert Anthropic response to OpenAI format using base_framework utility."""
+    finish_reason_mapping = {
+        "end_turn": "stop",
+        "max_tokens": "length",
+        "tool_use": "tool_calls",
+    }
+
+    # Process content blocks into structured format
+    tool_calls = []
+    content = ""
+
+    for content_block in response.content:
+        if content_block.type == "text":
+            content = content_block.text
+        elif content_block.type == "tool_use":
+            tool_calls.append(
+                {
+                    "id": content_block.id,
+                    "function": {
+                        "name": content_block.name,
+                        "arguments": json.dumps(content_block.input),
+                    },
+                    "type": "function",
+                }
+            )
+
+    # Structure response data for the utility
+    response_dict = {
+        "id": response.id,
+        "model": response.model,
+        "created": int(response.created_at.timestamp()) if hasattr(response, "created_at") else 0,
+        "choices": [
+            {
+                "message": {
+                    "role": "assistant",
+                    "content": content or None,
+                    "tool_calls": tool_calls if tool_calls else None,
+                },
+                "finish_reason": response.stop_reason or "end_turn",
+                "index": 0,
+            }
+        ],
+        "usage": {
+            "completion_tokens": response.usage.output_tokens,
+            "prompt_tokens": response.usage.input_tokens,
+            "total_tokens": response.usage.input_tokens + response.usage.output_tokens,
+        },
+    }
+
+    # Use base_framework utility for conversion
+    return create_completion_from_response(
+        response_data=response_dict,
+        model=response.model,
+        provider_name="anthropic",
+        finish_reason_mapping=finish_reason_mapping,
+    )
+
+
+def _convert_tool_spec(openai_tools: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Convert OpenAI tool specification to Anthropic format."""
+    # Use the generic utility first
+    generic_tools = []
+
+    for tool in openai_tools:
+        if tool.get("type") != "function":
+            continue
+
+        function = tool["function"]
+        generic_tool = {
+            "name": function["name"],
+            "description": function.get("description", ""),
+            "parameters": function.get("parameters", {}),
+        }
+        generic_tools.append(generic_tool)
+
+    # Convert to Anthropic-specific format
+    anthropic_tools = []
+    for tool in generic_tools:
+        anthropic_tool = {
+            "name": tool["name"],
+            "description": tool["description"],
+            "input_schema": {
+                "type": "object",
+                "properties": tool["parameters"]["properties"],
+                "required": tool["parameters"].get("required", []),
+            },
+        }
+        anthropic_tools.append(anthropic_tool)
+
+    return anthropic_tools
+
+
+def _convert_kwargs(kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert kwargs to Anthropic format."""
+    kwargs = kwargs.copy()
+
+    if "max_tokens" not in kwargs:
+        logger.warning(f"max_tokens is required for Anthropic, setting to {DEFAULT_MAX_TOKENS}")
+        kwargs["max_tokens"] = DEFAULT_MAX_TOKENS
+
+    # Convert tools if present
+    if "tools" in kwargs:
+        kwargs["tools"] = _convert_tool_spec(kwargs["tools"])
+
+    # Handle parallel_tool_calls
+    if "parallel_tool_calls" in kwargs:
+        parallel_tool_calls = kwargs.pop("parallel_tool_calls")
+        if parallel_tool_calls is False:
+            tool_choice = {"type": kwargs.get("tool_choice", "any"), "disable_parallel_tool_use": True}
+            kwargs["tool_choice"] = tool_choice
+
+    return kwargs
