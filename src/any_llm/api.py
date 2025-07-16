@@ -27,18 +27,15 @@ def completion(model: str, messages: list[dict[str, Any]], **kwargs: Any) -> Cha
         raise ValueError(msg)
 
     # Extract the provider key from the model identifier, e.g., "mistral/mistral-small"
-    provider_key, model_name = model.split("/", 1)
+    provider_key_str, model_name = model.split("/", 1)
 
     # Validate that neither provider nor model name is empty
-    if not provider_key or not model_name:
+    if not provider_key_str or not model_name:
         msg = f"Invalid model format. Expected 'provider/model', got '{model}'"
         raise ValueError(msg)
 
-    # Validate if the provider is supported
-    supported_providers = ProviderFactory.get_supported_providers()
-    if provider_key not in supported_providers:
-        msg = f"{provider_key} is not a supported provider. Supported providers: {supported_providers}. Make sure the model string is formatted correctly as 'provider/model'."
-        raise ValueError(msg)
+    # Convert string to ProviderName enum and validate
+    provider_key = ProviderFactory.get_provider_enum(provider_key_str)
 
     # Create provider instance
     config: dict[str, str] = {}

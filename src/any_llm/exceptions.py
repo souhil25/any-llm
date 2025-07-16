@@ -21,3 +21,21 @@ class MissingApiKeyError(Exception):
         )
 
         super().__init__(message)
+
+
+class UnsupportedProviderError(Exception):
+    """Exception raised when an unsupported provider is requested."""
+
+    def __init__(self, provider_key: str, supported_providers: list[str]) -> None:
+        """Initialize the exception.
+
+        Args:
+            provider_key: The provider key that was requested
+            supported_providers: List of supported provider keys
+        """
+        self.provider_key = provider_key
+        self.supported_providers = supported_providers
+
+        message = f"'{provider_key}' is not a supported provider. Supported providers: {', '.join(supported_providers)}"
+
+        super().__init__(message)

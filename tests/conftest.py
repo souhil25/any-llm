@@ -1,8 +1,8 @@
 import pytest
 
-from any_llm.provider import ProviderFactory
+from any_llm.provider import ProviderName
 
 
-@pytest.fixture(params=list(ProviderFactory.get_supported_providers()), ids=lambda x: x)
-def provider(request: pytest.FixtureRequest) -> str:
-    return str(request.param)
+@pytest.fixture(params=list(ProviderName), ids=lambda x: x.value)
+def provider(request: pytest.FixtureRequest) -> ProviderName:
+    return request.param  # type: ignore[no-any-return]

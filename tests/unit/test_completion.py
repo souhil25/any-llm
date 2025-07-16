@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 
-from any_llm.main import completion
+from any_llm import completion
 from any_llm.provider import ProviderFactory, ApiConfig, Provider
 
 
@@ -28,7 +28,7 @@ def test_completion_invalid_model_format_multiple_slashes() -> None:
     mock_provider = Mock()
     mock_provider.completion.return_value = Mock()
 
-    with patch("any_llm.main.ProviderFactory") as mock_factory:
+    with patch("any_llm.api.ProviderFactory") as mock_factory:
         mock_factory.get_supported_providers.return_value = ["provider"]
         mock_factory.create_provider.return_value = mock_provider
 

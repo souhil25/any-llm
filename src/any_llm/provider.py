@@ -1,12 +1,40 @@
 # Inspired by https://github.com/andrewyng/aisuite/tree/main/aisuite
 import importlib
 from abc import ABC, abstractmethod
+from enum import Enum
 from pathlib import Path
-from typing import Any, Type
+from typing import Any, Type, Union
 
 from openai.types.chat.chat_completion import ChatCompletion
 
 from pydantic import BaseModel
+
+from any_llm.exceptions import UnsupportedProviderError
+
+
+class ProviderName(str, Enum):
+    """String enum for supported providers."""
+
+    ANTHROPIC = "anthropic"
+    AWS = "aws"
+    AZURE = "azure"
+    CEREBRAS = "cerebras"
+    COHERE = "cohere"
+    DEEPSEEK = "deepseek"
+    FIREWORKS = "fireworks"
+    GOOGLE = "google"
+    GROQ = "groq"
+    HUGGINGFACE = "huggingface"
+    INCEPTION = "inception"
+    MISTRAL = "mistral"
+    MOONSHOT = "moonshot"
+    NEBIUS = "nebius"
+    OLLAMA = "ollama"
+    OPENAI = "openai"
+    SAMBANOVA = "sambanova"
+    TOGETHER = "together"
+    WATSONX = "watsonx"
+    XAI = "xai"
 
 
 class ApiConfig(BaseModel):
@@ -34,8 +62,12 @@ class ProviderFactory:
     PROVIDERS_DIR = Path(__file__).parent / "providers"
 
     @classmethod
-    def create_provider(cls, provider_key: str, config: ApiConfig) -> Provider:
+    def create_provider(cls, provider_key: Union[str, ProviderName], config: ApiConfig) -> Provider:
         """Dynamically load and create an instance of a provider based on the naming convention."""
+        # Convert to string if it's a ProviderName enum
+        if isinstance(provider_key, ProviderName):
+            provider_key = provider_key.value
+
         provider_class_name = f"{provider_key.capitalize()}Provider"
         provider_module_name = f"{provider_key}"
 
@@ -54,5 +86,14 @@ class ProviderFactory:
     @classmethod
     def get_supported_providers(cls) -> list[str]:
         """Get a list of supported provider keys."""
-        # list all subdirectories in the providers directory
-        return [d.name for d in cls.PROVIDERS_DIR.iterdir() if d.is_dir() and not d.name.startswith("_")]
+        # Return the enum values as strings
+        return [provider.value for provider in ProviderName]
+
+    @classmethod
+    def get_provider_enum(cls, provider_key: str) -> ProviderName:
+        """Convert a string provider key to a ProviderName enum."""
+        try:
+            return ProviderName(provider_key)
+        except ValueError:
+            supported = [provider.value for provider in ProviderName]
+            raise UnsupportedProviderError(provider_key, supported)
