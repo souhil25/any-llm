@@ -14,7 +14,7 @@ from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
 from any_llm.provider import Provider, ApiConfig, convert_instructor_response
-from any_llm.exceptions import MissingApiKeyError
+from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
 from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
@@ -106,6 +106,9 @@ class CerebrasProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Cerebras with instructor support for structured outputs."""
+
+        if kwargs.get("stream", False) is True:
+            raise UnsupportedParameterError("stream", "Cerebras")
 
         # Handle response_format for structured output
         if "response_format" in kwargs:

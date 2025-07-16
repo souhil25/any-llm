@@ -11,6 +11,7 @@ from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from any_llm.logging import logger
 from any_llm.provider import ApiConfig, Provider
 from any_llm.providers.base_framework import create_completion_from_response
+from any_llm.exceptions import UnsupportedParameterError
 
 
 class OllamaProvider(Provider):
@@ -37,6 +38,10 @@ class OllamaProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Ollama."""
+
+        if kwargs.get("stream", False) is True:
+            raise UnsupportedParameterError("stream", "Ollama")
+
         kwargs["stream"] = kwargs.get("stream", False)
         # Handle response_format for Pydantic models
         if "response_format" in kwargs:

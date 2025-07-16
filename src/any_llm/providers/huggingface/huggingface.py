@@ -14,7 +14,7 @@ from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
-from any_llm.exceptions import MissingApiKeyError
+from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
 from any_llm.providers.base_framework import (
     create_completion_from_response,
 )
@@ -78,6 +78,10 @@ class HuggingfaceProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using HuggingFace."""
+
+        if kwargs.get("stream", False) is True:
+            raise UnsupportedParameterError("stream", "HuggingFace")
+
         # Convert max_tokens to max_new_tokens (HuggingFace specific)
         if "max_tokens" in kwargs:
             kwargs["max_new_tokens"] = kwargs.pop("max_tokens")

@@ -136,6 +136,10 @@ class GoogleProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Google GenAI."""
+
+        if kwargs.get("stream", False) is True:
+            raise UnsupportedParameterError("stream", "Google")
+
         # Handle response_format for Pydantic models
         response_schema = None
         if "response_format" in kwargs:

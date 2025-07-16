@@ -57,6 +57,10 @@ class CohereProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Cohere."""
+
+        if kwargs.get("stream", False) is True:
+            raise UnsupportedParameterError("stream", "Cohere")
+
         # Remove unsupported parameters
         if "response_format" in kwargs:
             raise UnsupportedParameterError("response_format", self.PROVIDER_NAME)

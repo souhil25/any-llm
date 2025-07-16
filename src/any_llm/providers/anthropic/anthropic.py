@@ -15,6 +15,7 @@ from openai.types.chat.chat_completion import ChatCompletion
 from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
+from any_llm.exceptions import UnsupportedParameterError
 from any_llm.provider import ApiConfig, convert_instructor_response
 from any_llm.providers.base_framework import (
     BaseProviderFramework,
@@ -163,6 +164,10 @@ class AnthropicProvider(BaseProviderFramework):
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Anthropic with instructor support."""
+
+        if kwargs.get("stream", False) is True:
+            raise UnsupportedParameterError("stream", "Anthropic")
+
         # Handle response_format for structured output
         kwargs = _convert_kwargs(kwargs)
 

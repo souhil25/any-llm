@@ -41,9 +41,6 @@ def _prepare_completion_request(
         msg = f"Invalid model format. Expected 'provider/model', got '{model}'"
         raise ValueError(msg)
 
-    if stream:
-        raise ValueError("Streaming is not yet supported")
-
     # Extract the provider key from the model identifier, e.g., "mistral/mistral-small"
     provider_key_str, model_name = model.split("/", 1)
 
