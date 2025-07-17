@@ -80,7 +80,7 @@ class OllamaProvider(Provider):
             **kwargs,  # Pass any additional arguments to the API
         }
 
-        timeout = int(kwargs.pop("timeout", 30))
+        timeout = kwargs.pop("timeout", None)
 
         try:
             response = httpx.post(
