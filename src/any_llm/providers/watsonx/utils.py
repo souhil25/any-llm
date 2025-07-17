@@ -5,8 +5,6 @@ from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 
 
-
-
 def _convert_response(response: dict[str, Any]) -> ChatCompletion:
     """Convert Watsonx response to OpenAI ChatCompletion format."""
     choice_data = response["choices"][0]

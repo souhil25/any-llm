@@ -1,10 +1,10 @@
-
 from typing import Any
 
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
+
 
 def _convert_response(response_data: dict[str, Any]) -> ChatCompletion:
     """Convert Azure response to OpenAI ChatCompletion format."""

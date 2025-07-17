@@ -2,7 +2,6 @@ import json
 from typing import Any
 
 try:
-    from google import genai
     from google.genai import types
 except ImportError:
     msg = "google-genai is not installed. Please install it with `pip install any-llm-sdk[google]`"
