@@ -16,7 +16,7 @@ from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
 from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
-from any_llm.providers.base_framework import (
+from any_llm.providers.helpers import (
     create_completion_from_response,
 )
 from any_llm.providers.google.utils import _convert_tool_spec, _convert_messages

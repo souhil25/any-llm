@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from openai.types.chat.chat_completion import ChatCompletion
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
-from any_llm.providers.base_framework import create_completion_from_response
+from any_llm.providers.helpers import create_completion_from_response
 
 
 def _create_openai_chunk_from_cohere_chunk(chunk: Any) -> ChatCompletionChunk:

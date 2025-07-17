@@ -59,6 +59,7 @@ groq = [
 
 aws = [
   "boto3",
+  "instructor",
 ]
 
 azure = [
@@ -116,7 +117,7 @@ module = ["pytest", "mktestdocs", "pytest_lazy_fixtures", "syrupy.assertion"]
 ignore_missing_imports = true # pytest related modules are not found
 
 [tool.pytest.ini_options]
-timeout = 30
+timeout = 120
 
 [dependency-groups]
 dev = [

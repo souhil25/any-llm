@@ -1,6 +1,3 @@
-import os
-import asyncio
-from abc import ABC, abstractmethod
 from typing import Any, Optional
 import json
 
@@ -8,68 +5,6 @@ from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
-from openai._streaming import Stream
-from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
-
-from any_llm.provider import Provider, ApiConfig
-from any_llm.exceptions import MissingApiKeyError
-
-
-class BaseProviderFramework(Provider, ABC):
-    """
-    Base framework for all providers that standardizes conversion patterns.
-
-    This class provides a common structure for providers while allowing
-    customization of specific conversion logic through abstract methods.
-
-    All providers follow the same pattern:
-    1. Convert kwargs to provider format
-    2. Convert messages to provider format
-    3. Make the API call
-    4. Convert response back to OpenAI format
-
-    This eliminates code duplication while maintaining flexibility.
-    """
-
-    # Provider-specific configuration (to be overridden by subclasses)
-    PROVIDER_NAME: str
-    ENV_API_KEY_NAME: str
-
-    def __init__(self, config: ApiConfig) -> None:
-        """Initialize provider with standardized configuration handling."""
-        super().__init__(config)
-
-        # Standardized API key handling
-        if not config.api_key:
-            config.api_key = os.getenv(self.ENV_API_KEY_NAME)
-
-        if not config.api_key:
-            raise MissingApiKeyError(self.PROVIDER_NAME, self.ENV_API_KEY_NAME)
-
-        # Allow subclasses to perform custom initialization
-        self._initialize_client(config)
-
-    @abstractmethod
-    def _initialize_client(self, config: ApiConfig) -> None:
-        """Initialize the provider-specific client. Must be implemented by subclasses."""
-        pass
-
-    @abstractmethod
-    def completion(
-        self,
-        model: str,
-        messages: list[dict[str, Any]],
-        **kwargs: Any,
-    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
-        raise NotImplementedError("Subclasses must implement this method")
-
-    async def acompletion(
-        self,
-        model: str,
-        messages: list[dict[str, Any]],
-        **kwargs: Any,
-    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
-        return await asyncio.to_thread(self.completion, model, messages, **kwargs)
 
 
 # Common utility functions that can be shared across providers

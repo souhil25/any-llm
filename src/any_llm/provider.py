@@ -4,6 +4,7 @@ import importlib
 import json
 from abc import ABC, abstractmethod
 from enum import Enum
+import os
 from pathlib import Path
 from typing import Any, Type, Union
 
@@ -14,7 +15,7 @@ from openai.types.chat.chat_completion_message import ChatCompletionMessage
 
 from pydantic import BaseModel
 
-from any_llm.exceptions import UnsupportedProviderError
+from any_llm.exceptions import MissingApiKeyError, UnsupportedProviderError
 
 
 def convert_instructor_response(instructor_response: Any, model: str, provider_name: str) -> ChatCompletion:
@@ -91,20 +92,34 @@ class ApiConfig(BaseModel):
 class Provider(ABC):
     """Provider for the LLM."""
 
+    # Provider-specific configuration (to be overridden by subclasses)
+    PROVIDER_NAME: str
+    ENV_API_KEY_NAME: str
+
     def __init__(self, config: ApiConfig) -> None:
         self.config = config
+        # Standardized API key handling
+        if not config.api_key:
+            config.api_key = os.getenv(self.ENV_API_KEY_NAME)
+
+        if not config.api_key:
+            raise MissingApiKeyError(self.PROVIDER_NAME, self.ENV_API_KEY_NAME)
 
     @abstractmethod
     def completion(
-        self, model: str, messages: list[dict[str, Any]], **kwargs: dict[str, Any]
+        self,
+        model: str,
+        messages: list[dict[str, Any]],
+        **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
-        """Must be implemented by each provider."""
-        raise NotImplementedError
+        raise NotImplementedError("Subclasses must implement this method")
 
     async def acompletion(
-        self, model: str, messages: list[dict[str, Any]], **kwargs: dict[str, Any]
+        self,
+        model: str,
+        messages: list[dict[str, Any]],
+        **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
-        """Async completion method. Calls the sync completion method in a thread pool."""
         return await asyncio.to_thread(self.completion, model, messages, **kwargs)
 
 

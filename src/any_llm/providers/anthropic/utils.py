@@ -18,7 +18,7 @@ except ImportError:
 from openai.types.chat.chat_completion import ChatCompletion
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
-from any_llm.providers.base_framework import create_completion_from_response
+from any_llm.providers.helpers import create_completion_from_response
 
 DEFAULT_MAX_TOKENS = 4096
 

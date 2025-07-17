@@ -13,8 +13,7 @@ from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
 from any_llm.exceptions import UnsupportedParameterError
-from any_llm.provider import ApiConfig, convert_instructor_response
-from any_llm.providers.base_framework import BaseProviderFramework
+from any_llm.provider import ApiConfig, Provider, convert_instructor_response
 from any_llm.providers.anthropic.utils import (
     _create_openai_chunk_from_anthropic_chunk,
     _convert_response,
@@ -22,9 +21,9 @@ from any_llm.providers.anthropic.utils import (
 )
 
 
-class AnthropicProvider(BaseProviderFramework):
+class AnthropicProvider(Provider):
     """
-    Anthropic Provider using enhanced BaseProviderFramework framework.
+    Anthropic Provider using enhanced Provider framework.
 
     Handles conversion between OpenAI format and Anthropic's native format.
     """
@@ -46,6 +45,7 @@ class AnthropicProvider(BaseProviderFramework):
         **kwargs: Any,
     ) -> Iterator[ChatCompletionChunk]:
         """Handle streaming completion - extracted to avoid generator issues."""
+        self._initialize_client(self.config)
         # Get the Anthropic stream
         with self.client.messages.stream(
             model=model,
@@ -62,7 +62,7 @@ class AnthropicProvider(BaseProviderFramework):
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Anthropic with instructor support."""
-
+        self._initialize_client(self.config)
         # Handle response_format for structured output
         kwargs = _convert_kwargs(kwargs)
 

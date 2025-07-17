@@ -3,20 +3,21 @@ from typing import Any, Optional
 
 try:
     import boto3
+    import instructor
 except ImportError:
-    msg = "boto3 is not installed. Please install it with `pip install any-llm-sdk[aws]`"
+    msg = "boto3 or instructor is not installed. Please install it with `pip install any-llm-sdk[aws]`"
     raise ImportError(msg)
 
 from openai.types.chat.chat_completion import ChatCompletion
-from any_llm.provider import Provider, ApiConfig
-from any_llm.exceptions import MissingApiKeyError
+from any_llm.provider import Provider, ApiConfig, convert_instructor_response
+from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
 from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from any_llm.providers.aws.utils import _convert_response, _convert_kwargs, _convert_messages
 
 
 class AwsProvider(Provider):
-    """AWS Bedrock Provider using boto3."""
+    """AWS Bedrock Provider using boto3 with instructor support."""
 
     def __init__(self, config: ApiConfig) -> None:
         """Initialize AWS Bedrock provider."""
@@ -28,6 +29,7 @@ class AwsProvider(Provider):
 
         # Don't create client during init to avoid test failures
         self.client: Optional[Any] = None
+        self.instructor_client: Optional[Any] = None
 
     def _check_aws_credentials(self) -> None:
         """Check if AWS credentials are available."""
@@ -51,20 +53,50 @@ class AwsProvider(Provider):
                 provider_name="AWS", env_var_name="AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"
             ) from e
 
+    def _initialize_clients(self) -> None:
+        """Initialize both regular and instructor clients."""
+        if self.client is None:
+            self.client = boto3.client("bedrock-runtime", region_name=self.region_name)  # type: ignore[no-untyped-call]
+
+        if self.instructor_client is None:
+            self.instructor_client = instructor.from_bedrock(self.client)
+
     def completion(
         self,
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
-        """Create a chat completion using AWS Bedrock."""
+        """Create a chat completion using AWS Bedrock with instructor support."""
+        # Initialize clients
+        self._initialize_clients()
+
         # Check credentials before creating client
         self._check_aws_credentials()
 
-        # Create client if not already created
-        if self.client is None:
-            self.client = boto3.client("bedrock-runtime", region_name=self.region_name)  # type: ignore[no-untyped-call]
+        if kwargs.get("stream", False):
+            raise UnsupportedParameterError("stream", "AWS Bedrock")
 
+        # Handle response_format for structured output
+        if "response_format" in kwargs:
+            if kwargs.get("stream", False):
+                raise UnsupportedParameterError("response_format with streaming", "AWS Bedrock")
+
+            response_format = kwargs.pop("response_format")
+
+            # Use instructor for structured output
+            assert self.instructor_client is not None  # For mypy
+            instructor_response = self.instructor_client.chat.completions.create(
+                model=model,
+                messages=messages,
+                response_model=response_format,
+                **kwargs,
+            )
+
+            # Convert instructor response to ChatCompletion format
+            return convert_instructor_response(instructor_response, model, "aws")
+
+        # Regular completion flow
         system_message, formatted_messages = _convert_messages(messages)
         request_config = _convert_kwargs(kwargs)
 

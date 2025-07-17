@@ -41,6 +41,7 @@ class SambanovaProvider(BaseOpenAIProvider):
         """Initialize SambaNova provider with SambaNova configuration."""
         super().__init__(config)
         # Initialize instructor client for structured output
+        self._initialize_client(config)
         self._initialize_instructor_client(config)
 
     def _initialize_instructor_client(self, config: ApiConfig) -> None:

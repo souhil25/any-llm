@@ -6,11 +6,10 @@ from openai.types.chat.chat_completion import ChatCompletion
 from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
-from any_llm.provider import ApiConfig
-from any_llm.providers.base_framework import BaseProviderFramework
+from any_llm.provider import ApiConfig, Provider
 
 
-class BaseOpenAIProvider(BaseProviderFramework, ABC):
+class BaseOpenAIProvider(Provider, ABC):
     """
     Base provider for OpenAI-compatible services.
 
@@ -33,7 +32,7 @@ class BaseOpenAIProvider(BaseProviderFramework, ABC):
         else:
             client_kwargs["base_url"] = config.api_base
 
-        # API key is already validated in BaseProviderFramework
+        # API key is already validated in Provider
         client_kwargs["api_key"] = config.api_key
 
         # Create the OpenAI client
@@ -43,6 +42,8 @@ class BaseOpenAIProvider(BaseProviderFramework, ABC):
         self, model: str, messages: list[dict[str, Any]], **kwargs: Any
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Make the API call to OpenAI-compatible service."""
+        self._initialize_client(self.config)
+
         if "response_format" in kwargs:
             response = self.client.chat.completions.parse(  # type: ignore[attr-defined]
                 model=model,
