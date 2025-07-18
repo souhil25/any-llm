@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 
-from any_llm.provider import ProviderFactory, ProviderName
+from any_llm.provider import ApiConfig, ProviderFactory, ProviderName
 from any_llm.exceptions import UnsupportedProviderError
 
 
@@ -88,3 +88,20 @@ def test_unsupported_provider_error_attributes() -> None:
         assert "Supported providers:" in str(e)
     else:
         pytest.fail("Expected UnsupportedProviderError to be raised")
+
+
+def test_all_providers_have_required_attributes(provider: str) -> None:
+    """Test that all supported providers can be loaded with sample config parameters.
+
+    This test verifies that providers can handle common configuration parameters
+    like api_key and api_base without throwing errors during instantiation.
+    """
+    # Sample config that might be passed to any provider
+    sample_config = ApiConfig(api_key="test_key", api_base="https://test.example.com")
+
+    # Try to create the provider with sample config
+    # Providers should handle unknown config parameters gracefully
+    provider_instance = ProviderFactory.create_provider(provider, sample_config)
+
+    assert provider_instance.PROVIDER_NAME is not None
+    assert provider_instance.PROVIDER_DOCUMENTATION_URL is not None
