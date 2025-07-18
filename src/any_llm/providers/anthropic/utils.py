@@ -108,10 +108,11 @@ def _convert_response(response: Message) -> ChatCompletion:
     }
 
     # Process content blocks into structured format
-    tool_calls = []
-    content = ""
+    choices = []
 
     for content_block in response.content:
+        tool_calls = []
+        content = ""
         if content_block.type == "text":
             content = content_block.text
         elif content_block.type == "tool_use":
@@ -125,23 +126,27 @@ def _convert_response(response: Message) -> ChatCompletion:
                     "type": "function",
                 }
             )
+        elif content_block.type == "thinking":
+            content = content_block.thinking
+        else:
+            raise ValueError(f"Unsupported content block type: {content_block.type}")
+        
+        choices.append({
+            "message": {
+                "role": "assistant",
+                "content": content,
+                "tool_calls": tool_calls,
+            },
+            "finish_reason": response.stop_reason or "end_turn",
+            "index": 0,
+        })
 
     # Structure response data for the utility
     response_dict = {
         "id": response.id,
         "model": response.model,
         "created": int(response.created_at.timestamp()) if hasattr(response, "created_at") else 0,
-        "choices": [
-            {
-                "message": {
-                    "role": "assistant",
-                    "content": content or None,
-                    "tool_calls": tool_calls if tool_calls else None,
-                },
-                "finish_reason": response.stop_reason or "end_turn",
-                "index": 0,
-            }
-        ],
+        "choices": choices,
         "usage": {
             "completion_tokens": response.usage.output_tokens,
             "prompt_tokens": response.usage.input_tokens,
