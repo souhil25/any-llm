@@ -17,7 +17,7 @@ from any_llm.providers.openai.base import BaseOpenAIProvider
 
 
 class SambanovaProvider(BaseOpenAIProvider):
-    DEFAULT_API_BASE = "https://api.sambanova.ai/v1/"
+    API_BASE = "https://api.sambanova.ai/v1/"
     ENV_API_KEY_NAME = "SAMBANOVA_API_KEY"
     PROVIDER_NAME = "SambaNova"
     PROVIDER_DOCUMENTATION_URL = "https://sambanova.ai/"
@@ -26,17 +26,10 @@ class SambanovaProvider(BaseOpenAIProvider):
         self, model: str, messages: list[dict[str, Any]], **kwargs: Any
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Make the API call to SambaNova service with instructor for structured output."""
-        client_kwargs: dict[str, Any] = {}
-
-        if not self.config.api_base:
-            client_kwargs["base_url"] = self.DEFAULT_API_BASE or os.getenv("OPENAI_API_BASE")
-        else:
-            client_kwargs["base_url"] = self.config.api_base
-
-        # API key is already validated in Provider
-        client_kwargs["api_key"] = self.config.api_key
-
-        client = OpenAI(**client_kwargs)
+        client = OpenAI(
+            base_url=self.config.api_base or self.API_BASE or os.getenv("OPENAI_API_BASE"),
+            api_key=self.config.api_key,
+        )
 
         if "response_format" in kwargs:
             instructor_client = instructor.from_openai(client)

@@ -10,7 +10,7 @@ from any_llm.providers.deepseek.utils import _convert_pydantic_to_deepseek_json
 
 
 class DeepseekProvider(BaseOpenAIProvider):
-    DEFAULT_API_BASE = "https://api.deepseek.com"
+    API_BASE = "https://api.deepseek.com"
     ENV_API_KEY_NAME = "DEEPSEEK_API_KEY"
     PROVIDER_NAME = "DeepSeek"
     PROVIDER_DOCUMENTATION_URL = "https://platform.deepseek.com/"

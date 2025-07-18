@@ -96,6 +96,8 @@ class Provider(ABC):
     PROVIDER_NAME: str
     ENV_API_KEY_NAME: str
     PROVIDER_DOCUMENTATION_URL: str
+    # This value isn't required but may prove useful for providers that have overridable api bases.
+    API_BASE: str | None = None
 
     def __init__(self, config: ApiConfig) -> None:
         self.config = config
