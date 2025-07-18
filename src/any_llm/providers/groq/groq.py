@@ -1,4 +1,3 @@
-import os
 from typing import Any
 
 try:
@@ -12,53 +11,50 @@ except ImportError:
 from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from openai.types.chat.chat_completion import ChatCompletion
-from any_llm.provider import Provider, ApiConfig, convert_instructor_response
-from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
+from any_llm.provider import Provider, convert_instructor_response
+from any_llm.exceptions import UnsupportedParameterError
 from any_llm.providers.helpers import create_completion_from_response
 
 
 class GroqProvider(Provider):
     """Groq Provider using instructor for structured output."""
 
-    def __init__(self, config: ApiConfig) -> None:
-        """Initialize Groq provider."""
-        if not config.api_key:
-            config.api_key = os.getenv("GROQ_API_KEY")
-        if not config.api_key:
-            raise MissingApiKeyError("Groq", "GROQ_API_KEY")
+    PROVIDER_NAME = "Groq"
+    ENV_API_KEY_NAME = "GROQ_API_KEY"
 
-        # Create regular Groq client for standard completions
-        self.client = groq.Groq(api_key=config.api_key)
+    def _verify_kwargs(self, kwargs: dict[str, Any]) -> None:
+        """Verify the kwargs for the Groq provider."""
+        if kwargs.get("stream", False):
+            raise UnsupportedParameterError("stream", self.PROVIDER_NAME)
 
-        # Create instructor client for structured output
-        self.instructor_client = instructor.from_groq(self.client, mode=instructor.Mode.JSON)
-
-    def completion(
+    def _make_api_call(
         self,
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Groq."""
+        # Create regular Groq client for standard completions
+        client = groq.Groq(api_key=self.config.api_key)
 
-        if kwargs.get("stream", False) is True:
-            raise UnsupportedParameterError("stream", "Groq")
+        # Create instructor client for structured output
 
         # Handle response_format for structured output
         if "response_format" in kwargs:
+            instructor_client = instructor.from_groq(client, mode=instructor.Mode.JSON)
             response_format = kwargs.pop("response_format")
             # Use instructor for structured output
-            instructor_response = self.instructor_client.chat.completions.create(
+            instructor_response = instructor_client.chat.completions.create(
                 model=model,
                 messages=messages,  # type: ignore[arg-type]
                 response_model=response_format,
                 **kwargs,
             )
             # Convert instructor response to ChatCompletion format
-            return convert_instructor_response(instructor_response, model, "groq")
+            return convert_instructor_response(instructor_response, model, self.PROVIDER_NAME)
 
         # Make the API call with regular client
-        response: ChatCompletion = self.client.chat.completions.create(  # type: ignore[assignment]
+        response: ChatCompletion = client.chat.completions.create(  # type: ignore[assignment]
             model=model,
             messages=messages,  # type: ignore[arg-type]
             **kwargs,
@@ -68,5 +64,5 @@ class GroqProvider(Provider):
         return create_completion_from_response(
             response_data=response.model_dump(),
             model=model,
-            provider_name="groq",
+            provider_name=self.PROVIDER_NAME,
         )

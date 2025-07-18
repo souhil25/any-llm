@@ -106,13 +106,45 @@ class Provider(ABC):
             raise MissingApiKeyError(self.PROVIDER_NAME, self.ENV_API_KEY_NAME)
 
     @abstractmethod
+    def _verify_kwargs(self, kwargs: dict[str, Any]) -> None:
+        """This method is designed to check whether a provider supports specific arguments.
+        It is not used to verify the API key.
+
+        Args:
+            kwargs: The kwargs to check
+
+        Returns:
+            None
+
+        Raises:
+            UnsupportedParameterError: If the provider does not support the argument
+        """
+        return None
+
+    @abstractmethod
+    def _make_api_call(
+        self, model: str, messages: list[dict[str, Any]], **kwargs: Any
+    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
+        """This method is designed to make the API call to the provider.
+
+        Args:
+            model: The model to use
+            messages: The messages to send
+            kwargs: The kwargs to pass to the API call
+
+        Returns:
+            The response from the API call
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
     def completion(
         self,
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
-        raise NotImplementedError("Subclasses must implement this method")
+        self._verify_kwargs(kwargs)
+        return self._make_api_call(model, messages, **kwargs)
 
     async def acompletion(
         self,

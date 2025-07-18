@@ -53,17 +53,19 @@ class GoogleProvider(Provider):
             # Initialize client for Gemini Developer API
             self.client = genai.Client(api_key=api_key)
 
-    def completion(
+    def _verify_kwargs(self, kwargs: dict[str, Any]) -> None:
+        """Verify the kwargs for the Google provider."""
+        if kwargs.get("stream", False) is True:
+            raise UnsupportedParameterError("stream", self.PROVIDER_NAME)
+        if kwargs.get("parallel_tool_calls", None) is not None:
+            raise UnsupportedParameterError("parallel_tool_calls", self.PROVIDER_NAME)
+
+    def _make_api_call(
         self,
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
-        """Create a chat completion using Google GenAI."""
-
-        if kwargs.get("stream", False) is True:
-            raise UnsupportedParameterError("stream", "Google")
-
         # Handle response_format for Pydantic models
         response_schema = None
         if "response_format" in kwargs:
@@ -206,5 +208,5 @@ class GoogleProvider(Provider):
         return create_completion_from_response(
             response_data=response_dict,
             model=model,
-            provider_name="google",
+            provider_name=self.PROVIDER_NAME,
         )

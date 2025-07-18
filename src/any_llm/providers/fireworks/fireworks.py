@@ -1,4 +1,3 @@
-import os
 from typing import Any
 
 try:
@@ -11,48 +10,32 @@ from pydantic import BaseModel
 from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from openai.types.chat.chat_completion import ChatCompletion
-from any_llm.provider import Provider, ApiConfig
-from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
+from any_llm.provider import Provider
+from any_llm.exceptions import UnsupportedParameterError
 from any_llm.providers.helpers import create_completion_from_response
 
 
 class FireworksProvider(Provider):
-    """
-    Fireworks AI Provider using the native fireworks-ai client.
+    PROVIDER_NAME = "Fireworks"
+    ENV_API_KEY_NAME = "FIREWORKS_API_KEY"
 
-    This provider uses the fireworks-ai SDK to communicate with Fireworks AI's API,
-    properly handling their JSON schema format for structured outputs.
-    """
+    def _verify_kwargs(self, kwargs: dict[str, Any]) -> None:
+        """Verify the kwargs for the Fireworks provider."""
+        if kwargs.get("stream", False) is True:
+            raise UnsupportedParameterError("stream", self.PROVIDER_NAME)
 
-    def __init__(self, config: ApiConfig) -> None:
-        """Initialize Fireworks provider."""
-        if not config.api_key:
-            config.api_key = os.getenv("FIREWORKS_API_KEY")
-        if not config.api_key:
-            raise MissingApiKeyError("Fireworks", "FIREWORKS_API_KEY")
-
-        # Store the API key for client creation
-        self.api_key = config.api_key
-
-    def completion(
+    def _make_api_call(
         self,
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
-        """Create a chat completion using Fireworks."""
-
-        if kwargs.get("stream", False) is True:
-            raise UnsupportedParameterError("stream", "Fireworks")
-
-        # Initialize the LLM client with the model
         llm = LLM(
             model=model,
             deployment_type="serverless",
-            api_key=self.api_key,
+            api_key=self.config.api_key,
         )
 
-        # Handle response_format for Pydantic models
         if "response_format" in kwargs:
             response_format = kwargs.pop("response_format")
             if isinstance(response_format, type) and issubclass(response_format, BaseModel):

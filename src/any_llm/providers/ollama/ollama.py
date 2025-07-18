@@ -25,13 +25,19 @@ class OllamaProvider(Provider):
 
     _CHAT_COMPLETION_ENDPOINT = "/api/chat"
     _DEFAULT_URL = "http://localhost:11434"
-    _CONNECT_ERROR_MESSAGE = "Ollama is likely not running. Start Ollama by running `ollama serve` on your host."
+    PROVIDER_NAME = "Ollama"
 
     def __init__(self, config: ApiConfig) -> None:
-        """Initialize Ollama provider."""
+        """We don't use the Provider init because by default we don't require an API key."""
+
         self.url = str(config.api_base or os.getenv("OLLAMA_API_URL", self._DEFAULT_URL))
 
-    def completion(
+    def _verify_kwargs(self, kwargs: dict[str, Any]) -> None:
+        """Verify the kwargs for the Ollama provider."""
+        if kwargs.get("stream", False) is True:
+            raise UnsupportedParameterError("stream", self.PROVIDER_NAME)
+
+    def _make_api_call(
         self,
         model: str,
         messages: list[dict[str, Any]],
@@ -39,11 +45,8 @@ class OllamaProvider(Provider):
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Ollama."""
 
-        if kwargs.get("stream", False) is True:
-            raise UnsupportedParameterError("stream", "Ollama")
+        kwargs["stream"] = kwargs.get("stream", False)  # Ollama requires you to specifically set this to False.
 
-        kwargs["stream"] = kwargs.get("stream", False)
-        # Handle response_format for Pydantic models
         if "response_format" in kwargs:
             response_format = kwargs.pop("response_format")
             if isinstance(response_format, type) and issubclass(response_format, BaseModel):
@@ -160,5 +163,5 @@ class OllamaProvider(Provider):
         return create_completion_from_response(
             response_data=response_dict,
             model=model,
-            provider_name="ollama",
+            provider_name=self.PROVIDER_NAME,
         )

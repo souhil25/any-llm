@@ -17,17 +17,14 @@ from any_llm.providers.aws.utils import _convert_response, _convert_kwargs, _con
 
 
 class AwsProvider(Provider):
-    """AWS Bedrock Provider using boto3 with instructor support."""
+    """AWS Bedrock Provider using boto3 and instructor for structured output."""
+
+    PROVIDER_NAME = "AWS"
 
     def __init__(self, config: ApiConfig) -> None:
         """Initialize AWS Bedrock provider."""
-        # AWS uses region from environment variables or default
         self.region_name = os.getenv("AWS_REGION", "us-east-1")
-
-        # Store config for later use
         self.config = config
-
-        # Don't create client during init to avoid test failures
         self.client: Optional[Any] = None
         self.instructor_client: Optional[Any] = None
 
@@ -41,17 +38,13 @@ class AwsProvider(Provider):
             bedrock_api_key = os.getenv("AWS_BEARER_TOKEN_BEDROCK")
 
             if credentials is None and bedrock_api_key is None:
-                raise MissingApiKeyError(
-                    provider_name="AWS", env_var_name="AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"
-                )
+                raise MissingApiKeyError(provider_name=self.PROVIDER_NAME, env_var_name=self.ENV_API_KEY_NAME)
 
         except Exception as e:
             if isinstance(e, MissingApiKeyError):
                 raise
             # If any other error o  ccurs while checking credentials, treat as missing
-            raise MissingApiKeyError(
-                provider_name="AWS", env_var_name="AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"
-            ) from e
+            raise MissingApiKeyError(provider_name=self.PROVIDER_NAME, env_var_name=self.ENV_API_KEY_NAME) from e
 
     def _initialize_clients(self) -> None:
         """Initialize both regular and instructor clients."""
@@ -61,7 +54,12 @@ class AwsProvider(Provider):
         if self.instructor_client is None:
             self.instructor_client = instructor.from_bedrock(self.client)
 
-    def completion(
+    def _verify_kwargs(self, kwargs: dict[str, Any]) -> None:
+        """Verify the kwargs for the AWS Bedrock provider."""
+        if kwargs.get("stream", False):
+            raise UnsupportedParameterError("stream", self.PROVIDER_NAME)
+
+    def _make_api_call(
         self,
         model: str,
         messages: list[dict[str, Any]],
@@ -74,14 +72,8 @@ class AwsProvider(Provider):
         # Check credentials before creating client
         self._check_aws_credentials()
 
-        if kwargs.get("stream", False):
-            raise UnsupportedParameterError("stream", "AWS Bedrock")
-
         # Handle response_format for structured output
         if "response_format" in kwargs:
-            if kwargs.get("stream", False):
-                raise UnsupportedParameterError("response_format with streaming", "AWS Bedrock")
-
             response_format = kwargs.pop("response_format")
 
             # Use instructor for structured output

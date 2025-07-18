@@ -1,4 +1,3 @@
-import os
 from typing import Any
 
 try:
@@ -12,8 +11,8 @@ from pydantic import BaseModel
 from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from openai.types.chat.chat_completion import ChatCompletion
-from any_llm.provider import Provider, ApiConfig
-from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
+from any_llm.provider import Provider
+from any_llm.exceptions import UnsupportedParameterError
 from any_llm.providers.helpers import (
     create_completion_from_response,
 )
@@ -24,26 +23,21 @@ class HuggingfaceProvider(Provider):
     """HuggingFace Provider using the new response conversion utilities."""
 
     PROVIDER_NAME = "HuggingFace"
+    ENV_API_KEY_NAME = "HF_TOKEN"
 
-    def __init__(self, config: ApiConfig) -> None:
-        """Initialize HuggingFace provider."""
-        if not config.api_key:
-            config.api_key = os.getenv("HF_TOKEN")
-        if not config.api_key:
-            raise MissingApiKeyError("HuggingFace", "HF_TOKEN")
+    def _verify_kwargs(self, kwargs: dict[str, Any]) -> None:
+        """Verify the kwargs for the HuggingFace provider."""
+        if kwargs.get("stream", False):
+            raise UnsupportedParameterError("stream", self.PROVIDER_NAME)
 
-        self.client = InferenceClient(token=config.api_key, timeout=30)
-
-    def completion(
+    def _make_api_call(
         self,
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using HuggingFace."""
-
-        if kwargs.get("stream", False) is True:
-            raise UnsupportedParameterError("stream", "HuggingFace")
+        client = InferenceClient(token=self.config.api_key, timeout=kwargs.get("timeout", None))
 
         # Convert max_tokens to max_new_tokens (HuggingFace specific)
         if "max_tokens" in kwargs:
@@ -57,7 +51,7 @@ class HuggingfaceProvider(Provider):
                 messages = _convert_pydantic_to_huggingface_json(response_format, messages)
 
         # Make the API call
-        response = self.client.chat_completion(
+        response = client.chat_completion(
             model=model,
             messages=messages,
             **kwargs,
@@ -67,5 +61,5 @@ class HuggingfaceProvider(Provider):
         return create_completion_from_response(
             response_data=response,
             model=model,
-            provider_name="huggingface",
+            provider_name=self.PROVIDER_NAME,
         )

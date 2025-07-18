@@ -10,7 +10,7 @@ except ImportError:
 
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
-from any_llm.exceptions import MissingApiKeyError
+from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
 from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from any_llm.providers.watsonx.utils import _convert_response
@@ -19,49 +19,40 @@ from any_llm.providers.watsonx.utils import _convert_response
 class WatsonxProvider(Provider):
     """IBM Watsonx Provider using the official IBM Watsonx AI SDK."""
 
+    PROVIDER_NAME = "Watsonx"
+    ENV_API_KEY_NAME = "WATSONX_API_KEY"
+
     def __init__(self, config: ApiConfig) -> None:
         """Initialize Watsonx provider."""
-        # Get configuration from config or environment variables
-        self.service_url = config.api_base or os.getenv("WATSONX_SERVICE_URL")
-        self.api_key = config.api_key or os.getenv("WATSONX_API_KEY")
-        self.project_id = os.getenv("WATSONX_PROJECT_ID")
-
-        # Only validate API key during instantiation for consistency with other providers
+        self.api_key = config.api_key or os.getenv(self.ENV_API_KEY_NAME)
         if not self.api_key:
-            raise MissingApiKeyError("Watsonx", "WATSONX_API_KEY")
+            raise MissingApiKeyError(self.PROVIDER_NAME, self.ENV_API_KEY_NAME)
 
-    def completion(
+    def _verify_kwargs(self, kwargs: dict[str, Any]) -> None:
+        """Verify the kwargs for the Watsonx provider."""
+        if kwargs.get("stream", False) is True:
+            raise UnsupportedParameterError("stream", self.PROVIDER_NAME)
+
+    def _make_api_call(
         self,
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using Watsonx."""
-        # Validate required configuration at runtime
-        if not self.service_url:
-            raise ValueError(
-                "Missing WatsonX service URL. Please provide it in the config or set the WATSONX_SERVICE_URL environment variable."
-            )
-        if not self.project_id:
-            raise ValueError(
-                "Missing WatsonX project ID. Please provide it in the config or set the WATSONX_PROJECT_ID environment variable."
-            )
 
-        # Create ModelInference instance
         model_inference = ModelInference(
             model_id=model,
             credentials=Credentials(
                 api_key=self.api_key,
-                url=self.service_url,
+                url=self.config.api_base or os.getenv("WATSONX_SERVICE_URL"),
             ),
-            project_id=self.project_id,
+            project_id=os.getenv("WATSONX_PROJECT_ID"),
         )
 
-        # Make the API call
         response = model_inference.chat(
             messages=messages,
             params=kwargs,
         )
 
-        # Convert to OpenAI format
         return _convert_response(response)

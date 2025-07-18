@@ -6,7 +6,7 @@ from typing import Any
 
 from openai.types.chat.chat_completion import ChatCompletion
 from any_llm.provider import Provider, ApiConfig
-from any_llm.exceptions import MissingApiKeyError
+from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
 from openai._streaming import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from any_llm.providers.azure.utils import _convert_response
@@ -15,6 +15,9 @@ from any_llm.providers.azure.utils import _convert_response
 class AzureProvider(Provider):
     """Azure Provider using urllib for direct API calls."""
 
+    PROVIDER_NAME = "Azure"
+    ENV_API_KEY_NAME = "AZURE_API_KEY"
+
     def __init__(self, config: ApiConfig) -> None:
         """Initialize Azure provider."""
         self.base_url = config.api_base or os.getenv("AZURE_BASE_URL")
@@ -22,9 +25,14 @@ class AzureProvider(Provider):
         self.api_version = os.getenv("AZURE_API_VERSION")
 
         if not self.api_key:
-            raise MissingApiKeyError("Azure", "AZURE_API_KEY")
+            raise MissingApiKeyError(self.PROVIDER_NAME, self.ENV_API_KEY_NAME)
 
-    def completion(
+    def _verify_kwargs(self, kwargs: dict[str, Any]) -> None:
+        """Verify the kwargs for the Azure provider."""
+        if kwargs.get("stream", False):
+            raise UnsupportedParameterError("stream", self.PROVIDER_NAME)
+
+    def _make_api_call(
         self,
         model: str,
         messages: list[dict[str, Any]],

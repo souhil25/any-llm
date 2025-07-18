@@ -42,6 +42,11 @@ class CerebrasProvider(Provider):
         # Create instructor client for structured output support
         self.instructor_client = instructor.from_cerebras(self.client)
 
+    def _verify_kwargs(self, kwargs: dict[str, Any]) -> None:
+        """Verify the kwargs for the Cerebras provider."""
+        if kwargs.get("stream", False) and kwargs.get("response_format", None) is not None:
+            raise UnsupportedParameterError("stream and response_format", self.PROVIDER_NAME)
+
     def _stream_completion(
         self,
         model: str,
@@ -64,7 +69,7 @@ class CerebrasProvider(Provider):
             else:
                 raise ValueError(f"Unsupported chunk type: {type(chunk)}")
 
-    def completion(
+    def _make_api_call(
         self,
         model: str,
         messages: list[dict[str, Any]],
@@ -74,9 +79,6 @@ class CerebrasProvider(Provider):
 
         # Handle response_format for structured output
         if "response_format" in kwargs:
-            if kwargs.get("stream", False):
-                raise UnsupportedParameterError("response_format with streaming", "Cerebras")
-
             response_format = kwargs.pop("response_format")
             # Use instructor for structured output
             instructor_response = self.instructor_client.chat.completions.create(
