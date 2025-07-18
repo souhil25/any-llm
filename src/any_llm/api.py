@@ -242,6 +242,9 @@ def verify_kwargs(provider_name: str, **kwargs: Any) -> None:
 
     For example, if the provider does not yet support streaming, it will raise an error.
 
+    This does not verify that the provider supports the model or that the model supports the kwargs.
+    In order to determine that info you will need to refer to the provider documentation.
+
     Args:
         provider_name: The name of the provider to check
         **kwargs: The kwargs to check

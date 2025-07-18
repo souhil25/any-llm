@@ -18,7 +18,7 @@ dependencies = [
 [project.optional-dependencies]
 
 all = [
-  "any-llm-sdk[mistral,anthropic,huggingface,google,cohere,cerebras,fireworks,groq,aws,azure,watsonx,together,sambanova]"
+  "any-llm-sdk[mistral,anthropic,huggingface,google,cohere,cerebras,fireworks,groq,aws,azure,watsonx,together,sambanova,ollama,moonshot,nebius,xai,deepseek,inception,openai]"
 ]
 
 mistral = [
@@ -78,6 +78,15 @@ together = [
 sambanova = [
   "instructor",
 ]
+
+# These providers don't require any additional dependencies, but are included for completeness.
+ollama = []
+moonshot = []
+nebius = []
+xai = []
+deepseek = []
+inception = []
+openai = []
 
 [project.urls]
 Documentation = "https://mozilla-ai.github.io/any-llm/"

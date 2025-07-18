@@ -48,8 +48,8 @@ def generate_provider_table(providers):
 
     # Create table header
     table_lines = [
-        "| Provider | Documentation URL | Environment Variable | Source Code |",
-        "|----------| ------------------| ---------------------|-------------|",
+        "| Provider ID | Documentation URL | Environment Variable | Source Code |",
+        "|-------------| ------------------| ---------------------|-------------|",
     ]
 
     # Add rows for each provider
@@ -64,7 +64,11 @@ def generate_provider_table(providers):
         source_urls.append(source_url)
 
         source_link = f"[Source]({source_url})"
-        row = f"| {provider['name']} | {doc_url} | {env_key} | {source_link} |"
+
+        # Use fenced code block for copyable provider ID
+        provider_id_copyable = f"```{provider_key.lower()}```"
+
+        row = f"| {provider_id_copyable} | {doc_url} | {env_key} | {source_link} |"
         table_lines.append(row)
 
     asyncio.run(validate_url(source_urls))

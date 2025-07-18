@@ -6,43 +6,13 @@
 
 `any-llm` is a Python library providing a single interface to different llm providers.
 
-## Requirements
+### Getting Started
 
-- Python 3.11 or newer
-
-## Installation
-
-Install `any-llm` with the name of the provider that you plan to use
-
-```bash
-pip install any-llm-sdk[mistral,ollama]
-```
-
-Refer to [pyproject.toml](https://github.com/mozilla-ai/any-llm/blob/main/pyproject.toml) for a list of the options available.
-
-## Quickstart
-
-### Basic Usage
-
-The primary function is [`completion`][any_llm.completion], which uses a unified interface across all providers:
-
-```python
-from any_llm import completion
-import os
-
-# Make sure you have the appropriate environment variable set
-assert os.environ.get('MISTRAL_API_KEY')
-# Basic completion
-response = completion(
-    model="mistral/mistral-small-latest", # <provider>/<model-id>
-    messages=[{"role": "user", "content": "Hello!"}]
-)
-print(response.choices[0].message.content)
-```
+Refer to the [Quickstart](./quickstart.md) for instructions on installation and usage.
 
 ### Parameters
 
-For a complete list of available parameters, see the [completion API documentation](./api/completion.md).
+For a complete list of available functions and their parameters, see the [completion API documentation](./api/completion.md).
 
 ### Error Handling
 
