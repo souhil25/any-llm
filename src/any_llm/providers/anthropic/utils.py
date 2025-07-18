@@ -130,16 +130,18 @@ def _convert_response(response: Message) -> ChatCompletion:
             content = content_block.thinking
         else:
             raise ValueError(f"Unsupported content block type: {content_block.type}")
-        
-        choices.append({
-            "message": {
-                "role": "assistant",
-                "content": content,
-                "tool_calls": tool_calls,
-            },
-            "finish_reason": response.stop_reason or "end_turn",
-            "index": 0,
-        })
+
+        choices.append(
+            {
+                "message": {
+                    "role": "assistant",
+                    "content": content,
+                    "tool_calls": tool_calls,
+                },
+                "finish_reason": response.stop_reason or "end_turn",
+                "index": 0,
+            }
+        )
 
     # Structure response data for the utility
     response_dict = {
