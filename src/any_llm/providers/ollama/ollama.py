@@ -96,6 +96,16 @@ class OllamaProvider(Provider):
         created_str = response.created_at
         if created_str is None:
             raise ValueError("Expected Ollama to provide a created_at timestamp")
+        # Convert Ollama's timestamp format to int
+        created_str = response.created_at
+        if created_str is None:
+            raise ValueError("Expected Ollama to provide a created_at timestamp")
+        # Handle both microseconds (6 digits) and nanoseconds (9 digits)
+        if len(created_str.split(".")[1].rstrip("Z")) > 6:
+            # Truncate nanoseconds to microseconds
+            parts = created_str.split(".")
+            microseconds = parts[1][:6]
+            created_str = f"{parts[0]}.{microseconds}Z"
         created = int(datetime.strptime(created_str, "%Y-%m-%dT%H:%M:%S.%fZ").timestamp())
 
         # Normalize response structure for the utility
