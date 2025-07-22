@@ -19,7 +19,7 @@
     <img src="https://img.shields.io/static/v1?label=Chat%20on&message=Discord&color=blue&logo=Discord&style=flat-square" alt="Discord">
 </a>
 
-A single interface to use and evaluate different llm providers.
+A single interface to use different llm providers.
 
 </div>
 
