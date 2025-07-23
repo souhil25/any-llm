@@ -2,7 +2,7 @@ from pathlib import Path
 import pytest
 
 from any_llm.provider import ApiConfig, ProviderFactory, ProviderName
-from any_llm.exceptions import UnsupportedProviderError
+from any_llm.exceptions import MissingApiKeyError, UnsupportedProviderError
 
 
 def test_all_providers_in_enum() -> None:
@@ -105,3 +105,11 @@ def test_all_providers_have_required_attributes(provider: str) -> None:
 
     assert provider_instance.PROVIDER_NAME is not None
     assert provider_instance.PROVIDER_DOCUMENTATION_URL is not None
+
+
+def test_providers_raise_MissingApiKeyError(provider: str) -> None:
+    if provider in ("aws", "ollama"):
+        pytest.skip("This provider handles `api_key` differently.")
+
+    with pytest.raises(MissingApiKeyError):
+        ProviderFactory.create_provider(provider, ApiConfig())
