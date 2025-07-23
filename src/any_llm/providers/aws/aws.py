@@ -51,7 +51,8 @@ class AwsProvider(Provider):
     ) -> ChatCompletion | Stream[ChatCompletionChunk]:
         """Create a chat completion using AWS Bedrock with instructor support."""
         self._check_aws_credentials()
-        client = boto3.client("bedrock-runtime", region_name=self.region_name)  # type: ignore[no-untyped-call]
+
+        client = boto3.client("bedrock-runtime", endpoint_url=self.config.api_base, region_name=self.region_name)  # type: ignore[no-untyped-call]
 
         if "response_format" in kwargs:
             instructor_client = instructor.from_bedrock(client)
