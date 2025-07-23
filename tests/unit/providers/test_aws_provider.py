@@ -7,9 +7,10 @@ from any_llm.providers.aws.aws import AwsProvider
 
 
 @contextmanager
-def mock_aws_provider(region: str):
+def mock_aws_provider(region: str):  # type: ignore[no-untyped-def]
     with (
         patch.dict(os.environ, {"AWS_REGION": region}),
+        patch("any_llm.providers.aws.aws.AwsProvider._check_aws_credentials"),
         patch("any_llm.providers.aws.aws._convert_messages", return_value=("", [])),
         patch("any_llm.providers.aws.aws._convert_kwargs", return_value={}),
         patch("any_llm.providers.aws.aws._convert_response"),
