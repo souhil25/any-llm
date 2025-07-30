@@ -20,7 +20,7 @@ def test_tool(provider: ProviderName, provider_model_map: dict[ProviderName, str
             temperature=0.0,
             tools=[capital_city],
         )
-        assert any(choice.message.tool_calls is not None for choice in result.choices)
+        assert any(choice.message.tool_calls is not None for choice in result.choices)  # type: ignore[union-attr]
     except MissingApiKeyError:
         pytest.skip(f"{provider.value} API key not provided, skipping")
     except (httpx.HTTPStatusError, httpx.ConnectError):
