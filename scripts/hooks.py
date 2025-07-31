@@ -83,7 +83,7 @@ def generate_provider_table(providers):
         # Use fenced code block for copyable provider ID
         provider_id_copyable = f"```{provider_key.lower()}```"
 
-        stream_supported = "[x]" if provider_key.lower() in STREAM_SUPPORTED else "[]"
+        stream_supported = "YES" if provider_key.lower() in STREAM_SUPPORTED else "NO"
 
         row = f"| {provider_id_copyable} | {doc_url} | {env_key} | {source_link} | {stream_supported} |"
         table_lines.append(row)
