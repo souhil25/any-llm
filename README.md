@@ -8,6 +8,8 @@
 
 # any-llm
 
+[![Read the Blog Post](https://img.shields.io/badge/Read%20the%20Blog%20Post-red.svg)](https://blog.mozilla.ai/introducing-any-llm-a-unified-api-to-access-any-llm-provider/)
+
 [![Docs](https://github.com/mozilla-ai/any-llm/actions/workflows/docs.yaml/badge.svg)](https://github.com/mozilla-ai/any-llm/actions/workflows/docs.yaml/)
 [![Linting](https://github.com/mozilla-ai/any-llm/actions/workflows/lint.yaml/badge.svg)](https://github.com/mozilla-ai/any-llm/actions/workflows/lint.yaml/)
 [![Unit Tests](https://github.com/mozilla-ai/any-llm/actions/workflows/tests-unit.yaml/badge.svg)](https://github.com/mozilla-ai/any-llm/actions/workflows/tests-unit.yaml/)
@@ -61,7 +63,7 @@ While the OpenAI API has become the de facto standard for LLM provider interface
 
 ### Installation
 
-In your pip install, include the [supported providers](./docs/providers.md) that you plan on using, or use the `all` option if you want to install support for all `any-llm` supported providers.
+In your pip install, include the [supported providers](https://mozilla-ai.github.io/any-llm/providers/) that you plan on using, or use the `all` option if you want to install support for all `any-llm` supported providers.
 
 ```bash
 pip install 'any-llm-sdk[mistral,ollama]'
@@ -76,7 +78,7 @@ export MISTRAL_API_KEY="YOUR_KEY_HERE"  # or OPENAI_API_KEY, etc
 
 ### Basic Usage
 
-The provider_id key of the model should be specified according the [provider ids supported by any-llm](./docs/providers.md).
+The provider_id key of the model should be specified according the [provider ids supported by any-llm](https://mozilla-ai.github.io/any-llm/providers/).
 The `model_id` portion is passed directly to the provider internals: to understand what model ids are available for a provider,
 you will need to refer to the provider documentation.
 
