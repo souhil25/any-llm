@@ -32,6 +32,19 @@ def provider_model_map() -> dict[ProviderName, str]:
     }
 
 
+# Embedding model map - only for providers that support embeddings
+@pytest.fixture
+def embedding_provider_model_map() -> dict[ProviderName, str]:
+    return {
+        ProviderName.OPENAI: "text-embedding-ada-002",
+        ProviderName.NEBIUS: "Qwen/Qwen3-Embedding-8B",
+        ProviderName.SAMBANOVA: "E5-Mistral-7B-Instruct",
+        ProviderName.MISTRAL: "mistral-embed",
+        ProviderName.AWS: "amazon.titan-embed-text-v2:0",
+        ProviderName.OLLAMA: "llama3.2:1b",
+    }
+
+
 @pytest.fixture(params=list(ProviderName), ids=lambda x: x.value)
 def provider(request: pytest.FixtureRequest) -> ProviderName:
     return request.param  # type: ignore[no-any-return]

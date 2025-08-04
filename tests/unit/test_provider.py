@@ -1,4 +1,6 @@
+import os
 from pathlib import Path
+from unittest.mock import patch
 import pytest
 
 from any_llm.provider import ApiConfig, ProviderFactory, ProviderName
@@ -110,6 +112,6 @@ def test_all_providers_have_required_attributes(provider: str) -> None:
 def test_providers_raise_MissingApiKeyError(provider: str) -> None:
     if provider in ("aws", "ollama"):
         pytest.skip("This provider handles `api_key` differently.")
-
-    with pytest.raises(MissingApiKeyError):
-        ProviderFactory.create_provider(provider, ApiConfig())
+    with patch.dict(os.environ, {}, clear=True):
+        with pytest.raises(MissingApiKeyError):
+            ProviderFactory.create_provider(provider, ApiConfig())
