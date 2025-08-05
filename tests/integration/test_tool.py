@@ -2,6 +2,7 @@ import httpx
 import pytest
 from any_llm import completion, ProviderName
 from any_llm.exceptions import MissingApiKeyError
+from openai import APIConnectionError
 
 
 def test_tool(provider: ProviderName, provider_model_map: dict[ProviderName, str]) -> None:
@@ -23,7 +24,7 @@ def test_tool(provider: ProviderName, provider_model_map: dict[ProviderName, str
         assert any(choice.message.tool_calls is not None for choice in result.choices)  # type: ignore[union-attr]
     except MissingApiKeyError:
         pytest.skip(f"{provider.value} API key not provided, skipping")
-    except (httpx.HTTPStatusError, httpx.ConnectError):
-        if provider == ProviderName.OLLAMA:
-            pytest.skip("Ollama is not set up, skipping")
+    except (httpx.HTTPStatusError, httpx.ConnectError, APIConnectionError):
+        if provider in [ProviderName.OLLAMA, ProviderName.LMSTUDIO]:
+            pytest.skip("Local Model host is not set up, skipping")
         raise

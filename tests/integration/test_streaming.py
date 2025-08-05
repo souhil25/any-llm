@@ -3,6 +3,7 @@ import pytest
 from any_llm import completion, ProviderName
 from any_llm.exceptions import MissingApiKeyError, UnsupportedParameterError
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
+from openai import APIConnectionError
 
 
 def test_streaming_completion(provider: ProviderName, provider_model_map: dict[ProviderName, str]) -> None:
@@ -27,7 +28,7 @@ def test_streaming_completion(provider: ProviderName, provider_model_map: dict[P
         pytest.skip(f"{provider.value} API key not provided, skipping")
     except UnsupportedParameterError:
         pytest.skip(f"Streaming is not supported for {provider.value}")
-    except (httpx.HTTPStatusError, httpx.ConnectError):
-        if provider == ProviderName.OLLAMA:
-            pytest.skip("Ollama is not set up, skipping")
+    except (httpx.HTTPStatusError, httpx.ConnectError, APIConnectionError):
+        if provider in [ProviderName.OLLAMA, ProviderName.LMSTUDIO]:
+            pytest.skip("Local Model host is not set up, skipping")
         raise

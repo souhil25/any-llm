@@ -4,6 +4,7 @@ from any_llm import embedding, ProviderName
 from any_llm.exceptions import MissingApiKeyError
 from any_llm.provider import ProviderFactory
 from openai.types import CreateEmbeddingResponse
+from openai import APIConnectionError
 
 
 def test_embedding_providers(provider: ProviderName, embedding_provider_model_map: dict[ProviderName, str]) -> None:
@@ -19,7 +20,7 @@ def test_embedding_providers(provider: ProviderName, embedding_provider_model_ma
         result = embedding(f"{provider.value}/{model_id}", "Hello world")
     except MissingApiKeyError:
         pytest.skip(f"{provider.value} API key not provided, skipping")
-    except (httpx.HTTPStatusError, httpx.ConnectError):
+    except (httpx.HTTPStatusError, httpx.ConnectError, APIConnectionError):
         pytest.skip(f"{provider.value} connection failed, skipping")
     except Exception as e:
         # Skip if model doesn't exist or embedding isn't actually supported

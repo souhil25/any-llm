@@ -3,6 +3,8 @@ from pydantic import BaseModel
 import pytest
 from any_llm import completion, ProviderName
 from any_llm.exceptions import MissingApiKeyError
+from openai import APIConnectionError
+from openai.types.chat.chat_completion import ChatCompletion
 
 
 def test_response_format(provider: ProviderName, provider_model_map: dict[ProviderName, str]) -> None:
@@ -23,12 +25,13 @@ def test_response_format(provider: ProviderName, provider_model_map: dict[Provid
             temperature=0.0,
             response_format=ResponseFormat,
         )
+        assert isinstance(result, ChatCompletion)
         assert result.choices[0].message.content is not None
         output = ResponseFormat.model_validate_json(result.choices[0].message.content)
         assert "paris" in output.city_name.lower()
     except MissingApiKeyError:
         pytest.skip(f"{provider.value} API key not provided, skipping")
-    except (httpx.HTTPStatusError, httpx.ConnectError):
-        if provider == ProviderName.OLLAMA:
-            pytest.skip("Ollama is not set up, skipping")
+    except (httpx.HTTPStatusError, httpx.ConnectError, APIConnectionError):
+        if provider in [ProviderName.OLLAMA, ProviderName.LMSTUDIO]:
+            pytest.skip("Local Model host is not set up, skipping")
         raise
