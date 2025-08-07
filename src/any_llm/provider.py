@@ -6,13 +6,15 @@ from abc import ABC, abstractmethod
 from enum import Enum
 import os
 from pathlib import Path
-from typing import Any, Type, Union
+from typing import Any, Type, Union, Iterator
 
-from openai._streaming import Stream
-from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
-from openai.types.chat.chat_completion import ChatCompletion, Choice
-from openai.types.chat.chat_completion_message import ChatCompletionMessage
-from openai.types import CreateEmbeddingResponse
+from any_llm.types.completion import (
+    ChatCompletion,
+    ChatCompletionChunk,
+    Choice,
+    ChatCompletionMessage,
+    CreateEmbeddingResponse,
+)
 from pydantic import BaseModel
 
 from any_llm.exceptions import MissingApiKeyError, UnsupportedProviderError
@@ -103,6 +105,9 @@ class Provider(ABC):
 
     # Feature support flags (to be set by subclasses)
     SUPPORTS_STREAMING: bool
+    SUPPORTS_COMPLETION: bool
+    SUPPORTS_REASONING: bool
+    SUPPORTS_EMBEDDING: bool
     # This value isn't required but may prove useful for providers that have overridable api bases.
     API_BASE: str | None = None
 
@@ -133,6 +138,8 @@ class Provider(ABC):
             "env_key": getattr(cls, "ENV_API_KEY_NAME", "-"),
             "doc_url": getattr(cls, "PROVIDER_DOCUMENTATION_URL"),
             "streaming": getattr(cls, "SUPPORTS_STREAMING"),
+            "reasoning": getattr(cls, "SUPPORTS_REASONING"),
+            "completion": getattr(cls, "SUPPORTS_COMPLETION"),
             "embedding": getattr(cls, "SUPPORTS_EMBEDDING"),
             "class_name": cls.__name__,
         }
@@ -156,7 +163,7 @@ class Provider(ABC):
     @abstractmethod
     def _make_api_call(
         self, model: str, messages: list[dict[str, Any]], **kwargs: Any
-    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
+    ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
         """This method is designed to make the API call to the provider.
 
         Args:
@@ -174,7 +181,7 @@ class Provider(ABC):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
+    ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
         self.verify_kwargs(kwargs)
         return self._make_api_call(model, messages, **kwargs)
 
@@ -183,7 +190,7 @@ class Provider(ABC):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
+    ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
         return await asyncio.to_thread(self.completion, model, messages, **kwargs)
 
     def embedding(

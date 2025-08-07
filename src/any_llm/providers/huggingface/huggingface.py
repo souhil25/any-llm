@@ -11,9 +11,7 @@ except ImportError as exc:
 
 from pydantic import BaseModel
 
-from openai._streaming import Stream
-from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
-from openai.types.chat.chat_completion import ChatCompletion
+from any_llm.types.completion import ChatCompletionChunk, ChatCompletion
 from any_llm.provider import Provider
 from any_llm.providers.helpers import (
     create_completion_from_response,
@@ -32,6 +30,8 @@ class HuggingfaceProvider(Provider):
     PROVIDER_DOCUMENTATION_URL = "https://huggingface.co/inference-endpoints"
 
     SUPPORTS_STREAMING = True
+    SUPPORTS_COMPLETION = True
+    SUPPORTS_REASONING = False
     SUPPORTS_EMBEDDING = False
 
     def verify_kwargs(self, kwargs: dict[str, Any]) -> None:
@@ -58,7 +58,7 @@ class HuggingfaceProvider(Provider):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
+    ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
         """Create a chat completion using HuggingFace."""
         client = InferenceClient(token=self.config.api_key, timeout=kwargs.get("timeout", None))
 
@@ -75,7 +75,7 @@ class HuggingfaceProvider(Provider):
 
         # Handle streaming
         if kwargs.get("stream", False):
-            return self._stream_completion(client, model, messages, **kwargs)  # type: ignore[return-value]
+            return self._stream_completion(client, model, messages, **kwargs)
 
         # Make the non-streaming API call
         response = client.chat_completion(

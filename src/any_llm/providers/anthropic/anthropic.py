@@ -8,9 +8,8 @@ except ImportError:
     msg = "anthropic or instructor is not installed. Please install it with `pip install any-llm-sdk[anthropic]`"
     raise ImportError(msg)
 
-from openai.types.chat.chat_completion import ChatCompletion
-from openai._streaming import Stream
-from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
+from any_llm.types.completion import ChatCompletion
+from any_llm.types.completion import ChatCompletionChunk
 
 from any_llm.exceptions import UnsupportedParameterError
 from any_llm.provider import Provider, convert_instructor_response
@@ -34,6 +33,8 @@ class AnthropicProvider(Provider):
     PROVIDER_DOCUMENTATION_URL = "https://docs.anthropic.com/en/home"
 
     SUPPORTS_STREAMING = True
+    SUPPORTS_COMPLETION = True
+    SUPPORTS_REASONING = False
     SUPPORTS_EMBEDDING = False
 
     def verify_kwargs(self, kwargs: dict[str, Any]) -> None:
@@ -70,7 +71,7 @@ class AnthropicProvider(Provider):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
+    ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
         """Create a chat completion using Anthropic with instructor support."""
 
         client = Anthropic(api_key=self.config.api_key, base_url=self.config.api_base)
@@ -105,7 +106,7 @@ class AnthropicProvider(Provider):
         if kwargs.get("stream", False):
             # Return the streaming generator
             kwargs.pop("stream")
-            return self._stream_completion(client, model, messages, **kwargs)  # type: ignore[return-value]
+            return self._stream_completion(client, model, messages, **kwargs)
         else:
             # Convert messages for Anthropic format
             system_message, filtered_messages = _convert_messages_for_anthropic(messages)

@@ -9,20 +9,23 @@ from azure.ai.inference.models import (
 )
 from pydantic import BaseModel
 
-from openai.types.chat.chat_completion import ChatCompletion, Choice
-from openai.types.completion_usage import CompletionUsage
-from openai.types.chat.chat_completion_message import ChatCompletionMessage
-from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
-from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
-from openai.types import CreateEmbeddingResponse
-from openai.types.chat.chat_completion_chunk import (
-    Choice as ChunkChoice,
+from any_llm.types.completion import (
+    ChatCompletion,
+    Choice,
+    CompletionUsage,
+    ChatCompletionMessage,
+    Function,
+    ChatCompletionChunk,
+    CreateEmbeddingResponse,
     ChoiceDelta,
     ChoiceDeltaToolCall,
     ChoiceDeltaToolCallFunction,
+    Embedding,
+    Usage,
+    ChunkChoice,
 )
-from openai.types.embedding import Embedding
-from openai.types.create_embedding_response import Usage
+from openai.types.chat.chat_completion_message_function_tool_call import ChatCompletionMessageFunctionToolCall
+from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall
 
 
 def _convert_response_format(
@@ -78,7 +81,7 @@ def _convert_response(response_data: ChatCompletions) -> ChatCompletion:
         tool_calls = []
         for tool_call in message_data.tool_calls:
             tool_calls.append(
-                ChatCompletionMessageToolCall(
+                ChatCompletionMessageFunctionToolCall(
                     id=tool_call.id,
                     type=tool_call.type,
                     function=Function(

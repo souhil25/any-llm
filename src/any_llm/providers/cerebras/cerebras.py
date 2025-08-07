@@ -8,9 +8,7 @@ except ImportError:
     msg = "cerebras or instructor is not installed. Please install it with `pip install any-llm-sdk[cerebras]`"
     raise ImportError(msg)
 
-from openai.types.chat.chat_completion import ChatCompletion
-from openai._streaming import Stream
-from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
+from any_llm.types.completion import ChatCompletion, ChatCompletionChunk
 
 from any_llm.provider import Provider, ApiConfig, convert_instructor_response
 from any_llm.exceptions import UnsupportedParameterError
@@ -28,6 +26,8 @@ class CerebrasProvider(Provider):
     PROVIDER_DOCUMENTATION_URL = "https://docs.cerebras.ai/"
 
     SUPPORTS_STREAMING = True
+    SUPPORTS_COMPLETION = True
+    SUPPORTS_REASONING = False
     SUPPORTS_EMBEDDING = False
 
     def __init__(self, config: ApiConfig) -> None:
@@ -69,7 +69,7 @@ class CerebrasProvider(Provider):
         model: str,
         messages: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> ChatCompletion | Stream[ChatCompletionChunk]:
+    ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
         """Create a chat completion using Cerebras with instructor support for structured outputs."""
 
         # Handle response_format for structured output
@@ -90,7 +90,7 @@ class CerebrasProvider(Provider):
             # Remove stream parameter before passing to streaming method
             kwargs.pop("stream")
             # Return the streaming generator
-            return self._stream_completion(model, messages, **kwargs)  # type: ignore[return-value]
+            return self._stream_completion(model, messages, **kwargs)
         else:
             # Use regular create method for non-structured outputs
             response = self.client.chat.completions.create(

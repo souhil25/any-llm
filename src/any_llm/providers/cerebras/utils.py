@@ -6,11 +6,14 @@ except ImportError:
     msg = "cerebras is not installed. Please install it with `pip install any-llm-sdk[cerebras]`"
     raise ImportError(msg)
 
-from openai.types.chat.chat_completion import ChatCompletion
-from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
-from openai.types.completion_usage import CompletionUsage
-from openai.types.chat.chat_completion_message import ChatCompletionMessage
-from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
+from any_llm.types.completion import (
+    ChatCompletion,
+    ChatCompletionChunk,
+    CompletionUsage,
+    ChatCompletionMessage,
+    Function,
+)
+from openai.types.chat.chat_completion_message_function_tool_call import ChatCompletionMessageFunctionToolCall
 
 
 def _create_openai_chunk_from_cerebras_chunk(chunk: ChatChunkResponse) -> ChatCompletionChunk:
@@ -113,7 +116,7 @@ def _convert_response(response_data: Dict[str, Any]) -> ChatCompletion:
         tool_calls = []
         for tool_call in message_data["tool_calls"]:
             tool_calls.append(
-                ChatCompletionMessageToolCall(
+                ChatCompletionMessageFunctionToolCall(
                     id=tool_call.get("id"),
                     type="function",  # Always set to "function" as it's the only valid value
                     function=Function(
@@ -127,11 +130,11 @@ def _convert_response(response_data: Dict[str, Any]) -> ChatCompletion:
     message = ChatCompletionMessage(
         content=message_data.get("content"),
         role=message_data.get("role", "assistant"),
-        tool_calls=tool_calls,
+        tool_calls=tool_calls,  # type: ignore[arg-type]
     )
 
     # Create the choice
-    from openai.types.chat.chat_completion import Choice
+    from any_llm.types.completion import Choice
 
     choice = Choice(
         finish_reason=choice_data.get("finish_reason", "stop"),
