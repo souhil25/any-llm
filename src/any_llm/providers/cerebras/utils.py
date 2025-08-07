@@ -15,9 +15,7 @@ from any_llm.providers.helpers import create_completion_from_response
 
 def _create_openai_chunk_from_cerebras_chunk(chunk: ChatChunkResponse) -> ChatCompletionChunk:
     """Convert Cerebras streaming chunk to OpenAI ChatCompletionChunk format."""
-    # Handle different chunk types gracefully
     if not hasattr(chunk, "choices") or not hasattr(chunk, "model"):
-        # Return empty chunk for unsupported types
         return ChatCompletionChunk.model_validate(
             {
                 "id": "chatcmpl-empty",
@@ -49,17 +47,14 @@ def _create_openai_chunk_from_cerebras_chunk(chunk: ChatChunkResponse) -> ChatCo
 
         choice_delta = getattr(choice, "delta", None)
         if choice_delta:
-            # Handle content delta
             content = getattr(choice_delta, "content", None)
             if content:
                 delta["content"] = content
 
-            # Handle role delta
             role = getattr(choice_delta, "role", None)
             if role:
                 delta["role"] = role
 
-            # Handle tool calls delta
             tool_calls = getattr(choice_delta, "tool_calls", None)
             if tool_calls:
                 tool_calls_list = []
@@ -78,7 +73,6 @@ def _create_openai_chunk_from_cerebras_chunk(chunk: ChatChunkResponse) -> ChatCo
                     tool_calls_list.append(tool_call_dict)
                 delta["tool_calls"] = tool_calls_list
 
-    # Add usage info if available
     usage = getattr(chunk, "usage", None)
     if usage:
         chunk_dict["usage"] = {
