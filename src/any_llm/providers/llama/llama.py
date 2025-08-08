@@ -9,7 +9,8 @@ class LlamaProvider(BaseOpenAIProvider):
     PROVIDER_NAME = "Llama API"
     PROVIDER_DOCUMENTATION_URL = "https://www.llama.com/products/llama-api/"
 
-    SUPPORTS_STREAMING = True
+    SUPPORTS_COMPLETION_STREAMING = True
     SUPPORTS_COMPLETION = True
-    SUPPORTS_REASONING = False
+    SUPPORTS_RESPONSES = False
+    SUPPORTS_COMPLETION_REASONING = False
     SUPPORTS_EMBEDDING = False
