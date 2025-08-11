@@ -1,6 +1,8 @@
 from contextlib import contextmanager
 from unittest.mock import patch, Mock
 
+import pytest
+
 from any_llm.provider import ApiConfig
 from any_llm.providers.anthropic.anthropic import AnthropicProvider
 
@@ -122,43 +124,23 @@ def test_make_api_call_with_tool_choice_required() -> None:
         )
 
 
-def test_make_api_call_with_tool_choice_and_parallel_tool_calls() -> None:
+@pytest.mark.parametrize("parallel_tool_calls", [True, False])
+def test_make_api_call_with_tool_choice_and_parallel_tool_calls(parallel_tool_calls: bool) -> None:
     """Test that _make_api_call correctly processes tool_choice and parallel_tool_calls."""
     api_key = "test-api-key"
     model = "model-id"
     messages = [{"role": "user", "content": "Hello"}]
-    kwargs = {"tool_choice": "auto", "parallel_tool_calls": True}
+    kwargs = {"tool_choice": "auto", "parallel_tool_calls": parallel_tool_calls}
 
     with mock_anthropic_provider() as mock_anthropic:
         provider = AnthropicProvider(ApiConfig(api_key=api_key))
         provider._make_api_call(model, messages, **kwargs)
 
-        expected_kwargs = {"tool_choice": {"type": "auto", "disable_parallel_tool_use": False}}
+        expected_kwargs = {"tool_choice": {"type": "auto", "disable_parallel_tool_use": not parallel_tool_calls}}
 
         mock_anthropic.return_value.messages.create.assert_called_once_with(
             model=model,
             messages=[{"role": "user", "content": "Hello"}],
-            max_tokens=4096,
-            **expected_kwargs,
-        )
-
-
-def test_make_api_call_with_tool_choice_and_no_parallel_tool_calls() -> None:
-    """Test that _make_api_call correctly processes tool_choice and no parallel_tool_calls."""
-    api_key = "test-api-key"
-    model = "model-id"
-    messages = [{"role": "user", "content": "Hello"}]
-    kwargs = {"tool_choice": "auto", "parallel_tool_calls": False}
-
-    with mock_anthropic_provider() as mock_anthropic:
-        provider = AnthropicProvider(ApiConfig(api_key=api_key))
-        provider._make_api_call(model, messages, **kwargs)
-
-        expected_kwargs = {"tool_choice": {"type": "auto", "disable_parallel_tool_use": True}}
-
-        mock_anthropic.return_value.messages.create.assert_called_once_with(
-            model=model,
-            messages=messages,
             max_tokens=4096,
             **expected_kwargs,
         )
