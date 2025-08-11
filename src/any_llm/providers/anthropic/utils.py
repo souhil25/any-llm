@@ -1,19 +1,19 @@
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 from any_llm.logging import logger
 
 try:
-    from anthropic.types import Message
     from anthropic.types import (
-        ContentBlockStartEvent,
         ContentBlockDeltaEvent,
+        ContentBlockStartEvent,
         ContentBlockStopEvent,
+        Message,
         MessageStopEvent,
     )
-except ImportError:
+except ImportError as exc:
     msg = "anthropic is not installed. Please install it with `pip install any-llm-sdk[anthropic]`"
-    raise ImportError(msg)
+    raise ImportError(msg) from exc
 
 from any_llm.types.completion import (
     ChatCompletion,
@@ -57,7 +57,7 @@ def _create_openai_chunk_from_anthropic_chunk(chunk: Any) -> ChatCompletionChunk
         "usage": None,
     }
 
-    delta: Dict[str, Any] = {}
+    delta: dict[str, Any] = {}
     finish_reason = None
 
     if isinstance(chunk, ContentBlockStartEvent):
@@ -148,7 +148,8 @@ def _convert_response(response: Message) -> ChatCompletion:
             # Provider does not advertise reasoning support; include in content for completeness
             content_parts.append(content_block.thinking)
         else:
-            raise ValueError(f"Unsupported content block type: {content_block.type}")
+            msg = f"Unsupported content block type: {content_block.type}"
+            raise ValueError(msg)
 
     message = ChatCompletionMessage(role="assistant", content="".join(content_parts), tool_calls=tool_calls or None)
 
@@ -163,7 +164,7 @@ def _convert_response(response: Message) -> ChatCompletion:
     choice = Choice(
         index=0,
         finish_reason=cast(
-            Literal["stop", "length", "tool_calls", "content_filter", "function_call"], finish_reason or "stop"
+            "Literal['stop', 'length', 'tool_calls', 'content_filter', 'function_call']", finish_reason or "stop"
         ),
         message=message,
     )
@@ -180,7 +181,7 @@ def _convert_response(response: Message) -> ChatCompletion:
     )
 
 
-def _convert_tool_spec(openai_tools: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _convert_tool_spec(openai_tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Convert OpenAI tool specification to Anthropic format."""
     generic_tools = []
 
@@ -212,7 +213,7 @@ def _convert_tool_spec(openai_tools: List[Dict[str, Any]]) -> List[Dict[str, Any
     return anthropic_tools
 
 
-def _convert_tool_choice(kwargs: Dict[str, Any]) -> Dict[str, Any]:
+def _convert_tool_choice(kwargs: dict[str, Any]) -> dict[str, Any]:
     parallel_tool_calls = kwargs.pop("parallel_tool_calls", True)
     tool_choice = kwargs.pop("tool_choice", "any")
     if tool_choice == "required":
@@ -220,7 +221,7 @@ def _convert_tool_choice(kwargs: Dict[str, Any]) -> Dict[str, Any]:
     return {"type": tool_choice, "disable_parallel_tool_use": not parallel_tool_calls}
 
 
-def _convert_kwargs(kwargs: Dict[str, Any]) -> Dict[str, Any]:
+def _convert_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
     """Convert kwargs to Anthropic format."""
     kwargs = kwargs.copy()
 

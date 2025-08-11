@@ -1,6 +1,7 @@
-import os
-from typing import Any, Iterator
 import json
+import os
+from collections.abc import Iterator
+from typing import Any
 
 try:
     from ollama import ChatResponse as OllamaChatResponse
@@ -10,24 +11,23 @@ except ImportError as exc:
     raise ImportError(msg) from exc
 
 from pydantic import BaseModel
+
+from any_llm.provider import ApiConfig, Provider
+from any_llm.providers.ollama.utils import (
+    _create_openai_chunk_from_ollama_chunk,
+    _create_openai_embedding_response_from_ollama,
+    _create_response_dict_from_ollama_response,
+)
 from any_llm.types.completion import (
     ChatCompletion,
     ChatCompletionChunk,
-    CreateEmbeddingResponse,
     ChatCompletionMessage,
-    ChatCompletionMessageToolCall,
     ChatCompletionMessageFunctionToolCall,
+    ChatCompletionMessageToolCall,
     Choice,
     CompletionUsage,
+    CreateEmbeddingResponse,
     Function,
-)
-from any_llm.provider import ApiConfig, Provider
-
-
-from any_llm.providers.ollama.utils import (
-    _create_openai_embedding_response_from_ollama,
-    _create_openai_chunk_from_ollama_chunk,
-    _create_response_dict_from_ollama_response,
 )
 
 
@@ -84,12 +84,12 @@ class OllamaProvider(Provider):
             response_format = kwargs.pop("response_format")
             if isinstance(response_format, type) and issubclass(response_format, BaseModel):
                 # response_format is a Pydantic model class
-                format = response_format.model_json_schema()
+                output_format = response_format.model_json_schema()
             else:
                 # response_format is already a dict/schema
-                format = response_format
+                output_format = response_format
         else:
-            format = None
+            output_format = None
 
         # (https://www.reddit.com/r/ollama/comments/1ked8x2/feeding_tool_output_back_to_llm/)
         cleaned_messages = []
@@ -122,7 +122,7 @@ class OllamaProvider(Provider):
             tools=kwargs.pop("tools", None),
             think=kwargs.pop("think", None),
             messages=cleaned_messages,
-            format=format,
+            format=output_format,
             options=kwargs,
         )
 
@@ -156,7 +156,7 @@ class OllamaProvider(Provider):
                 Choice(
                     index=i,
                     finish_reason=cast(
-                        Literal["stop", "length", "tool_calls", "content_filter", "function_call"],
+                        "Literal['stop', 'length', 'tool_calls', 'content_filter', 'function_call']",
                         ch.get("finish_reason", "stop"),
                     ),
                     message=message,

@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import pytest
 
-from any_llm.provider import ApiConfig
 from any_llm.exceptions import UnsupportedParameterError
+from any_llm.provider import ApiConfig
 from any_llm.providers.google.google import GoogleProvider
 
 
@@ -34,7 +34,7 @@ def mock_google_provider():  # type: ignore[no-untyped-def]
 
 
 @pytest.mark.parametrize(
-    "tool_choice,expected_mode",
+    ("tool_choice", "expected_mode"),
     [
         ("auto", "AUTO"),
         ("required", "ANY"),

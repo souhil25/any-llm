@@ -1,20 +1,23 @@
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any
 
 try:
-    import together
-    from together.types import (
-        ChatCompletionResponse,
-    )
     import instructor
+    import together
 except ImportError as exc:
     msg = "together or instructor is not installed. Please install it with `pip install any-llm-sdk[together]`"
     raise ImportError(msg) from exc
 
 
-from any_llm.types.completion import ChatCompletion, ChatCompletionChunk, ChatCompletionMessage, Choice, CompletionUsage
 from any_llm.provider import Provider, convert_instructor_response
 from any_llm.providers.together.utils import _create_openai_chunk_from_together_chunk
-from together.types.chat_completions import ChatCompletionChunk as TogetherChatCompletionChunk
+from any_llm.types.completion import ChatCompletion, ChatCompletionChunk, ChatCompletionMessage, Choice, CompletionUsage
+
+if TYPE_CHECKING:
+    from together.types import (
+        ChatCompletionResponse,
+    )
+    from together.types.chat_completions import ChatCompletionChunk as TogetherChatCompletionChunk
 
 
 class TogetherProvider(Provider):
@@ -39,7 +42,7 @@ class TogetherProvider(Provider):
         from typing import cast
 
         response = cast(
-            Iterator[TogetherChatCompletionChunk],
+            "Iterator[TogetherChatCompletionChunk]",
             client.chat.completions.create(
                 model=model,
                 messages=messages,
@@ -80,7 +83,7 @@ class TogetherProvider(Provider):
         from typing import cast
 
         response = cast(
-            ChatCompletionResponse,
+            "ChatCompletionResponse",
             client.chat.completions.create(
                 model=model,
                 messages=messages,
@@ -95,7 +98,7 @@ class TogetherProvider(Provider):
             from typing import Literal, cast
 
             message = ChatCompletionMessage(
-                role=cast(Literal["assistant"], "assistant"),
+                role=cast("Literal['assistant']", "assistant"),
                 content=msg.get("content"),
                 tool_calls=msg.get("tool_calls"),
             )
@@ -103,7 +106,7 @@ class TogetherProvider(Provider):
                 Choice(
                     index=i,
                     finish_reason=cast(
-                        Literal["stop", "length", "tool_calls", "content_filter", "function_call"],
+                        "Literal['stop', 'length', 'tool_calls', 'content_filter', 'function_call']",
                         ch.get("finish_reason"),
                     ),
                     message=message,
