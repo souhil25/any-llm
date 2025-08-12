@@ -1,0 +1,1210 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0 -- /Users/rbesaleli/any-llm/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/rbesaleli/any-llm
+configfile: pyproject.toml
+plugins: asyncio-1.1.0, xdist-3.8.0, timeout-2.4.0, anyio-4.10.0, cov-6.2.1
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+timeout: 120.0s
+timeout method: signal
+timeout func_only: False
+created: 14/14 workers
+14 workers [200 items]
+
+scheduling tests via LoadScheduling
+
+tests/integration/test_completion.py::test_providers[cerebras] 
+tests/integration/test_completion.py::test_providers[groq] 
+tests/integration/test_completion.py::test_providers[deepseek] 
+tests/integration/test_completion.py::test_providers[openai] 
+tests/integration/test_completion.py::test_parallel_async_completion[inception] 
+tests/integration/test_completion.py::test_providers[llama] 
+tests/integration/test_completion.py::test_providers[anthropic] 
+tests/integration/test_completion.py::test_providers[sambanova] 
+tests/integration/test_completion.py::test_providers[xai] 
+tests/integration/test_completion.py::test_parallel_async_completion[google] 
+tests/integration/test_completion.py::test_parallel_async_completion[mistral] 
+tests/integration/test_completion.py::test_providers[moonshot] 
+tests/integration/test_completion.py::test_parallel_async_completion[azure] 
+tests/integration/test_completion.py::test_parallel_async_completion[databricks] 
+[gw5] [  0%] SKIPPED tests/integration/test_completion.py::test_providers[moonshot] 
+tests/integration/test_completion.py::test_providers[nebius] 
+[gw5] [  1%] SKIPPED tests/integration/test_completion.py::test_providers[nebius] 
+[gw7] [  1%] SKIPPED tests/integration/test_completion.py::test_providers[openai] 
+tests/integration/test_completion.py::test_providers[openrouter] 
+[gw7] [  2%] SKIPPED tests/integration/test_completion.py::test_providers[openrouter] 
+[gw4] [  2%] SKIPPED tests/integration/test_completion.py::test_providers[llama] 
+tests/integration/test_completion.py::test_providers[lmstudio] 
+[gw2] [  3%] SKIPPED tests/integration/test_completion.py::test_providers[deepseek] 
+tests/integration/test_completion.py::test_providers[fireworks] 
+tests/integration/test_completion.py::test_providers[ollama] 
+tests/integration/test_completion.py::test_providers[portkey] 
+[gw7] [  3%] SKIPPED tests/integration/test_completion.py::test_providers[portkey] 
+tests/integration/test_completion.py::test_parallel_async_completion[sambanova] 
+[gw12] [  4%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[inception] 
+tests/integration/test_completion.py::test_parallel_async_completion[llama] 
+[gw12] [  4%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[llama] 
+tests/integration/test_completion.py::test_parallel_async_completion[lmstudio] 
+[gw4] [  5%] FAILED tests/integration/test_completion.py::test_providers[lmstudio] 
+[gw9] [  5%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[azure] 
+tests/integration/test_completion.py::test_providers[mistral] 
+tests/integration/test_completion.py::test_parallel_async_completion[cerebras] 
+[gw12] [  6%] FAILED tests/integration/test_completion.py::test_parallel_async_completion[lmstudio] 
+tests/integration/test_embedding.py::test_embedding_providers[anthropic] 
+[gw8] [  6%] SKIPPED tests/integration/test_completion.py::test_providers[xai] 
+tests/integration/test_completion.py::test_parallel_async_completion[anthropic] 
+[gw5] [  7%] FAILED tests/integration/test_completion.py::test_providers[ollama] 
+tests/integration/test_completion.py::test_parallel_async_completion[ollama] 
+[gw5] [  7%] FAILED tests/integration/test_completion.py::test_parallel_async_completion[ollama] 
+tests/integration/test_completion.py::test_parallel_async_completion[openai] 
+[gw5] [  8%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[openai] 
+tests/integration/test_completion.py::test_parallel_async_completion[openrouter] 
+[gw5] [  8%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[openrouter] 
+tests/integration/test_completion.py::test_parallel_async_completion[portkey] 
+[gw5] [  9%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[portkey] 
+tests/integration/test_embedding.py::test_embedding_providers[google] 
+[gw2] [  9%] SKIPPED tests/integration/test_completion.py::test_providers[fireworks] 
+tests/integration/test_completion.py::test_providers[google] 
+[gw13] [ 10%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[mistral] 
+tests/integration/test_completion.py::test_parallel_async_completion[moonshot] 
+[gw13] [ 10%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[moonshot] 
+tests/integration/test_completion.py::test_parallel_async_completion[nebius] 
+[gw13] [ 11%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[nebius] 
+tests/integration/test_embedding.py::test_embedding_providers[moonshot] 
+[gw4] [ 11%] SKIPPED tests/integration/test_completion.py::test_providers[mistral] 
+tests/integration/test_embedding.py::test_embedding_providers[cohere] 
+[gw11] [ 12%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[google] 
+tests/integration/test_completion.py::test_parallel_async_completion[groq] 
+[gw2] [ 12%] SKIPPED tests/integration/test_completion.py::test_providers[google] 
+tests/integration/test_embedding.py::test_embedding_providers[llama] 
+[gw6] [ 13%] SKIPPED tests/integration/test_completion.py::test_providers[sambanova] 
+tests/integration/test_completion.py::test_providers[together] 
+[gw0] [ 13%] SKIPPED tests/integration/test_completion.py::test_providers[anthropic] 
+tests/integration/test_completion.py::test_providers[aws] 
+[gw1] [ 14%] SKIPPED tests/integration/test_completion.py::test_providers[cerebras] 
+tests/integration/test_completion.py::test_providers[cohere] 
+[gw1] [ 14%] SKIPPED tests/integration/test_completion.py::test_providers[cohere] 
+tests/integration/test_completion.py::test_providers[databricks] 
+[gw3] [ 15%] SKIPPED tests/integration/test_completion.py::test_providers[groq] 
+tests/integration/test_completion.py::test_providers[huggingface] 
+[gw6] [ 15%] SKIPPED tests/integration/test_completion.py::test_providers[together] 
+tests/integration/test_completion.py::test_providers[watsonx] 
+[gw11] [ 16%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[groq] 
+tests/integration/test_completion.py::test_parallel_async_completion[huggingface] 
+[gw3] [ 16%] SKIPPED tests/integration/test_completion.py::test_providers[huggingface] 
+tests/integration/test_completion.py::test_providers[inception] 
+[gw3] [ 17%] SKIPPED tests/integration/test_completion.py::test_providers[inception] 
+tests/integration/test_reasoning.py::test_reasoning_providers[azure] 
+[gw3] [ 17%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[azure] 
+tests/integration/test_reasoning.py::test_reasoning_providers[cerebras] 
+[gw3] [ 18%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[cerebras] 
+tests/integration/test_reasoning.py::test_reasoning_providers[cohere] 
+[gw3] [ 18%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[cohere] 
+tests/integration/test_reasoning.py::test_reasoning_providers[databricks] 
+[gw3] [ 19%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[databricks] 
+tests/integration/test_reasoning.py::test_reasoning_providers[deepseek] 
+[gw3] [ 19%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[deepseek] 
+tests/integration/test_reasoning.py::test_reasoning_providers[fireworks] 
+[gw3] [ 20%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[fireworks] 
+tests/integration/test_reasoning.py::test_reasoning_providers[google] 
+[gw3] [ 20%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[google] 
+tests/integration/test_reasoning.py::test_reasoning_providers[groq] 
+[gw3] [ 21%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[groq] 
+tests/integration/test_reasoning.py::test_reasoning_providers[huggingface] 
+[gw3] [ 21%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[huggingface] 
+tests/integration/test_reasoning.py::test_reasoning_providers[inception] 
+[gw3] [ 22%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[inception] 
+tests/integration/test_reasoning.py::test_reasoning_providers[llama] 
+[gw3] [ 22%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[llama] 
+tests/integration/test_reasoning.py::test_reasoning_providers[lmstudio] 
+[gw3] [ 23%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[lmstudio] 
+tests/integration/test_reasoning.py::test_reasoning_providers[mistral] 
+[gw3] [ 23%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[mistral] 
+tests/integration/test_reasoning.py::test_reasoning_providers[moonshot] 
+[gw3] [ 24%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[moonshot] 
+tests/integration/test_reasoning.py::test_reasoning_providers[nebius] 
+[gw3] [ 24%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[nebius] 
+tests/integration/test_reasoning.py::test_reasoning_providers[ollama] 
+[gw3] [ 25%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[ollama] 
+tests/integration/test_reasoning.py::test_reasoning_providers[openai] 
+[gw3] [ 25%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[openai] 
+tests/integration/test_reasoning.py::test_reasoning_providers[openrouter] 
+[gw3] [ 26%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[openrouter] 
+tests/integration/test_reasoning.py::test_reasoning_providers[portkey] 
+[gw3] [ 26%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[portkey] 
+tests/integration/test_reasoning.py::test_reasoning_providers[sambanova] 
+[gw3] [ 27%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[sambanova] 
+tests/integration/test_reasoning.py::test_reasoning_providers[together] 
+[gw3] [ 27%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[together] 
+tests/integration/test_reasoning.py::test_reasoning_providers[watsonx] 
+[gw3] [ 28%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[watsonx] 
+tests/integration/test_reasoning.py::test_reasoning_providers[xai] 
+[gw3] [ 28%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[xai] 
+tests/integration/test_response_format.py::test_response_format[anthropic] 
+[gw3] [ 29%] SKIPPED tests/integration/test_response_format.py::test_response_format[anthropic] 
+tests/integration/test_response_format.py::test_response_format[aws] 
+[gw11] [ 29%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[huggingface] 
+tests/integration/test_embedding.py::test_embedding_providers[xai] 
+[gw8] [ 30%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[anthropic] 
+tests/integration/test_completion.py::test_parallel_async_completion[aws] 
+[gw7] [ 30%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[sambanova] 
+tests/integration/test_completion.py::test_parallel_async_completion[together] 
+[gw9] [ 31%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[cerebras] 
+tests/integration/test_completion.py::test_parallel_async_completion[cohere] 
+[gw9] [ 31%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[cohere] 
+tests/integration/test_response_format.py::test_response_format[databricks] 
+[gw7] [ 32%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[together] 
+tests/integration/test_completion.py::test_parallel_async_completion[watsonx] 
+[gw10] [ 32%] PASSED tests/integration/test_completion.py::test_parallel_async_completion[databricks] 
+tests/integration/test_completion.py::test_parallel_async_completion[deepseek] 
+[gw10] [ 33%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[deepseek] 
+tests/integration/test_completion.py::test_parallel_async_completion[fireworks] 
+[gw6] [ 33%] SKIPPED tests/integration/test_completion.py::test_providers[watsonx] 
+tests/integration/test_embedding.py::test_embedding_providers[sambanova] 
+[gw10] [ 34%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[fireworks] 
+tests/integration/test_response_format.py::test_response_format[fireworks] 
+[gw10] [ 34%] SKIPPED tests/integration/test_response_format.py::test_response_format[fireworks] 
+tests/integration/test_response_format.py::test_response_format[google] 
+[gw13] [ 35%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[moonshot] 
+tests/integration/test_embedding.py::test_embedding_providers[nebius] 
+[gw13] [ 35%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[nebius] 
+tests/integration/test_embedding.py::test_embedding_providers[ollama] 
+[gw13] [ 36%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[ollama] 
+tests/integration/test_response_format.py::test_response_format[inception] 
+[gw13] [ 36%] SKIPPED tests/integration/test_response_format.py::test_response_format[inception] 
+tests/integration/test_response_format.py::test_response_format[llama] 
+[gw13] [ 37%] SKIPPED tests/integration/test_response_format.py::test_response_format[llama] 
+tests/integration/test_response_format.py::test_response_format[lmstudio] 
+[gw6] [ 37%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[sambanova] 
+tests/integration/test_embedding.py::test_embedding_providers[together] 
+[gw6] [ 38%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[together] 
+tests/integration/test_embedding.py::test_embedding_providers[watsonx] 
+[gw6] [ 38%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[watsonx] 
+tests/integration/test_response_format.py::test_response_format[moonshot] 
+[gw6] [ 39%] SKIPPED tests/integration/test_response_format.py::test_response_format[moonshot] 
+tests/integration/test_response_format.py::test_response_format[nebius] 
+[gw6] [ 39%] SKIPPED tests/integration/test_response_format.py::test_response_format[nebius] 
+tests/integration/test_response_format.py::test_response_format[ollama] 
+[gw12] [ 40%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[anthropic] 
+tests/integration/test_embedding.py::test_embedding_providers[aws] 
+[gw2] [ 40%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[llama] 
+tests/integration/test_embedding.py::test_embedding_providers[lmstudio] 
+[gw4] [ 41%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[cohere] 
+tests/integration/test_embedding.py::test_embedding_providers[databricks] 
+[gw13] [ 41%] FAILED tests/integration/test_response_format.py::test_response_format[lmstudio] 
+tests/integration/test_response_format.py::test_response_format[mistral] 
+[gw13] [ 42%] SKIPPED tests/integration/test_response_format.py::test_response_format[mistral] 
+tests/integration/test_response_format.py::test_response_format[openrouter] 
+[gw13] [ 42%] SKIPPED tests/integration/test_response_format.py::test_response_format[openrouter] 
+tests/integration/test_response_format.py::test_response_format[portkey] 
+[gw13] [ 43%] SKIPPED tests/integration/test_response_format.py::test_response_format[portkey] 
+tests/integration/test_response_format.py::test_response_format[sambanova] 
+[gw13] [ 43%] SKIPPED tests/integration/test_response_format.py::test_response_format[sambanova] 
+tests/integration/test_response_format.py::test_response_format[together] 
+[gw11] [ 44%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[xai] 
+tests/integration/test_reasoning.py::test_reasoning_providers[anthropic] 
+[gw13] [ 44%] SKIPPED tests/integration/test_response_format.py::test_response_format[together] 
+[gw11] [ 45%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[anthropic] 
+tests/integration/test_response_format.py::test_response_format[watsonx] 
+tests/integration/test_reasoning.py::test_reasoning_providers[aws] 
+[gw13] [ 45%] SKIPPED tests/integration/test_response_format.py::test_response_format[watsonx] 
+[gw11] [ 46%] SKIPPED tests/integration/test_reasoning.py::test_reasoning_providers[aws] 
+tests/integration/test_response_format.py::test_response_format[xai] 
+tests/integration/test_responses.py::test_responses[anthropic] 
+[gw13] [ 46%] SKIPPED tests/integration/test_response_format.py::test_response_format[xai] 
+[gw11] [ 47%] SKIPPED tests/integration/test_responses.py::test_responses[anthropic] 
+tests/integration/test_responses.py::test_responses[aws] 
+tests/integration/test_responses.py::test_responses[azure] 
+[gw13] [ 47%] SKIPPED tests/integration/test_responses.py::test_responses[aws] 
+[gw11] [ 48%] SKIPPED tests/integration/test_responses.py::test_responses[azure] 
+tests/integration/test_responses.py::test_responses[cerebras] 
+tests/integration/test_responses.py::test_responses[cohere] 
+[gw13] [ 48%] SKIPPED tests/integration/test_responses.py::test_responses[cerebras] 
+[gw11] [ 49%] SKIPPED tests/integration/test_responses.py::test_responses[cohere] 
+tests/integration/test_responses.py::test_responses[databricks] 
+tests/integration/test_responses.py::test_responses[deepseek] 
+[gw13] [ 49%] SKIPPED tests/integration/test_responses.py::test_responses[databricks] 
+[gw11] [ 50%] SKIPPED tests/integration/test_responses.py::test_responses[deepseek] 
+tests/integration/test_responses.py::test_responses[fireworks] 
+tests/integration/test_responses.py::test_responses[google] 
+[gw13] [ 50%] SKIPPED tests/integration/test_responses.py::test_responses[fireworks] 
+[gw11] [ 51%] SKIPPED tests/integration/test_responses.py::test_responses[google] 
+tests/integration/test_responses.py::test_responses[groq] 
+tests/integration/test_responses.py::test_responses[huggingface] 
+[gw11] [ 51%] SKIPPED tests/integration/test_responses.py::test_responses[huggingface] 
+[gw13] [ 52%] SKIPPED tests/integration/test_responses.py::test_responses[groq] 
+tests/integration/test_responses.py::test_responses[llama] 
+tests/integration/test_responses.py::test_responses[inception] 
+[gw11] [ 52%] SKIPPED tests/integration/test_responses.py::test_responses[llama] 
+[gw13] [ 53%] SKIPPED tests/integration/test_responses.py::test_responses[inception] 
+tests/integration/test_responses.py::test_responses[mistral] 
+tests/integration/test_responses.py::test_responses[lmstudio] 
+[gw13] [ 53%] SKIPPED tests/integration/test_responses.py::test_responses[mistral] 
+[gw11] [ 54%] SKIPPED tests/integration/test_responses.py::test_responses[lmstudio] 
+tests/integration/test_responses.py::test_responses[moonshot] 
+tests/integration/test_responses.py::test_responses[nebius] 
+[gw13] [ 54%] SKIPPED tests/integration/test_responses.py::test_responses[moonshot] 
+[gw11] [ 55%] SKIPPED tests/integration/test_responses.py::test_responses[nebius] 
+tests/integration/test_responses.py::test_responses[ollama] 
+tests/integration/test_responses.py::test_responses[openai] 
+[gw13] [ 55%] SKIPPED tests/integration/test_responses.py::test_responses[ollama] 
+[gw11] [ 56%] SKIPPED tests/integration/test_responses.py::test_responses[openai] 
+tests/integration/test_responses.py::test_responses[openrouter] 
+tests/integration/test_responses.py::test_responses[portkey] 
+[gw13] [ 56%] SKIPPED tests/integration/test_responses.py::test_responses[openrouter] 
+[gw11] [ 57%] SKIPPED tests/integration/test_responses.py::test_responses[portkey] 
+tests/integration/test_responses.py::test_responses[sambanova] 
+tests/integration/test_responses.py::test_responses[together] 
+[gw13] [ 57%] SKIPPED tests/integration/test_responses.py::test_responses[sambanova] 
+[gw11] [ 58%] SKIPPED tests/integration/test_responses.py::test_responses[together] 
+tests/integration/test_responses.py::test_responses[watsonx] 
+tests/integration/test_responses.py::test_responses[xai] 
+[gw13] [ 58%] SKIPPED tests/integration/test_responses.py::test_responses[watsonx] 
+[gw11] [ 59%] SKIPPED tests/integration/test_responses.py::test_responses[xai] 
+tests/integration/test_streaming.py::test_streaming_completion[anthropic] 
+tests/integration/test_streaming.py::test_streaming_completion[aws] 
+[gw13] [ 59%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[anthropic] 
+tests/integration/test_streaming.py::test_streaming_completion[azure] 
+[gw13] [ 60%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[azure] 
+tests/integration/test_streaming.py::test_streaming_completion[cohere] 
+[gw7] [ 60%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[watsonx] 
+[gw13] [ 61%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[cohere] 
+tests/integration/test_completion.py::test_parallel_async_completion[xai] 
+tests/integration/test_streaming.py::test_streaming_completion[databricks] 
+[gw7] [ 61%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[xai] 
+tests/integration/test_streaming.py::test_streaming_completion[deepseek] 
+[gw7] [ 62%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[deepseek] 
+tests/integration/test_streaming.py::test_streaming_completion[google] 
+[gw7] [ 62%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[google] 
+tests/integration/test_streaming.py::test_streaming_completion[groq] 
+[gw7] [ 63%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[groq] 
+tests/integration/test_streaming.py::test_streaming_completion[huggingface] 
+[gw6] [ 63%] FAILED tests/integration/test_response_format.py::test_response_format[ollama] 
+tests/integration/test_response_format.py::test_response_format[openai] 
+[gw6] [ 64%] SKIPPED tests/integration/test_response_format.py::test_response_format[openai] 
+tests/integration/test_streaming.py::test_streaming_completion[llama] 
+[gw6] [ 64%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[llama] 
+tests/integration/test_streaming.py::test_streaming_completion[lmstudio] 
+[gw5] [ 65%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[google] 
+tests/integration/test_embedding.py::test_embedding_providers[groq] 
+[gw5] [ 65%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[groq] 
+tests/integration/test_embedding.py::test_embedding_providers[huggingface] 
+[gw5] [ 66%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[huggingface] 
+tests/integration/test_embedding.py::test_embedding_providers[inception] 
+[gw5] [ 66%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[inception] 
+[gw6] [ 67%] FAILED tests/integration/test_streaming.py::test_streaming_completion[lmstudio] 
+tests/integration/test_streaming.py::test_streaming_completion[moonshot] 
+tests/integration/test_streaming.py::test_streaming_completion[mistral] 
+[gw5] [ 67%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[moonshot] 
+tests/integration/test_streaming.py::test_streaming_completion[nebius] 
+[gw6] [ 68%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[mistral] 
+[gw5] [ 68%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[nebius] 
+tests/integration/test_streaming.py::test_streaming_completion[ollama] 
+tests/integration/test_streaming.py::test_streaming_completion[openai] 
+[gw5] [ 69%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[openai] 
+tests/integration/test_streaming.py::test_streaming_completion[portkey] 
+[gw5] [ 69%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[portkey] 
+tests/integration/test_streaming.py::test_streaming_completion[sambanova] 
+[gw5] [ 70%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[sambanova] 
+tests/integration/test_streaming.py::test_streaming_completion[together] 
+[gw5] [ 70%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[together] 
+tests/integration/test_streaming.py::test_streaming_completion[watsonx] 
+[gw2] [ 71%] FAILED tests/integration/test_embedding.py::test_embedding_providers[lmstudio] 
+[gw5] [ 71%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[watsonx] 
+tests/integration/test_embedding.py::test_embedding_providers[mistral] 
+tests/integration/test_streaming.py::test_streaming_completion[xai] 
+[gw2] [ 72%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[mistral] 
+[gw5] [ 72%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[xai] 
+tests/integration/test_tool.py::test_tool[aws] 
+tests/integration/test_tool.py::test_tool[anthropic] 
+[gw2] [ 73%] SKIPPED tests/integration/test_tool.py::test_tool[anthropic] 
+tests/integration/test_tool.py::test_tool[cerebras] 
+[gw2] [ 73%] SKIPPED tests/integration/test_tool.py::test_tool[cerebras] 
+tests/integration/test_tool.py::test_tool[cohere] 
+[gw2] [ 74%] SKIPPED tests/integration/test_tool.py::test_tool[cohere] 
+tests/integration/test_tool.py::test_tool[databricks] 
+[gw6] [ 74%] FAILED tests/integration/test_streaming.py::test_streaming_completion[ollama] 
+tests/integration/test_streaming.py::test_streaming_completion[openrouter] 
+[gw6] [ 75%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[openrouter] 
+tests/integration/test_tool.py::test_tool[fireworks] 
+[gw6] [ 75%] SKIPPED tests/integration/test_tool.py::test_tool[fireworks] 
+tests/integration/test_tool.py::test_tool[google] 
+[gw6] [ 76%] SKIPPED tests/integration/test_tool.py::test_tool[google] 
+tests/integration/test_tool.py::test_tool[groq] 
+[gw6] [ 76%] SKIPPED tests/integration/test_tool.py::test_tool[groq] 
+tests/integration/test_tool.py::test_tool[huggingface] 
+[gw6] [ 77%] SKIPPED tests/integration/test_tool.py::test_tool[huggingface] 
+tests/integration/test_tool.py::test_tool[inception] 
+[gw6] [ 77%] SKIPPED tests/integration/test_tool.py::test_tool[inception] 
+tests/integration/test_tool.py::test_tool[llama] 
+[gw6] [ 78%] SKIPPED tests/integration/test_tool.py::test_tool[llama] 
+tests/integration/test_tool.py::test_tool[lmstudio] 
+[gw7] [ 78%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[huggingface] 
+tests/integration/test_streaming.py::test_streaming_completion[inception] 
+[gw7] [ 79%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[inception] 
+tests/integration/test_tool.py::test_tool[moonshot] 
+[gw7] [ 79%] SKIPPED tests/integration/test_tool.py::test_tool[moonshot] 
+tests/integration/test_tool.py::test_tool[nebius] 
+[gw7] [ 80%] SKIPPED tests/integration/test_tool.py::test_tool[nebius] 
+tests/integration/test_tool.py::test_tool[ollama] 
+[gw6] [ 80%] FAILED tests/integration/test_tool.py::test_tool[lmstudio] 
+tests/integration/test_tool.py::test_tool[mistral] 
+[gw6] [ 81%] SKIPPED tests/integration/test_tool.py::test_tool[mistral] 
+tests/integration/test_tool.py::test_tool[openrouter] 
+[gw6] [ 81%] SKIPPED tests/integration/test_tool.py::test_tool[openrouter] 
+tests/integration/test_tool.py::test_tool[portkey] 
+[gw6] [ 82%] SKIPPED tests/integration/test_tool.py::test_tool[portkey] 
+tests/integration/test_tool.py::test_tool[sambanova] 
+[gw6] [ 82%] SKIPPED tests/integration/test_tool.py::test_tool[sambanova] 
+tests/integration/test_tool.py::test_tool[together] 
+[gw6] [ 83%] SKIPPED tests/integration/test_tool.py::test_tool[together] 
+tests/integration/test_tool.py::test_tool[watsonx] 
+[gw10] [ 83%] SKIPPED tests/integration/test_response_format.py::test_response_format[google] 
+[gw6] [ 84%] SKIPPED tests/integration/test_tool.py::test_tool[watsonx] 
+tests/integration/test_response_format.py::test_response_format[groq] 
+tests/integration/test_tool.py::test_tool[xai] 
+[gw6] [ 84%] SKIPPED tests/integration/test_tool.py::test_tool[xai] 
+[gw7] [ 85%] FAILED tests/integration/test_tool.py::test_tool[ollama] 
+tests/integration/test_tool.py::test_tool[openai] 
+[gw7] [ 85%] SKIPPED tests/integration/test_tool.py::test_tool[openai] 
+[gw0] [ 86%] SKIPPED tests/integration/test_completion.py::test_providers[aws] 
+tests/integration/test_completion.py::test_providers[azure] 
+[gw0] [ 86%] SKIPPED tests/integration/test_completion.py::test_providers[azure] 
+[gw3] [ 87%] SKIPPED tests/integration/test_response_format.py::test_response_format[aws] 
+tests/integration/test_response_format.py::test_response_format[azure] 
+[gw3] [ 87%] SKIPPED tests/integration/test_response_format.py::test_response_format[azure] 
+[gw8] [ 88%] SKIPPED tests/integration/test_completion.py::test_parallel_async_completion[aws] 
+tests/integration/test_response_format.py::test_response_format[cerebras] 
+[gw8] [ 88%] SKIPPED tests/integration/test_response_format.py::test_response_format[cerebras] 
+tests/integration/test_response_format.py::test_response_format[cohere] 
+[gw8] [ 89%] SKIPPED tests/integration/test_response_format.py::test_response_format[cohere] 
+[gw10] [ 89%] SKIPPED tests/integration/test_response_format.py::test_response_format[groq] 
+tests/integration/test_response_format.py::test_response_format[huggingface] 
+[gw10] [ 90%] SKIPPED tests/integration/test_response_format.py::test_response_format[huggingface] 
+[gw12] [ 90%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[aws] 
+tests/integration/test_embedding.py::test_embedding_providers[azure] 
+[gw12] [ 91%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[azure] 
+tests/integration/test_embedding.py::test_embedding_providers[cerebras] 
+[gw12] [ 91%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[cerebras] 
+[gw11] [ 92%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[aws] 
+tests/integration/test_streaming.py::test_streaming_completion[cerebras] 
+[gw11] [ 92%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[cerebras] 
+[gw4] [ 93%] PASSED tests/integration/test_embedding.py::test_embedding_providers[databricks] 
+tests/integration/test_embedding.py::test_embedding_providers[deepseek] 
+[gw4] [ 93%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[deepseek] 
+tests/integration/test_embedding.py::test_embedding_providers[fireworks] 
+[gw4] [ 94%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[fireworks] 
+[gw13] [ 94%] PASSED tests/integration/test_streaming.py::test_streaming_completion[databricks] 
+tests/integration/test_streaming.py::test_streaming_completion[fireworks] 
+[gw13] [ 95%] SKIPPED tests/integration/test_streaming.py::test_streaming_completion[fireworks] 
+[gw5] [ 95%] SKIPPED tests/integration/test_tool.py::test_tool[aws] 
+tests/integration/test_tool.py::test_tool[azure] 
+[gw5] [ 96%] SKIPPED tests/integration/test_tool.py::test_tool[azure] 
+[gw1] [ 96%] PASSED tests/integration/test_completion.py::test_providers[databricks] 
+tests/integration/test_embedding.py::test_embedding_providers[openai] 
+[gw9] [ 97%] PASSED tests/integration/test_response_format.py::test_response_format[databricks] 
+tests/integration/test_response_format.py::test_response_format[deepseek] 
+[gw9] [ 97%] SKIPPED tests/integration/test_response_format.py::test_response_format[deepseek] 
+[gw1] [ 98%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[openai] 
+tests/integration/test_embedding.py::test_embedding_providers[openrouter] 
+[gw1] [ 98%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[openrouter] 
+tests/integration/test_embedding.py::test_embedding_providers[portkey] 
+[gw1] [ 99%] SKIPPED tests/integration/test_embedding.py::test_embedding_providers[portkey] 
+[gw2] [ 99%] PASSED tests/integration/test_tool.py::test_tool[databricks] 
+tests/integration/test_tool.py::test_tool[deepseek] 
+[gw2] [100%] SKIPPED tests/integration/test_tool.py::test_tool[deepseek] 
+
+=================================== FAILURES ===================================
+___________________________ test_providers[lmstudio] ___________________________
+[gw4] darwin -- Python 3.13.5 /Users/rbesaleli/any-llm/.venv/bin/python3
+
+provider = <ProviderName.LMSTUDIO: 'lmstudio'>
+provider_model_map = {<ProviderName.ANTHROPIC: 'anthropic'>: 'claude-3-5-haiku-latest', <ProviderName.AWS: 'aws'>: 'amazon.nova-lite-v1:0', <ProviderName.AZURE: 'azure'>: 'openai/gpt-4.1-nano', <ProviderName.CEREBRAS: 'cerebras'>: 'llama-3.3-70b', ...}
+provider_extra_kwargs_map = {<ProviderName.AZURE: 'azure'>: {'api_base': 'https://models.github.ai/inference'}, <ProviderName.DATABRICKS: 'databri...X: 'watsonx'>: {'api_base': 'https://us-south.ml.cloud.ibm.com', 'project_id': '5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0'}}
+
+    def test_providers(
+        provider: ProviderName,
+        provider_model_map: dict[ProviderName, str],
+        provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
+    ) -> None:
+        """Test that all supported providers can be loaded successfully."""
+        model_id = provider_model_map[provider]
+        extra_kwargs = provider_extra_kwargs_map.get(provider, {})
+        try:
+>           result = completion(
+                f"{provider.value}/{model_id}", **extra_kwargs, messages=[{"role": "user", "content": "Hello"}]
+            )
+
+tests/integration/test_completion.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/any_llm/api.py:161: in completion
+    return provider.completion(model_name, messages, **completion_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/providers/openai/base.py:114: in completion
+    client = OpenAI(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <openai.OpenAI object at 0x10ddacad0>
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        organization: str | None = None,
+        project: str | None = None,
+        webhook_secret: str | None = None,
+        base_url: str | httpx.URL | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
+        timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        # Configure a custom httpx client.
+        # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
+        # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
+        http_client: httpx.Client | None = None,
+        # Enable or disable schema validation for data returned by the API.
+        # When enabled an error APIResponseValidationError is raised
+        # if the API responds with invalid data for the expected schema.
+        #
+        # This parameter may be removed or changed in the future.
+        # If you rely on this feature, please open a GitHub issue
+        # outlining your use-case to help us decide if it should be
+        # part of our public interface in the future.
+        _strict_response_validation: bool = False,
+    ) -> None:
+        """Construct a new synchronous OpenAI client instance.
+    
+        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+        - `api_key` from `OPENAI_API_KEY`
+        - `organization` from `OPENAI_ORG_ID`
+        - `project` from `OPENAI_PROJECT_ID`
+        - `webhook_secret` from `OPENAI_WEBHOOK_SECRET`
+        """
+        if api_key is None:
+            api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key is None:
+>           raise OpenAIError(
+                "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
+            )
+E           openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+
+.venv/lib/python3.13/site-packages/openai/_client.py:130: OpenAIError
+___________________ test_parallel_async_completion[lmstudio] ___________________
+[gw12] darwin -- Python 3.13.5 /Users/rbesaleli/any-llm/.venv/bin/python3
+
+provider = <ProviderName.LMSTUDIO: 'lmstudio'>
+provider_model_map = {<ProviderName.ANTHROPIC: 'anthropic'>: 'claude-3-5-haiku-latest', <ProviderName.AWS: 'aws'>: 'amazon.nova-lite-v1:0', <ProviderName.AZURE: 'azure'>: 'openai/gpt-4.1-nano', <ProviderName.CEREBRAS: 'cerebras'>: 'llama-3.3-70b', ...}
+provider_extra_kwargs_map = {<ProviderName.AZURE: 'azure'>: {'api_base': 'https://models.github.ai/inference'}, <ProviderName.DATABRICKS: 'databri...X: 'watsonx'>: {'api_base': 'https://us-south.ml.cloud.ibm.com', 'project_id': '5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0'}}
+
+    @pytest.mark.asyncio
+    async def test_parallel_async_completion(
+        provider: ProviderName,
+        provider_model_map: dict[ProviderName, str],
+        provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
+    ) -> None:
+        """Test that parallel completion works."""
+        model_id = provider_model_map[provider]
+        prompt_1 = "What's the capital of France?"
+        prompt_2 = "What's the capital of Germany?"
+        extra_kwargs = provider_extra_kwargs_map.get(provider, {})
+        try:
+>           results = await asyncio.gather(
+                acompletion(
+                    f"{provider.value}/{model_id}", **extra_kwargs, messages=[{"role": "user", "content": prompt_1}]
+                ),
+                acompletion(
+                    f"{provider.value}/{model_id}", **extra_kwargs, messages=[{"role": "user", "content": prompt_2}]
+                ),
+            )
+
+tests/integration/test_completion.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/any_llm/api.py:238: in acompletion
+    return await provider.acompletion(model_name, messages, **completion_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/provider.py:177: in acompletion
+    return await asyncio.to_thread(self.completion, model, messages, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.13/3.13.5/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.13/3.13.5/Frameworks/Python.framework/Versions/3.13/lib/python3.13/concurrent/futures/thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/providers/openai/base.py:114: in completion
+    client = OpenAI(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <openai.OpenAI object at 0x107b9d7f0>
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        organization: str | None = None,
+        project: str | None = None,
+        webhook_secret: str | None = None,
+        base_url: str | httpx.URL | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
+        timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        # Configure a custom httpx client.
+        # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
+        # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
+        http_client: httpx.Client | None = None,
+        # Enable or disable schema validation for data returned by the API.
+        # When enabled an error APIResponseValidationError is raised
+        # if the API responds with invalid data for the expected schema.
+        #
+        # This parameter may be removed or changed in the future.
+        # If you rely on this feature, please open a GitHub issue
+        # outlining your use-case to help us decide if it should be
+        # part of our public interface in the future.
+        _strict_response_validation: bool = False,
+    ) -> None:
+        """Construct a new synchronous OpenAI client instance.
+    
+        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+        - `api_key` from `OPENAI_API_KEY`
+        - `organization` from `OPENAI_ORG_ID`
+        - `project` from `OPENAI_PROJECT_ID`
+        - `webhook_secret` from `OPENAI_WEBHOOK_SECRET`
+        """
+        if api_key is None:
+            api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key is None:
+>           raise OpenAIError(
+                "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
+            )
+E           openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+
+.venv/lib/python3.13/site-packages/openai/_client.py:130: OpenAIError
+____________________________ test_providers[ollama] ____________________________
+[gw5] darwin -- Python 3.13.5 /Users/rbesaleli/any-llm/.venv/bin/python3
+
+provider = <ProviderName.OLLAMA: 'ollama'>
+provider_model_map = {<ProviderName.ANTHROPIC: 'anthropic'>: 'claude-3-5-haiku-latest', <ProviderName.AWS: 'aws'>: 'amazon.nova-lite-v1:0', <ProviderName.AZURE: 'azure'>: 'openai/gpt-4.1-nano', <ProviderName.CEREBRAS: 'cerebras'>: 'llama-3.3-70b', ...}
+provider_extra_kwargs_map = {<ProviderName.AZURE: 'azure'>: {'api_base': 'https://models.github.ai/inference'}, <ProviderName.DATABRICKS: 'databri...X: 'watsonx'>: {'api_base': 'https://us-south.ml.cloud.ibm.com', 'project_id': '5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0'}}
+
+    def test_providers(
+        provider: ProviderName,
+        provider_model_map: dict[ProviderName, str],
+        provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
+    ) -> None:
+        """Test that all supported providers can be loaded successfully."""
+        model_id = provider_model_map[provider]
+        extra_kwargs = provider_extra_kwargs_map.get(provider, {})
+        try:
+>           result = completion(
+                f"{provider.value}/{model_id}", **extra_kwargs, messages=[{"role": "user", "content": "Hello"}]
+            )
+
+tests/integration/test_completion.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/any_llm/api.py:161: in completion
+    return provider.completion(model_name, messages, **completion_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/providers/ollama/ollama.py:120: in completion
+    response: OllamaChatResponse = client.chat(
+.venv/lib/python3.13/site-packages/ollama/_client.py:342: in chat
+    return self._request(
+.venv/lib/python3.13/site-packages/ollama/_client.py:180: in _request
+    return cls(**self._request_raw(*args, **kwargs).json())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ollama._client.Client object at 0x1076a2350>
+args = ('POST', '/api/chat')
+kwargs = {'json': {'messages': [{'content': 'Hello', 'role': 'user'}], 'model': 'llama3.2:1b', 'options': {'num_ctx': 32000}, 'stream': False, ...}}
+r = <Response [404 Not Found]>
+
+    def _request_raw(self, *args, **kwargs):
+      try:
+        r = self._client.request(*args, **kwargs)
+        r.raise_for_status()
+        return r
+      except httpx.HTTPStatusError as e:
+>       raise ResponseError(e.response.text, e.response.status_code) from None
+E       ollama._types.ResponseError: model "llama3.2:1b" not found, try pulling it first (status code: 404)
+
+.venv/lib/python3.13/site-packages/ollama/_client.py:124: ResponseError
+____________________ test_parallel_async_completion[ollama] ____________________
+[gw5] darwin -- Python 3.13.5 /Users/rbesaleli/any-llm/.venv/bin/python3
+
+provider = <ProviderName.OLLAMA: 'ollama'>
+provider_model_map = {<ProviderName.ANTHROPIC: 'anthropic'>: 'claude-3-5-haiku-latest', <ProviderName.AWS: 'aws'>: 'amazon.nova-lite-v1:0', <ProviderName.AZURE: 'azure'>: 'openai/gpt-4.1-nano', <ProviderName.CEREBRAS: 'cerebras'>: 'llama-3.3-70b', ...}
+provider_extra_kwargs_map = {<ProviderName.AZURE: 'azure'>: {'api_base': 'https://models.github.ai/inference'}, <ProviderName.DATABRICKS: 'databri...X: 'watsonx'>: {'api_base': 'https://us-south.ml.cloud.ibm.com', 'project_id': '5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0'}}
+
+    @pytest.mark.asyncio
+    async def test_parallel_async_completion(
+        provider: ProviderName,
+        provider_model_map: dict[ProviderName, str],
+        provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
+    ) -> None:
+        """Test that parallel completion works."""
+        model_id = provider_model_map[provider]
+        prompt_1 = "What's the capital of France?"
+        prompt_2 = "What's the capital of Germany?"
+        extra_kwargs = provider_extra_kwargs_map.get(provider, {})
+        try:
+>           results = await asyncio.gather(
+                acompletion(
+                    f"{provider.value}/{model_id}", **extra_kwargs, messages=[{"role": "user", "content": prompt_1}]
+                ),
+                acompletion(
+                    f"{provider.value}/{model_id}", **extra_kwargs, messages=[{"role": "user", "content": prompt_2}]
+                ),
+            )
+
+tests/integration/test_completion.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/any_llm/api.py:238: in acompletion
+    return await provider.acompletion(model_name, messages, **completion_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/provider.py:177: in acompletion
+    return await asyncio.to_thread(self.completion, model, messages, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.13/3.13.5/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.13/3.13.5/Frameworks/Python.framework/Versions/3.13/lib/python3.13/concurrent/futures/thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/providers/ollama/ollama.py:120: in completion
+    response: OllamaChatResponse = client.chat(
+.venv/lib/python3.13/site-packages/ollama/_client.py:342: in chat
+    return self._request(
+.venv/lib/python3.13/site-packages/ollama/_client.py:180: in _request
+    return cls(**self._request_raw(*args, **kwargs).json())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ollama._client.Client object at 0x1182775c0>
+args = ('POST', '/api/chat')
+kwargs = {'json': {'messages': [{'content': "What's the capital of Germany?", 'role': 'user'}], 'model': 'llama3.2:1b', 'options': {'num_ctx': 32000}, 'stream': False, ...}}
+r = <Response [404 Not Found]>
+
+    def _request_raw(self, *args, **kwargs):
+      try:
+        r = self._client.request(*args, **kwargs)
+        r.raise_for_status()
+        return r
+      except httpx.HTTPStatusError as e:
+>       raise ResponseError(e.response.text, e.response.status_code) from None
+E       ollama._types.ResponseError: model "llama3.2:1b" not found, try pulling it first (status code: 404)
+
+.venv/lib/python3.13/site-packages/ollama/_client.py:124: ResponseError
+________________________ test_response_format[lmstudio] ________________________
+[gw13] darwin -- Python 3.13.5 /Users/rbesaleli/any-llm/.venv/bin/python3
+
+provider = <ProviderName.LMSTUDIO: 'lmstudio'>
+provider_model_map = {<ProviderName.ANTHROPIC: 'anthropic'>: 'claude-3-5-haiku-latest', <ProviderName.AWS: 'aws'>: 'amazon.nova-lite-v1:0', <ProviderName.AZURE: 'azure'>: 'openai/gpt-4.1-nano', <ProviderName.CEREBRAS: 'cerebras'>: 'llama-3.3-70b', ...}
+provider_extra_kwargs_map = {<ProviderName.AZURE: 'azure'>: {'api_base': 'https://models.github.ai/inference'}, <ProviderName.DATABRICKS: 'databri...X: 'watsonx'>: {'api_base': 'https://us-south.ml.cloud.ibm.com', 'project_id': '5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0'}}
+
+    def test_response_format(
+        provider: ProviderName,
+        provider_model_map: dict[ProviderName, str],
+        provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
+    ) -> None:
+        """Test that all supported providers can be loaded successfully."""
+        if provider in [ProviderName.COHERE]:
+            pytest.skip(f"{provider.value} does not support response_format")
+            return
+        model_id = provider_model_map[provider]
+        extra_kwargs = provider_extra_kwargs_map.get(provider, {})
+    
+        class ResponseFormat(BaseModel):
+            city_name: str
+    
+        prompt = "What is the capital of France?"
+        try:
+>           result = completion(
+                f"{provider.value}/{model_id}",
+                **extra_kwargs,
+                messages=[{"role": "user", "content": prompt}],
+                response_format=ResponseFormat,
+            )
+
+tests/integration/test_response_format.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/any_llm/api.py:161: in completion
+    return provider.completion(model_name, messages, **completion_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/providers/openai/base.py:114: in completion
+    client = OpenAI(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <openai.OpenAI object at 0x1690ef620>
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        organization: str | None = None,
+        project: str | None = None,
+        webhook_secret: str | None = None,
+        base_url: str | httpx.URL | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
+        timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        # Configure a custom httpx client.
+        # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
+        # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
+        http_client: httpx.Client | None = None,
+        # Enable or disable schema validation for data returned by the API.
+        # When enabled an error APIResponseValidationError is raised
+        # if the API responds with invalid data for the expected schema.
+        #
+        # This parameter may be removed or changed in the future.
+        # If you rely on this feature, please open a GitHub issue
+        # outlining your use-case to help us decide if it should be
+        # part of our public interface in the future.
+        _strict_response_validation: bool = False,
+    ) -> None:
+        """Construct a new synchronous OpenAI client instance.
+    
+        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+        - `api_key` from `OPENAI_API_KEY`
+        - `organization` from `OPENAI_ORG_ID`
+        - `project` from `OPENAI_PROJECT_ID`
+        - `webhook_secret` from `OPENAI_WEBHOOK_SECRET`
+        """
+        if api_key is None:
+            api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key is None:
+>           raise OpenAIError(
+                "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
+            )
+E           openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+
+.venv/lib/python3.13/site-packages/openai/_client.py:130: OpenAIError
+_________________________ test_response_format[ollama] _________________________
+[gw6] darwin -- Python 3.13.5 /Users/rbesaleli/any-llm/.venv/bin/python3
+
+provider = <ProviderName.OLLAMA: 'ollama'>
+provider_model_map = {<ProviderName.ANTHROPIC: 'anthropic'>: 'claude-3-5-haiku-latest', <ProviderName.AWS: 'aws'>: 'amazon.nova-lite-v1:0', <ProviderName.AZURE: 'azure'>: 'openai/gpt-4.1-nano', <ProviderName.CEREBRAS: 'cerebras'>: 'llama-3.3-70b', ...}
+provider_extra_kwargs_map = {<ProviderName.AZURE: 'azure'>: {'api_base': 'https://models.github.ai/inference'}, <ProviderName.DATABRICKS: 'databri...X: 'watsonx'>: {'api_base': 'https://us-south.ml.cloud.ibm.com', 'project_id': '5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0'}}
+
+    def test_response_format(
+        provider: ProviderName,
+        provider_model_map: dict[ProviderName, str],
+        provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
+    ) -> None:
+        """Test that all supported providers can be loaded successfully."""
+        if provider in [ProviderName.COHERE]:
+            pytest.skip(f"{provider.value} does not support response_format")
+            return
+        model_id = provider_model_map[provider]
+        extra_kwargs = provider_extra_kwargs_map.get(provider, {})
+    
+        class ResponseFormat(BaseModel):
+            city_name: str
+    
+        prompt = "What is the capital of France?"
+        try:
+>           result = completion(
+                f"{provider.value}/{model_id}",
+                **extra_kwargs,
+                messages=[{"role": "user", "content": prompt}],
+                response_format=ResponseFormat,
+            )
+
+tests/integration/test_response_format.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/any_llm/api.py:161: in completion
+    return provider.completion(model_name, messages, **completion_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/providers/ollama/ollama.py:120: in completion
+    response: OllamaChatResponse = client.chat(
+.venv/lib/python3.13/site-packages/ollama/_client.py:342: in chat
+    return self._request(
+.venv/lib/python3.13/site-packages/ollama/_client.py:180: in _request
+    return cls(**self._request_raw(*args, **kwargs).json())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ollama._client.Client object at 0x12498dd10>
+args = ('POST', '/api/chat')
+kwargs = {'json': {'format': {'properties': {'city_name': {'title': 'City Name', 'type': 'string'}}, 'required': ['city_name'],...tent': 'What is the capital of France?', 'role': 'user'}], 'model': 'llama3.2:1b', 'options': {'num_ctx': 32000}, ...}}
+r = <Response [404 Not Found]>
+
+    def _request_raw(self, *args, **kwargs):
+      try:
+        r = self._client.request(*args, **kwargs)
+        r.raise_for_status()
+        return r
+      except httpx.HTTPStatusError as e:
+>       raise ResponseError(e.response.text, e.response.status_code) from None
+E       ollama._types.ResponseError: model "llama3.2:1b" not found, try pulling it first (status code: 404)
+
+.venv/lib/python3.13/site-packages/ollama/_client.py:124: ResponseError
+_____________________ test_streaming_completion[lmstudio] ______________________
+[gw6] darwin -- Python 3.13.5 /Users/rbesaleli/any-llm/.venv/bin/python3
+
+provider = <ProviderName.LMSTUDIO: 'lmstudio'>
+provider_model_map = {<ProviderName.ANTHROPIC: 'anthropic'>: 'claude-3-5-haiku-latest', <ProviderName.AWS: 'aws'>: 'amazon.nova-lite-v1:0', <ProviderName.AZURE: 'azure'>: 'openai/gpt-4.1-nano', <ProviderName.CEREBRAS: 'cerebras'>: 'llama-3.3-70b', ...}
+provider_extra_kwargs_map = {<ProviderName.AZURE: 'azure'>: {'api_base': 'https://models.github.ai/inference'}, <ProviderName.DATABRICKS: 'databri...X: 'watsonx'>: {'api_base': 'https://us-south.ml.cloud.ibm.com', 'project_id': '5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0'}}
+
+    def test_streaming_completion(
+        provider: ProviderName,
+        provider_model_map: dict[ProviderName, str],
+        provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
+    ) -> None:
+        """Test that streaming completion works for supported providers."""
+        model_id = provider_model_map[provider]
+        extra_kwargs = provider_extra_kwargs_map.get(provider, {})
+        try:
+            output = ""
+            reasoning = ""
+            num_chunks = 0
+>           for result in completion(
+                f"{provider.value}/{model_id}",
+                **extra_kwargs,
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that exactly follows the user request."},
+                    {"role": "user", "content": "Say the exact phrase:'Hello World'"},
+                ],
+                stream=True,
+            ):
+
+tests/integration/test_streaming.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/any_llm/api.py:161: in completion
+    return provider.completion(model_name, messages, **completion_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/providers/openai/base.py:114: in completion
+    client = OpenAI(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <openai.OpenAI object at 0x124d217f0>
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        organization: str | None = None,
+        project: str | None = None,
+        webhook_secret: str | None = None,
+        base_url: str | httpx.URL | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
+        timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        # Configure a custom httpx client.
+        # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
+        # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
+        http_client: httpx.Client | None = None,
+        # Enable or disable schema validation for data returned by the API.
+        # When enabled an error APIResponseValidationError is raised
+        # if the API responds with invalid data for the expected schema.
+        #
+        # This parameter may be removed or changed in the future.
+        # If you rely on this feature, please open a GitHub issue
+        # outlining your use-case to help us decide if it should be
+        # part of our public interface in the future.
+        _strict_response_validation: bool = False,
+    ) -> None:
+        """Construct a new synchronous OpenAI client instance.
+    
+        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+        - `api_key` from `OPENAI_API_KEY`
+        - `organization` from `OPENAI_ORG_ID`
+        - `project` from `OPENAI_PROJECT_ID`
+        - `webhook_secret` from `OPENAI_WEBHOOK_SECRET`
+        """
+        if api_key is None:
+            api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key is None:
+>           raise OpenAIError(
+                "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
+            )
+E           openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+
+.venv/lib/python3.13/site-packages/openai/_client.py:130: OpenAIError
+______________________ test_embedding_providers[lmstudio] ______________________
+[gw2] darwin -- Python 3.13.5 /Users/rbesaleli/any-llm/.venv/bin/python3
+
+provider = <ProviderName.LMSTUDIO: 'lmstudio'>
+embedding_provider_model_map = {<ProviderName.AWS: 'aws'>: 'amazon.titan-embed-text-v2:0', <ProviderName.AZURE: 'azure'>: 'openai/text-embedding-3-sm...ame.DATABRICKS: 'databricks'>: 'databricks-bge-large-en', <ProviderName.GOOGLE: 'google'>: 'gemini-embedding-001', ...}
+provider_extra_kwargs_map = {<ProviderName.AZURE: 'azure'>: {'api_base': 'https://models.github.ai/inference'}, <ProviderName.DATABRICKS: 'databri...X: 'watsonx'>: {'api_base': 'https://us-south.ml.cloud.ibm.com', 'project_id': '5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0'}}
+
+    def test_embedding_providers(
+        provider: ProviderName,
+        embedding_provider_model_map: dict[ProviderName, str],
+        provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
+    ) -> None:
+        """Test that all embedding-supported providers can generate embeddings successfully."""
+        # first check if the provider supports embeddings
+        providers_metadata = ProviderFactory.get_all_provider_metadata()
+        provider_metadata = next(metadata for metadata in providers_metadata if metadata["provider_key"] == provider.value)
+        if not provider_metadata["embedding"]:
+            pytest.skip(f"{provider.value} does not support embeddings, skipping")
+    
+        model_id = embedding_provider_model_map[provider]
+        extra_kwargs = provider_extra_kwargs_map.get(provider, {})
+        try:
+>           result = embedding(f"{provider.value}/{model_id}", **extra_kwargs, inputs="Hello world")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_embedding.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/any_llm/api.py:431: in embedding
+    return provider.embedding(model_name, inputs, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/providers/openai/base.py:164: in embedding
+    client = OpenAI(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <openai.OpenAI object at 0x11f90af90>
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        organization: str | None = None,
+        project: str | None = None,
+        webhook_secret: str | None = None,
+        base_url: str | httpx.URL | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
+        timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        # Configure a custom httpx client.
+        # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
+        # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
+        http_client: httpx.Client | None = None,
+        # Enable or disable schema validation for data returned by the API.
+        # When enabled an error APIResponseValidationError is raised
+        # if the API responds with invalid data for the expected schema.
+        #
+        # This parameter may be removed or changed in the future.
+        # If you rely on this feature, please open a GitHub issue
+        # outlining your use-case to help us decide if it should be
+        # part of our public interface in the future.
+        _strict_response_validation: bool = False,
+    ) -> None:
+        """Construct a new synchronous OpenAI client instance.
+    
+        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+        - `api_key` from `OPENAI_API_KEY`
+        - `organization` from `OPENAI_ORG_ID`
+        - `project` from `OPENAI_PROJECT_ID`
+        - `webhook_secret` from `OPENAI_WEBHOOK_SECRET`
+        """
+        if api_key is None:
+            api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key is None:
+>           raise OpenAIError(
+                "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
+            )
+E           openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+
+.venv/lib/python3.13/site-packages/openai/_client.py:130: OpenAIError
+______________________ test_streaming_completion[ollama] _______________________
+[gw6] darwin -- Python 3.13.5 /Users/rbesaleli/any-llm/.venv/bin/python3
+
+provider = <ProviderName.OLLAMA: 'ollama'>
+provider_model_map = {<ProviderName.ANTHROPIC: 'anthropic'>: 'claude-3-5-haiku-latest', <ProviderName.AWS: 'aws'>: 'amazon.nova-lite-v1:0', <ProviderName.AZURE: 'azure'>: 'openai/gpt-4.1-nano', <ProviderName.CEREBRAS: 'cerebras'>: 'llama-3.3-70b', ...}
+provider_extra_kwargs_map = {<ProviderName.AZURE: 'azure'>: {'api_base': 'https://models.github.ai/inference'}, <ProviderName.DATABRICKS: 'databri...X: 'watsonx'>: {'api_base': 'https://us-south.ml.cloud.ibm.com', 'project_id': '5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0'}}
+
+    def test_streaming_completion(
+        provider: ProviderName,
+        provider_model_map: dict[ProviderName, str],
+        provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
+    ) -> None:
+        """Test that streaming completion works for supported providers."""
+        model_id = provider_model_map[provider]
+        extra_kwargs = provider_extra_kwargs_map.get(provider, {})
+        try:
+            output = ""
+            reasoning = ""
+            num_chunks = 0
+>           for result in completion(
+                f"{provider.value}/{model_id}",
+                **extra_kwargs,
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that exactly follows the user request."},
+                    {"role": "user", "content": "Say the exact phrase:'Hello World'"},
+                ],
+                stream=True,
+            ):
+
+tests/integration/test_streaming.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/any_llm/providers/ollama/ollama.py:72: in _stream_completion
+    for chunk in response:
+                 ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def inner():
+      with self._client.stream(*args, **kwargs) as r:
+        try:
+          r.raise_for_status()
+        except httpx.HTTPStatusError as e:
+          e.response.read()
+>         raise ResponseError(e.response.text, e.response.status_code) from None
+E         ollama._types.ResponseError: model "llama3.2:1b" not found, try pulling it first (status code: 404)
+
+.venv/lib/python3.13/site-packages/ollama/_client.py:170: ResponseError
+_____________________________ test_tool[lmstudio] ______________________________
+[gw6] darwin -- Python 3.13.5 /Users/rbesaleli/any-llm/.venv/bin/python3
+
+provider = <ProviderName.LMSTUDIO: 'lmstudio'>
+provider_model_map = {<ProviderName.ANTHROPIC: 'anthropic'>: 'claude-3-5-haiku-latest', <ProviderName.AWS: 'aws'>: 'amazon.nova-lite-v1:0', <ProviderName.AZURE: 'azure'>: 'openai/gpt-4.1-nano', <ProviderName.CEREBRAS: 'cerebras'>: 'llama-3.3-70b', ...}
+provider_extra_kwargs_map = {<ProviderName.AZURE: 'azure'>: {'api_base': 'https://models.github.ai/inference'}, <ProviderName.DATABRICKS: 'databri...X: 'watsonx'>: {'api_base': 'https://us-south.ml.cloud.ibm.com', 'project_id': '5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0'}}
+
+    def test_tool(
+        provider: ProviderName,
+        provider_model_map: dict[ProviderName, str],
+        provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
+    ) -> None:
+        """Test that all supported providers can be loaded successfully."""
+        model_id = provider_model_map[provider]
+        extra_kwargs = provider_extra_kwargs_map.get(provider, {})
+    
+        def capital_city(country: str) -> str:
+            """Tool function to get the capital of a city."""
+            return f"The capital of {country} is what you want it to be"
+    
+        prompt = "Please call the `capital_city` tool with the argument `France`"
+        try:
+>           result = completion(
+                f"{provider.value}/{model_id}",
+                **extra_kwargs,
+                messages=[{"role": "user", "content": prompt}],
+                tools=[capital_city],
+            )
+
+tests/integration/test_tool.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/any_llm/api.py:161: in completion
+    return provider.completion(model_name, messages, **completion_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/providers/openai/base.py:114: in completion
+    client = OpenAI(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <openai.OpenAI object at 0x12498e990>
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        organization: str | None = None,
+        project: str | None = None,
+        webhook_secret: str | None = None,
+        base_url: str | httpx.URL | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
+        timeout: Union[float, Timeout, None, NotGiven] = NOT_GIVEN,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        default_headers: Mapping[str, str] | None = None,
+        default_query: Mapping[str, object] | None = None,
+        # Configure a custom httpx client.
+        # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
+        # See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
+        http_client: httpx.Client | None = None,
+        # Enable or disable schema validation for data returned by the API.
+        # When enabled an error APIResponseValidationError is raised
+        # if the API responds with invalid data for the expected schema.
+        #
+        # This parameter may be removed or changed in the future.
+        # If you rely on this feature, please open a GitHub issue
+        # outlining your use-case to help us decide if it should be
+        # part of our public interface in the future.
+        _strict_response_validation: bool = False,
+    ) -> None:
+        """Construct a new synchronous OpenAI client instance.
+    
+        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+        - `api_key` from `OPENAI_API_KEY`
+        - `organization` from `OPENAI_ORG_ID`
+        - `project` from `OPENAI_PROJECT_ID`
+        - `webhook_secret` from `OPENAI_WEBHOOK_SECRET`
+        """
+        if api_key is None:
+            api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key is None:
+>           raise OpenAIError(
+                "The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
+            )
+E           openai.OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+
+.venv/lib/python3.13/site-packages/openai/_client.py:130: OpenAIError
+______________________________ test_tool[ollama] _______________________________
+[gw7] darwin -- Python 3.13.5 /Users/rbesaleli/any-llm/.venv/bin/python3
+
+provider = <ProviderName.OLLAMA: 'ollama'>
+provider_model_map = {<ProviderName.ANTHROPIC: 'anthropic'>: 'claude-3-5-haiku-latest', <ProviderName.AWS: 'aws'>: 'amazon.nova-lite-v1:0', <ProviderName.AZURE: 'azure'>: 'openai/gpt-4.1-nano', <ProviderName.CEREBRAS: 'cerebras'>: 'llama-3.3-70b', ...}
+provider_extra_kwargs_map = {<ProviderName.AZURE: 'azure'>: {'api_base': 'https://models.github.ai/inference'}, <ProviderName.DATABRICKS: 'databri...X: 'watsonx'>: {'api_base': 'https://us-south.ml.cloud.ibm.com', 'project_id': '5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0'}}
+
+    def test_tool(
+        provider: ProviderName,
+        provider_model_map: dict[ProviderName, str],
+        provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
+    ) -> None:
+        """Test that all supported providers can be loaded successfully."""
+        model_id = provider_model_map[provider]
+        extra_kwargs = provider_extra_kwargs_map.get(provider, {})
+    
+        def capital_city(country: str) -> str:
+            """Tool function to get the capital of a city."""
+            return f"The capital of {country} is what you want it to be"
+    
+        prompt = "Please call the `capital_city` tool with the argument `France`"
+        try:
+>           result = completion(
+                f"{provider.value}/{model_id}",
+                **extra_kwargs,
+                messages=[{"role": "user", "content": prompt}],
+                tools=[capital_city],
+            )
+
+tests/integration/test_tool.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/any_llm/api.py:161: in completion
+    return provider.completion(model_name, messages, **completion_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/any_llm/providers/ollama/ollama.py:120: in completion
+    response: OllamaChatResponse = client.chat(
+.venv/lib/python3.13/site-packages/ollama/_client.py:342: in chat
+    return self._request(
+.venv/lib/python3.13/site-packages/ollama/_client.py:180: in _request
+    return cls(**self._request_raw(*args, **kwargs).json())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ollama._client.Client object at 0x11b9bda90>
+args = ('POST', '/api/chat')
+kwargs = {'json': {'messages': [{'content': 'Please call the `capital_city` tool with the argument `France`', 'role': 'user'}], 'model': 'llama3.2:1b', 'options': {'num_ctx': 32000}, 'stream': False, ...}}
+r = <Response [404 Not Found]>
+
+    def _request_raw(self, *args, **kwargs):
+      try:
+        r = self._client.request(*args, **kwargs)
+        r.raise_for_status()
+        return r
+      except httpx.HTTPStatusError as e:
+>       raise ResponseError(e.response.text, e.response.status_code) from None
+E       ollama._types.ResponseError: model "llama3.2:1b" not found, try pulling it first (status code: 404)
+
+.venv/lib/python3.13/site-packages/ollama/_client.py:124: ResponseError
+=========================== short test summary info ============================
+FAILED tests/integration/test_completion.py::test_providers[lmstudio] - opena...
+FAILED tests/integration/test_completion.py::test_parallel_async_completion[lmstudio]
+FAILED tests/integration/test_completion.py::test_providers[ollama] - ollama....
+FAILED tests/integration/test_completion.py::test_parallel_async_completion[ollama]
+FAILED tests/integration/test_response_format.py::test_response_format[lmstudio]
+FAILED tests/integration/test_response_format.py::test_response_format[ollama]
+FAILED tests/integration/test_streaming.py::test_streaming_completion[lmstudio]
+FAILED tests/integration/test_embedding.py::test_embedding_providers[lmstudio]
+FAILED tests/integration/test_streaming.py::test_streaming_completion[ollama]
+FAILED tests/integration/test_tool.py::test_tool[lmstudio] - openai.OpenAIErr...
+FAILED tests/integration/test_tool.py::test_tool[ollama] - ollama._types.Resp...
+================== 11 failed, 6 passed, 183 skipped in 8.31s ===================
