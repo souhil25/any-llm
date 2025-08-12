@@ -72,9 +72,7 @@ def provider_extra_kwargs_map() -> dict[ProviderName, dict[str, Any]]:
             "api_base": "https://us-south.ml.cloud.ibm.com",
             "project_id": "5b083ace-95a6-4f95-a0a0-d4c5d9e98ca0",
         },
-        ProviderName.DATABRICKS: {
-            "api_base": "https://dbc-40d03128-ecae.cloud.databricks.com/serving-endpoints"
-        }
+        ProviderName.DATABRICKS: {"api_base": "https://dbc-40d03128-ecae.cloud.databricks.com/serving-endpoints"},
     }
 
 
