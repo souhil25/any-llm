@@ -26,7 +26,7 @@ def test_reasoning_providers(
         result = completion(
             f"{provider.value}/{model_id}",
             **extra_kwargs,
-            messages=[{"role": "user", "content": "Please say hello! Think before you respond."}],
+            messages=[{"role": "user", "content": "Please say hello! Think very briefly before you respond."}],
         )
     except MissingApiKeyError:
         pytest.skip(f"{provider.value} API key not provided, skipping")
