@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from any_llm import ProviderName, completion
 from any_llm.exceptions import MissingApiKeyError
+from any_llm.provider import ProviderFactory
 from any_llm.types.completion import ChatCompletion
 
 
@@ -15,6 +16,10 @@ def test_response_format(
     provider_model_map: dict[ProviderName, str],
     provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
 ) -> None:
+    # first check if the provider supports response_format
+    cls = ProviderFactory.get_provider_class(provider)
+    if not cls.SUPPORTS_COMPLETION:
+        pytest.skip(f"{provider.value} does not support response_format, skipping")
     """Test that all supported providers can be loaded successfully."""
     if provider in [ProviderName.COHERE]:
         pytest.skip(f"{provider.value} does not support response_format")

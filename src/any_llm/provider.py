@@ -46,6 +46,7 @@ class ProviderName(str, Enum):
     PORTKEY = "portkey"
     SAMBANOVA = "sambanova"
     TOGETHER = "together"
+    VOYAGE = "voyage"
     WATSONX = "watsonx"
     XAI = "xai"
 
