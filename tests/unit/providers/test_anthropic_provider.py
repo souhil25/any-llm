@@ -43,7 +43,7 @@ def test_anthropic_client_created_without_api_base() -> None:
         mock_anthropic.assert_called_once_with(api_key=api_key, base_url=None)
 
 
-def testcompletion_with_system_message() -> None:
+def test_completion_with_system_message() -> None:
     """Test that completion correctly processes a system message."""
     api_key = "test-api-key"
     model = "model-id"
@@ -64,7 +64,7 @@ def testcompletion_with_system_message() -> None:
         )
 
 
-def testcompletion_with_multiple_system_messages() -> None:
+def test_completion_with_multiple_system_messages() -> None:
     """Test that completion concatenates multiple system messages."""
     api_key = "test-api-key"
     model = "model-id"
@@ -86,7 +86,7 @@ def testcompletion_with_multiple_system_messages() -> None:
         )
 
 
-def testcompletion_with_kwargs() -> None:
+def test_completion_with_kwargs() -> None:
     """Test that completion passes kwargs to the Anthropic client."""
     api_key = "test-api-key"
     model = "model-id"
@@ -104,7 +104,7 @@ def testcompletion_with_kwargs() -> None:
         )
 
 
-def testcompletion_with_tool_choice_required() -> None:
+def test_completion_with_tool_choice_required() -> None:
     """Test that completion correctly processes tool_choice='required'."""
     api_key = "test-api-key"
     model = "model-id"
@@ -126,7 +126,7 @@ def testcompletion_with_tool_choice_required() -> None:
 
 
 @pytest.mark.parametrize("parallel_tool_calls", [True, False])
-def testcompletion_with_tool_choice_and_parallel_tool_calls(parallel_tool_calls: bool) -> None:
+def test_completion_with_tool_choice_and_parallel_tool_calls(parallel_tool_calls: bool) -> None:
     """Test that completion correctly processes tool_choice and parallel_tool_calls."""
     api_key = "test-api-key"
     model = "model-id"
@@ -162,4 +162,39 @@ def test_stream_with_response_format_raises() -> None:
                 messages=messages,
                 response_format={"type": "json_object"},
             )
+        )
+
+
+def test_make_api_call_inside_agent_loop() -> None:
+    api_key = "test-api-key"
+    model = "model-id"
+    messages = [
+        {"role": "user", "content": "What is the weather like in Salvaterra?"},
+        {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {"id": "foo", "function": {"name": "get_weather", "arguments": '{"location": "Salvaterra"}'}}
+            ],
+        },
+        {"role": "tool", "tool_call_id": "foo", "content": "sunny"},
+    ]
+
+    with mock_anthropic_provider() as mock_anthropic:
+        provider = AnthropicProvider(ApiConfig(api_key=api_key))
+        provider.completion(model, messages)  # type: ignore[arg-type]
+
+        mock_anthropic.return_value.messages.create.assert_called_once_with(
+            model=model,
+            messages=[
+                {"role": "user", "content": "What is the weather like in Salvaterra?"},
+                {
+                    "role": "assistant",
+                    "content": [
+                        {"type": "tool_use", "id": "foo", "name": "get_weather", "input": {"location": "Salvaterra"}}
+                    ],
+                },
+                {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "foo", "content": "sunny"}]},
+            ],
+            max_tokens=4096,
         )
