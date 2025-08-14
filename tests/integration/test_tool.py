@@ -14,6 +14,8 @@ def test_tool(
     provider_model_map: dict[ProviderName, str],
     provider_extra_kwargs_map: dict[ProviderName, dict[str, Any]],
 ) -> None:
+    if provider == ProviderName.LLAMAFILE:
+        pytest.skip("Llamafile does not support tools, skipping")
     """Test that all supported providers can be loaded successfully."""
     cls = ProviderFactory.get_provider_class(provider)
     if not cls.SUPPORTS_COMPLETION:
@@ -37,6 +39,6 @@ def test_tool(
     except MissingApiKeyError:
         pytest.skip(f"{provider.value} API key not provided, skipping")
     except (httpx.HTTPStatusError, httpx.ConnectError, APIConnectionError):
-        if provider in [ProviderName.OLLAMA, ProviderName.LMSTUDIO]:
+        if provider in [ProviderName.OLLAMA, ProviderName.LMSTUDIO, ProviderName.LLAMAFILE]:
             pytest.skip("Local Model host is not set up, skipping")
         raise

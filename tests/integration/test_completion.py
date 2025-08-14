@@ -30,7 +30,7 @@ def test_sync_completion(
     except MissingApiKeyError:
         pytest.skip(f"{provider.value} API key not provided, skipping")
     except (httpx.HTTPStatusError, httpx.ConnectError, APIConnectionError):
-        if provider in [ProviderName.OLLAMA, ProviderName.LMSTUDIO]:
+        if provider in [ProviderName.OLLAMA, ProviderName.LMSTUDIO, ProviderName.LLAMAFILE]:
             pytest.skip("Local Model host is not set up, skipping")
         raise
     assert isinstance(result, ChatCompletion)
@@ -72,6 +72,6 @@ async def test_async_completion(
     except MissingApiKeyError:
         pytest.skip(f"{provider.value} API key not provided, skipping")
     except (httpx.HTTPStatusError, httpx.ConnectError, APIConnectionError):
-        if provider in [ProviderName.OLLAMA, ProviderName.LMSTUDIO]:
+        if provider in [ProviderName.OLLAMA, ProviderName.LMSTUDIO, ProviderName.LLAMAFILE]:
             pytest.skip("Local model host is not set up, skipping")
         raise
