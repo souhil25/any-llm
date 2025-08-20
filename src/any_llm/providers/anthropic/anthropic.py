@@ -56,7 +56,7 @@ class AnthropicProvider(Provider):
             **kwargs,
         ) as anthropic_stream:
             async for event in anthropic_stream:
-                yield _create_openai_chunk_from_anthropic_chunk(event)
+                yield _create_openai_chunk_from_anthropic_chunk(event, kwargs.get("model", "unknown"))
 
     def _stream_completion(
         self,
@@ -72,7 +72,7 @@ class AnthropicProvider(Provider):
             **kwargs,
         ) as anthropic_stream:
             for event in anthropic_stream:
-                yield _create_openai_chunk_from_anthropic_chunk(event)
+                yield _create_openai_chunk_from_anthropic_chunk(event, kwargs.get("model", "unknown"))
 
     async def acompletion(
         self,

@@ -84,13 +84,13 @@ def _convert_messages_for_anthropic(messages: list[dict[str, Any]]) -> tuple[str
     return system_message, filtered_messages
 
 
-def _create_openai_chunk_from_anthropic_chunk(chunk: Any) -> ChatCompletionChunk:
+def _create_openai_chunk_from_anthropic_chunk(chunk: Any, model_id: str) -> ChatCompletionChunk:
     """Convert Anthropic streaming chunk to OpenAI ChatCompletionChunk format."""
     chunk_dict = {
         "id": f"chatcmpl-{hash(str(chunk))}",
         "object": "chat.completion.chunk",
         "created": 0,
-        "model": "claude-3-5-sonnet-20241022",  # Default model
+        "model": model_id,
         "choices": [],
         "usage": None,
     }
@@ -99,11 +99,9 @@ def _create_openai_chunk_from_anthropic_chunk(chunk: Any) -> ChatCompletionChunk
     finish_reason = None
 
     if isinstance(chunk, ContentBlockStartEvent):
-        # Starting a new content block
         if chunk.content_block.type == "text":
             delta = {"content": ""}
         elif chunk.content_block.type == "tool_use":
-            # Start of tool call
             delta = {
                 "tool_calls": [
                     {
@@ -114,13 +112,13 @@ def _create_openai_chunk_from_anthropic_chunk(chunk: Any) -> ChatCompletionChunk
                     }
                 ]
             }
+        elif chunk.content_block.type == "thinking":
+            delta = {"reasoning": {"content": ""}}
 
     elif isinstance(chunk, ContentBlockDeltaEvent):
-        # Delta content
         if chunk.delta.type == "text_delta":
             delta = {"content": chunk.delta.text}
         elif chunk.delta.type == "input_json_delta":
-            # Tool call arguments delta
             delta = {
                 "tool_calls": [
                     {
@@ -129,16 +127,16 @@ def _create_openai_chunk_from_anthropic_chunk(chunk: Any) -> ChatCompletionChunk
                     }
                 ]
             }
+        elif chunk.delta.type == "thinking_delta":
+            delta = {"reasoning": {"content": chunk.delta.thinking}}
 
     elif isinstance(chunk, ContentBlockStopEvent):
-        # End of content block
         if hasattr(chunk, "content_block") and chunk.content_block.type == "tool_use":
             finish_reason = "tool_calls"
         else:
             finish_reason = None
 
     elif isinstance(chunk, MessageStopEvent):
-        # End of message
         finish_reason = "stop"
         if hasattr(chunk, "message") and chunk.message.usage:
             chunk_dict["usage"] = {
