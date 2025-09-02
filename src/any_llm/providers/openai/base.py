@@ -37,18 +37,12 @@ class BaseOpenAIProvider(Provider, ABC):
 
     _DEFAULT_REASONING_EFFORT: Literal["minimal", "low", "medium", "high", "auto"] | None = None
 
-    @property
-    def openai_client(self) -> OpenAI:
-        return OpenAI(
+    def _get_client(self, sync: bool = False) -> AsyncOpenAI | OpenAI:
+        _client_class = OpenAI if sync else AsyncOpenAI
+        return _client_class(
             base_url=self.config.api_base or self.API_BASE or os.getenv("OPENAI_API_BASE"),
             api_key=self.config.api_key,
-        )
-
-    @property
-    def async_openai_client(self) -> AsyncOpenAI:
-        return AsyncOpenAI(
-            base_url=self.config.api_base or self.API_BASE or os.getenv("OPENAI_API_BASE"),
-            api_key=self.config.api_key,
+            **(self.config.client_args if self.config.client_args else {}),
         )
 
     def _convert_completion_response_async(
@@ -75,7 +69,7 @@ class BaseOpenAIProvider(Provider, ABC):
     async def acompletion(
         self, params: CompletionParams, **kwargs: Any
     ) -> ChatCompletion | AsyncIterator[ChatCompletionChunk]:
-        client = self.async_openai_client
+        client = cast("AsyncOpenAI", self._get_client(sync=False))
 
         if params.reasoning_effort == "auto":
             params.reasoning_effort = self._DEFAULT_REASONING_EFFORT
@@ -104,7 +98,7 @@ class BaseOpenAIProvider(Provider, ABC):
         self, model: str, input_data: Any, **kwargs: Any
     ) -> Response | AsyncIterator[ResponseStreamEvent]:
         """Call OpenAI Responses API"""
-        client = self.async_openai_client
+        client = self._get_client()
 
         response = await client.responses.create(
             model=model,
@@ -127,7 +121,7 @@ class BaseOpenAIProvider(Provider, ABC):
             msg = "This provider does not support embeddings."
             raise NotImplementedError(msg)
 
-        client = self.async_openai_client
+        client = cast("AsyncOpenAI", self._get_client())
 
         return await client.embeddings.create(
             model=model,
@@ -143,6 +137,5 @@ class BaseOpenAIProvider(Provider, ABC):
         if not self.SUPPORTS_LIST_MODELS:
             message = f"{self.PROVIDER_NAME} does not support listing models."
             raise NotImplementedError(message)
-        client = self.openai_client
-
+        client = cast("OpenAI", self._get_client(sync=True))
         return client.models.list(**kwargs).data

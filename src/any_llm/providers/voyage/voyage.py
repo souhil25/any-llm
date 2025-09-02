@@ -42,7 +42,9 @@ class VoyageProvider(Provider):
         if isinstance(inputs, str):
             inputs = [inputs]
 
-        client = AsyncClient(api_key=self.config.api_key)
+        client = AsyncClient(
+            api_key=self.config.api_key, **(self.config.client_args if self.config.client_args else {})
+        )
         result = await client.embed(
             texts=inputs,
             model=model,

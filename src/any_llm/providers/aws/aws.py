@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from any_llm.exceptions import MissingApiKeyError
 from any_llm.logging import logger
-from any_llm.provider import ApiConfig, Provider
+from any_llm.provider import ClientConfig, Provider
 from any_llm.types.completion import ChatCompletion, ChatCompletionChunk, CompletionParams, CreateEmbeddingResponse
 from any_llm.types.model import Model
 from any_llm.utils.instructor import _convert_instructor_response
@@ -46,7 +46,7 @@ class AwsProvider(Provider):
 
     MISSING_PACKAGES_ERROR = MISSING_PACKAGES_ERROR
 
-    def __init__(self, config: ApiConfig) -> None:
+    def __init__(self, config: ClientConfig) -> None:
         """Initialize AWS Bedrock provider."""
         # This intentionally does not call super().__init__(config) because AWS has a different way of handling credentials
         self._verify_no_missing_packages()
@@ -97,7 +97,12 @@ class AwsProvider(Provider):
         """Create a chat completion using AWS Bedrock with instructor support."""
         self._check_aws_credentials()
 
-        client = boto3.client("bedrock-runtime", endpoint_url=self.config.api_base, region_name=self.region_name)  # type: ignore[no-untyped-call]
+        client = boto3.client(  # type: ignore[no-untyped-call]
+            "bedrock-runtime",
+            endpoint_url=self.config.api_base,
+            region_name=self.region_name,
+            **(self.config.client_args if self.config.client_args else {}),
+        )
 
         if params.reasoning_effort == "auto":
             params.reasoning_effort = None
@@ -180,7 +185,12 @@ class AwsProvider(Provider):
         """Create embeddings using AWS Bedrock."""
         self._check_aws_credentials()
 
-        client = boto3.client("bedrock-runtime", endpoint_url=self.config.api_base, region_name=self.region_name)  # type: ignore[no-untyped-call]
+        client = boto3.client(
+            "bedrock-runtime",
+            endpoint_url=self.config.api_base,
+            region_name=self.region_name,
+            **(self.config.client_args if self.config.client_args else {}),
+        )  # type: ignore[no-untyped-call]
 
         input_texts = [inputs] if isinstance(inputs, str) else inputs
 
@@ -209,7 +219,12 @@ class AwsProvider(Provider):
         """
         Fetch available models from the /v1/models endpoint.
         """
-        client = boto3.client("bedrock", endpoint_url=self.config.api_base, region_name=self.region_name)  # type: ignore[no-untyped-call]
+        client = boto3.client(
+            "bedrock",
+            endpoint_url=self.config.api_base,
+            region_name=self.region_name,
+            **(self.config.client_args if self.config.client_args else {}),
+        )  # type: ignore[no-untyped-call]
         models_list = client.list_foundation_models(**kwargs).get("modelSummaries", [])
         # AWS doesn't provide a creation date for models
         # AWS doesn't provide typing, but per https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/bedrock/client/list_foundation_models.html

@@ -6,7 +6,7 @@ from unittest.mock import patch
 import pytest
 
 from any_llm.exceptions import MissingApiKeyError, UnsupportedProviderError
-from any_llm.provider import ApiConfig, ProviderFactory, ProviderName
+from any_llm.provider import ClientConfig, ProviderFactory, ProviderName
 
 
 def test_all_providers_in_enum() -> None:
@@ -114,7 +114,7 @@ def test_all_providers_have_required_attributes(provider: str) -> None:
     This test verifies that providers can handle common configuration parameters
     like api_key and api_base without throwing errors during instantiation.
     """
-    sample_config = ApiConfig(api_key="test_key", api_base="https://test.example.com")
+    sample_config = ClientConfig(api_key="test_key", api_base="https://test.example.com")
 
     provider_instance = ProviderFactory.create_provider(provider, sample_config)
 
@@ -129,11 +129,11 @@ def test_all_providers_have_required_attributes(provider: str) -> None:
 
 
 def test_providers_raise_MissingApiKeyError(provider: str) -> None:
-    if provider in ("aws", "ollama", "lmstudio", "llamafile"):
+    if provider in ("aws", "google", "ollama", "lmstudio", "llamafile"):
         pytest.skip("This provider handles `api_key` differently.")
     with patch.dict(os.environ, {}, clear=True):
         with pytest.raises(MissingApiKeyError):
-            ProviderFactory.create_provider(provider, ApiConfig())
+            ProviderFactory.create_provider(provider, ClientConfig())
 
 
 @pytest.mark.parametrize(
@@ -162,7 +162,7 @@ def test_providers_raise_ImportError_from_original(provider_name: str, module_na
             if mod.startswith((f"any_llm.providers.{provider_name}", f"{module_name}.")):
                 sys.modules.pop(mod)
         with pytest.raises(ImportError) as e:
-            ProviderFactory.create_provider(provider_name, ApiConfig(api_key="test_key"))
+            ProviderFactory.create_provider(provider_name, ClientConfig(api_key="test_key"))
         original_error = e.value.__cause__
         assert any(
             msg in str(original_error)

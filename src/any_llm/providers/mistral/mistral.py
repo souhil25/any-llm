@@ -70,7 +70,11 @@ class MistralProvider(Provider):
         ):
             kwargs["response_format"] = response_format_from_pydantic_model(params.response_format)
 
-        client = Mistral(api_key=self.config.api_key, server_url=self.config.api_base)
+        client = Mistral(
+            api_key=self.config.api_key,
+            server_url=self.config.api_base,
+            **(self.config.client_args if self.config.client_args else {}),
+        )
 
         if params.stream:
             return self._stream_completion_async(
@@ -99,7 +103,11 @@ class MistralProvider(Provider):
         inputs: str | list[str],
         **kwargs: Any,
     ) -> CreateEmbeddingResponse:
-        client = Mistral(api_key=self.config.api_key, server_url=self.config.api_base)
+        client = Mistral(
+            api_key=self.config.api_key,
+            server_url=self.config.api_base,
+            **(self.config.client_args if self.config.client_args else {}),
+        )
         result: EmbeddingResponse = await client.embeddings.create_async(
             model=model,
             inputs=inputs,
@@ -112,6 +120,10 @@ class MistralProvider(Provider):
         """
         Fetch available models from the /v1/models endpoint.
         """
-        client = Mistral(api_key=self.config.api_key, server_url=self.config.api_base)
+        client = Mistral(
+            api_key=self.config.api_key,
+            server_url=self.config.api_base,
+            **(self.config.client_args if self.config.client_args else {}),
+        )
         models_list = client.models.list(**kwargs)
         return _convert_models_list(models_list)

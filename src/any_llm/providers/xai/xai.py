@@ -43,7 +43,9 @@ class XaiProvider(Provider):
         self, params: CompletionParams, **kwargs: Any
     ) -> ChatCompletion | AsyncIterator[ChatCompletionChunk]:
         """Call the XAI Python SDK Chat Completions API and convert to AnyLLM types."""
-        client = XaiAsyncClient(api_key=self.config.api_key)
+        client = XaiAsyncClient(
+            api_key=self.config.api_key, **(self.config.client_args if self.config.client_args else {})
+        )
 
         xai_messages = []
         for message in params.messages:
@@ -113,6 +115,6 @@ class XaiProvider(Provider):
         """
         Fetch available models from the /v1/models endpoint.
         """
-        client = XaiClient(api_key=self.config.api_key)
+        client = XaiClient(api_key=self.config.api_key, **(self.config.client_args if self.config.client_args else {}))
         models_list = client.models.list_language_models()
         return _convert_models_list(models_list)

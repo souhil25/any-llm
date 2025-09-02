@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, Any, cast
 
-from any_llm.provider import ApiConfig, Provider
+from any_llm.provider import ClientConfig, Provider
 
 MISSING_PACKAGES_ERROR = None
 try:
@@ -43,7 +43,7 @@ class AzureProvider(Provider):
 
     MISSING_PACKAGES_ERROR = MISSING_PACKAGES_ERROR
 
-    def __init__(self, config: ApiConfig) -> None:
+    def __init__(self, config: ClientConfig) -> None:
         """Initialize Azure provider."""
         super().__init__(config)
 
@@ -64,6 +64,7 @@ class AzureProvider(Provider):
             endpoint=self._get_endpoint(),
             credential=AzureKeyCredential(self.config.api_key or ""),
             api_version=api_version,
+            **(self.config.client_args if self.config.client_args else {}),
         )
 
     def _create_embeddings_client_async(self, api_version: str) -> aio.EmbeddingsClient:
@@ -72,6 +73,7 @@ class AzureProvider(Provider):
             endpoint=self._get_endpoint(),
             credential=AzureKeyCredential(self.config.api_key or ""),
             api_version=api_version,
+            **(self.config.client_args if self.config.client_args else {}),
         )
 
     async def _stream_completion_async(

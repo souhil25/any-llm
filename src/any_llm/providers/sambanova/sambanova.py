@@ -32,6 +32,7 @@ class SambanovaProvider(BaseOpenAIProvider):
         client = AsyncOpenAI(
             base_url=self.config.api_base or self.API_BASE or os.getenv("OPENAI_API_BASE"),
             api_key=self.config.api_key,
+            **(self.config.client_args if self.config.client_args else {}),
         )
 
         if params.reasoning_effort == "auto":

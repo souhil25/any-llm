@@ -90,10 +90,11 @@ class TogetherProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
         """Make the API call to Together AI with instructor support for structured outputs."""
-        if self.config.api_base:
-            client = together.Together(api_key=self.config.api_key, base_url=self.config.api_base)
-        else:
-            client = together.Together(api_key=self.config.api_key)
+        client = together.Together(
+            api_key=self.config.api_key,
+            base_url=self.config.api_base,
+            **(self.config.client_args if self.config.client_args else {}),
+        )
 
         if params.reasoning_effort == "auto":
             params.reasoning_effort = None
@@ -138,10 +139,11 @@ class TogetherProvider(Provider):
         **kwargs: Any,
     ) -> ChatCompletion | AsyncIterator[ChatCompletionChunk]:
         """Make the API call to Together AI with instructor support for structured outputs."""
-        if self.config.api_base:
-            client = together.AsyncTogether(api_key=self.config.api_key, base_url=self.config.api_base)
-        else:
-            client = together.AsyncTogether(api_key=self.config.api_key)
+        client = together.AsyncTogether(
+            api_key=self.config.api_key,
+            base_url=self.config.api_base,
+            **(self.config.client_args if self.config.client_args else {}),
+        )
 
         if params.reasoning_effort == "auto":
             params.reasoning_effort = None
@@ -154,7 +156,8 @@ class TogetherProvider(Provider):
                 messages=cast("Any", params.messages),
                 response_model=params.response_format,
                 **params.model_dump(
-                    exclude_none=True, exclude={"model_id", "messages", "reasoning_effort", "response_format"}
+                    exclude_none=True,
+                    exclude={"model_id", "messages", "reasoning_effort", "response_format"},
                 ),
                 **kwargs,
             )

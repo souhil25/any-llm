@@ -4,7 +4,7 @@ from typing import Any, cast
 from pydantic import BaseModel
 
 from any_llm.exceptions import UnsupportedParameterError
-from any_llm.provider import ApiConfig, Provider
+from any_llm.provider import Provider
 from any_llm.types.completion import ChatCompletion, ChatCompletionChunk, CompletionParams
 from any_llm.types.model import Model
 from any_llm.utils.instructor import _convert_instructor_response
@@ -40,12 +40,6 @@ class CerebrasProvider(Provider):
 
     MISSING_PACKAGES_ERROR = MISSING_PACKAGES_ERROR
 
-    def __init__(self, config: ApiConfig) -> None:
-        """Initialize Cerebras provider."""
-        super().__init__(config)
-        self.client = cerebras.Cerebras(api_key=config.api_key)
-        self.instructor_client = instructor.from_cerebras(self.client)
-
     async def _stream_completion_async(
         self,
         model: str,
@@ -54,7 +48,9 @@ class CerebrasProvider(Provider):
     ) -> AsyncIterator[ChatCompletionChunk]:
         """Handle streaming completion - extracted to avoid generator issues."""
 
-        client = cerebras.AsyncCerebras(api_key=self.config.api_key)
+        client = cerebras.AsyncCerebras(
+            api_key=self.config.api_key, **(self.config.client_args if self.config.client_args else {})
+        )
 
         if kwargs.get("response_format", None) is not None:
             msg = "stream and response_format"
@@ -92,7 +88,9 @@ class CerebrasProvider(Provider):
                 **kwargs,
             )
 
-        client = cerebras.AsyncCerebras(api_key=self.config.api_key)
+        client = cerebras.AsyncCerebras(
+            api_key=self.config.api_key, **(self.config.client_args if self.config.client_args else {})
+        )
         instructor_client = instructor.from_cerebras(client)
 
         if params.response_format:
@@ -129,5 +127,8 @@ class CerebrasProvider(Provider):
         """
         Fetch available models from the /v1/models endpoint.
         """
-        models_list = self.client.models.list(**kwargs)
+        client = cerebras.Cerebras(
+            api_key=self.config.api_key, **(self.config.client_args if self.config.client_args else {})
+        )
+        models_list = client.models.list(**kwargs)
         return _convert_models_list(models_list)

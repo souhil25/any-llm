@@ -78,11 +78,12 @@ class ProviderName(StrEnum):
             raise UnsupportedProviderError(value, supported) from exc
 
 
-class ApiConfig(BaseModel):
-    """Configuration for the provider."""
+class ClientConfig(BaseModel):
+    """Configuration for the underlying client used by the provider."""
 
     api_key: str | None = None
     api_base: str | None = None
+    client_args: dict[str, Any] | None = None
 
 
 class Provider(ABC):
@@ -128,7 +129,7 @@ class Provider(ABC):
     This flag is used to check if the packages are installed before instantiating the provider.
     """
 
-    def __init__(self, config: ApiConfig) -> None:
+    def __init__(self, config: ClientConfig) -> None:
         self._verify_no_missing_packages()
         self.config = self._verify_and_set_api_key(config)
 
@@ -137,7 +138,7 @@ class Provider(ABC):
             msg = f"{self.PROVIDER_NAME} required packages are not installed. Please install them with `pip install any-llm-sdk[{self.PROVIDER_NAME}]`"
             raise ImportError(msg) from self.MISSING_PACKAGES_ERROR
 
-    def _verify_and_set_api_key(self, config: ApiConfig) -> ApiConfig:
+    def _verify_and_set_api_key(self, config: ClientConfig) -> ClientConfig:
         # Standardized API key handling. Splitting into its own function so that providers
         # Can easily override this method if they don't want verification (for instance, LMStudio)
         if not config.api_key:
@@ -253,7 +254,7 @@ class ProviderFactory:
     PROVIDERS_DIR = Path(__file__).parent / "providers"
 
     @classmethod
-    def create_provider(cls, provider_key: str | ProviderName, config: ApiConfig) -> Provider:
+    def create_provider(cls, provider_key: str | ProviderName, config: ClientConfig) -> Provider:
         """Dynamically load and create an instance of a provider based on the naming convention."""
         provider_key = ProviderName.from_string(provider_key).value
 

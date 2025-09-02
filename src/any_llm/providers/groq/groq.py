@@ -73,7 +73,9 @@ class GroqProvider(Provider):
         self, params: CompletionParams, **kwargs: Any
     ) -> ChatCompletion | AsyncIterator[ChatCompletionChunk]:
         """Create a chat completion using Groq."""
-        client = groq.AsyncGroq(api_key=self.config.api_key)
+        client = groq.AsyncGroq(
+            api_key=self.config.api_key, **(self.config.client_args if self.config.client_args else {})
+        )
 
         if params.reasoning_effort == "auto":
             params.reasoning_effort = None
@@ -118,6 +120,7 @@ class GroqProvider(Provider):
         client = AsyncOpenAI(
             base_url="https://api.groq.com/openai/v1",
             api_key=self.config.api_key,
+            **(self.config.client_args if self.config.client_args else {}),
         )
 
         response = await client.responses.create(
@@ -136,6 +139,6 @@ class GroqProvider(Provider):
         """
         Fetch available models from the /v1/models endpoint.
         """
-        client = groq.Groq(api_key=self.config.api_key)
+        client = groq.Groq(api_key=self.config.api_key, **(self.config.client_args if self.config.client_args else {}))
         models_list = client.models.list(**kwargs)
         return _convert_models_list(models_list)

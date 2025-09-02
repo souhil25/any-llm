@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel
 
-from any_llm.provider import ApiConfig, Provider
+from any_llm.provider import ClientConfig, Provider
 
 MISSING_PACKAGES_ERROR = None
 try:
@@ -52,11 +52,12 @@ class OllamaProvider(Provider):
 
     MISSING_PACKAGES_ERROR = MISSING_PACKAGES_ERROR
 
-    def __init__(self, config: ApiConfig) -> None:
+    def __init__(self, config: ClientConfig) -> None:
         """We don't use the Provider init because by default we don't require an API key."""
         self._verify_no_missing_packages()
 
         self.url = config.api_base or os.getenv("OLLAMA_API_URL")
+        self.config = config
 
     async def _stream_completion_async(
         self,
@@ -127,7 +128,7 @@ class OllamaProvider(Provider):
         if params.reasoning_effort is not None:
             kwargs["think"] = True
 
-        client = AsyncClient(host=self.url, timeout=kwargs.pop("timeout", None))
+        client = AsyncClient(host=self.url, **(self.config.client_args if self.config.client_args else {}))
 
         if params.stream:
             return self._stream_completion_async(client, params.model_id, cleaned_messages, **kwargs)
@@ -149,7 +150,7 @@ class OllamaProvider(Provider):
         **kwargs: Any,
     ) -> CreateEmbeddingResponse:
         """Generate embeddings using Ollama."""
-        client = AsyncClient(host=self.url, timeout=kwargs.pop("timeout", None))
+        client = AsyncClient(host=self.url, **(self.config.client_args if self.config.client_args else {}))
 
         response = await client.embed(
             model=model,
@@ -162,6 +163,6 @@ class OllamaProvider(Provider):
         """
         Fetch available models from the /v1/models endpoint.
         """
-        client = Client(host=self.url, timeout=kwargs.pop("timeout", None))
+        client = Client(host=self.url, **(self.config.client_args if self.config.client_args else {}))
         models_list = client.list(**kwargs)
         return _convert_models_list(models_list)
